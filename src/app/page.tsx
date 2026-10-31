@@ -193,6 +193,12 @@ export default function LandingPage() {
           <span className="text-xl font-bold tracking-tight sm:text-2xl">Orbit</span>
         </Link>
 
+        {/* hackathon pill (desktop) */}
+        <span className="hidden items-center gap-2 rounded-full bg-[hsl(var(--card))]/35 px-4 py-2.5 text-xs font-semibold text-[hsl(var(--muted-foreground))] shadow-[var(--shadow-soft)] ring-1 ring-white/40 backdrop-blur-2xl backdrop-saturate-150 lg:inline-flex">
+          <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--chart-1))]" />
+          Odoo × Make-a-Ton 9.0
+        </span>
+
         {/* actions pill */}
         <nav className="flex items-center gap-1 rounded-full bg-[hsl(var(--card))]/35 p-1.5 shadow-[var(--shadow-soft)] ring-1 ring-white/40 backdrop-blur-2xl backdrop-saturate-150">
           <div className="hidden items-center md:flex">
@@ -694,7 +700,7 @@ export default function LandingPage() {
           <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-5 text-xs text-[hsl(var(--muted-foreground))]">
             <p>Orbit ©2026 · Put your revenue in orbit</p>
             <div className="flex items-center gap-2">
-              <p>Kochi · offline-first · zero dependencies</p>
+              <p>offline-first · zero dependencies</p>
               <span
                 className="text-[hsl(var(--muted-foreground))]"
                 title="The billing-day stick man. Hover him, he waves."
