@@ -29,5 +29,6 @@ export type {
   RevenueByPlanItem,
   RenewalForecastItem,
   MRRMovement,
+  MRRTrendItem,
 } from "./queries";
 export * from "./components";

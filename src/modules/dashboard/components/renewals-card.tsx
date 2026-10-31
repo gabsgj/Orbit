@@ -21,6 +21,11 @@ export function RenewalsCard({
   daysAhead,
   onDaysAheadChange,
 }: RenewalsCardProps) {
+  const totalForecastValue = renewals.reduce(
+    (acc, r) => acc + r.estimatedRenewalAmount,
+    0
+  );
+
   const columns: ColumnDef<RenewalForecastItem>[] = [
     {
       accessorKey: "subscriptionNumber",
@@ -42,7 +47,7 @@ export function RenewalsCard({
     },
     {
       accessorKey: "planName",
-      header: "Plan",
+      header: "Plan & Tier",
       cell: ({ row }) => (
         <span className="text-xs text-[hsl(var(--muted-foreground))]">
           {row.original.planName}
@@ -51,7 +56,7 @@ export function RenewalsCard({
     },
     {
       accessorKey: "expiryDate",
-      header: "Expiry Date",
+      header: "Billing / Renewal Date",
       cell: ({ row }) => (
         <span className="text-xs text-[hsl(var(--foreground))] tabular-nums">
           {formatDate(row.original.expiryDate)}
@@ -60,20 +65,24 @@ export function RenewalsCard({
     },
     {
       accessorKey: "daysRemaining",
-      header: "Renewal Horizon",
+      header: "Horizon",
       cell: ({ row }) => {
         const days = row.original.daysRemaining;
         const variant = days <= 7 ? "warning" : "neutral";
         return (
           <Badge variant={variant} className="text-[10px] py-0 px-2 font-medium">
-            {days === 0 ? "Expires today" : `in ${days} ${days === 1 ? "day" : "days"}`}
+            {days === 0
+              ? "Due today"
+              : days < 0
+              ? `${Math.abs(days)}d past due`
+              : `in ${days} ${days === 1 ? "day" : "days"}`}
           </Badge>
         );
       },
     },
     {
       accessorKey: "estimatedRenewalAmount",
-      header: () => <div className="text-right">Estimated Amount</div>,
+      header: () => <div className="text-right">Projected Value</div>,
       cell: ({ row }) => (
         <div className="text-right font-semibold tabular-nums text-xs text-[hsl(var(--foreground))]">
           {formatINR(row.original.estimatedRenewalAmount)}
@@ -83,33 +92,44 @@ export function RenewalsCard({
   ];
 
   return (
-    <Card>
+    <Card className="border-[hsl(var(--border))] bg-[hsl(var(--card))]">
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 gap-2">
         <div>
-          <CardTitle className="text-base font-semibold">
+          <CardTitle className="text-base font-semibold text-[hsl(var(--foreground))]">
             Upcoming Renewal Forecast
           </CardTitle>
-          <CardDescription>
-            Active subscriptions expiring in the next window (FR-DASH-05)
+          <CardDescription className="text-xs">
+            Active subscriptions due for renewal or billing in the selected window (FR-DASH-05)
           </CardDescription>
         </div>
 
-        {/* Horizon selector buttons */}
-        <div className="flex items-center gap-1 rounded-[var(--radius-xs)] border border-[hsl(var(--border))] p-0.5 bg-[hsl(var(--background))]">
-          {(["7", "30", "90"] as const).map((days) => (
-            <button
-              key={days}
-              type="button"
-              onClick={() => onDaysAheadChange(days)}
-              className={`px-2.5 py-1 text-xs font-medium rounded-[calc(var(--radius-xs)-1px)] transition-colors ${
-                daysAhead === days
-                  ? "bg-[hsl(var(--card))] text-[hsl(var(--foreground))] shadow-xs font-semibold"
-                  : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-              }`}
-            >
-              {days} Days
-            </button>
-          ))}
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <span className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase tracking-wider block">
+              Forecasted Revenue
+            </span>
+            <span className="text-sm font-bold tabular-nums text-[hsl(var(--foreground))]">
+              {formatINR(totalForecastValue)}
+            </span>
+          </div>
+
+          {/* Horizon selector buttons */}
+          <div className="flex items-center rounded-[var(--radius-xs)] border border-[hsl(var(--border))] p-0.5 bg-[hsl(var(--background))]">
+            {(["7", "30", "90"] as const).map((days) => (
+              <button
+                key={days}
+                type="button"
+                onClick={() => onDaysAheadChange(days)}
+                className={`px-2.5 py-0.5 text-xs font-medium rounded-[calc(var(--radius-xs)-1px)] transition-colors ${
+                  daysAhead === days
+                    ? "bg-[hsl(var(--card))] text-[hsl(var(--foreground))] shadow-xs font-semibold"
+                    : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+                }`}
+              >
+                {days}d
+              </button>
+            ))}
+          </div>
         </div>
       </CardHeader>
 
@@ -118,13 +138,13 @@ export function RenewalsCard({
           columns={columns}
           data={renewals}
           isLoading={isLoading}
-          searchPlaceholder="Filter renewals by customer or plan..."
-          emptyTitle="No upcoming renewals"
-          emptyDescription={`There are no active subscriptions scheduled for renewal in the next ${daysAhead} days.`}
+          searchPlaceholder="Filter upcoming renewals..."
+          emptyTitle="No renewals in this horizon"
+          emptyDescription={`There are no active subscriptions with renewal or billing dates falling in the next ${daysAhead} days.`}
           pageSize={5}
+          pageSizeOptions={[5, 10, 25]}
         />
       </CardContent>
     </Card>
   );
 }
-

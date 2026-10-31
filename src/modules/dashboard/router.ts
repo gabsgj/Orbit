@@ -46,4 +46,9 @@ export const dashboardRouter = router({
   mrrMovement: publicProcedure.query(async () => {
     return DashboardService.getMRRMovementSummary();
   }),
+
+  /** MRR & Revenue 6-month historical trend (FR-DASH-03) */
+  mrrTrend: publicProcedure.query(async () => {
+    return DashboardService.getMRRTrend();
+  }),
 });

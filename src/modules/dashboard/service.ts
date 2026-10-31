@@ -6,11 +6,13 @@ import {
   getRevenueByPlan,
   getRenewalForecast,
   getMRRMovement,
+  getMRRTrend,
   type DashboardKPIs,
   type AgingBucketItem,
   type RevenueByPlanItem,
   type RenewalForecastItem,
   type MRRMovement,
+  type MRRTrendItem,
 } from "./queries";
 import { DashboardFilterInput, RenewalForecastFilterInput } from "./schemas";
 
@@ -124,5 +126,9 @@ export class DashboardService {
 
   static async getMRRMovementSummary(): Promise<MRRMovement> {
     return getMRRMovement();
+  }
+
+  static async getMRRTrend(): Promise<MRRTrendItem[]> {
+    return getMRRTrend();
   }
 }

@@ -209,3 +209,33 @@ _Chronological record of work done. Newest entries at the bottom._
   - `npm run lint` (0 warnings)
   - `npx vitest run` (14 test files passed / 73 tests passed)
   - `npm run build` (20 static & dynamic routes compiled successfully)
+
+
+## 2026-10-31 — UI Polish, Recharts Integration, MRR Movement, Shared Table Hardening & Customer Portal (Pavithra S Rajesh)
+
+**By:** Pavithra S Rajesh (Experience & Insights Lead) on `main`
+
+- **Gate 1 & Gate 2 UI Excellence Passes:**
+  - Audited `/dashboard` and `/portal` against the `impeccable` craft-floor checklist (no decorative halos, strict WCAG AA contrast, tabular numbers on all financial data, designed skeletons).
+  - Preserved token system in `docs/DESIGN.md` and `globals.css` with zero arbitrary colors.
+- **Finance Dashboard Polish (`src/modules/dashboard`):**
+  - **MRR Movement Strip (`MRRMovementCard`):** Displays New MRR, Expansion MRR, Contraction MRR, Churn MRR, and Net Velocity with risk badges.
+  - **MRR & Revenue Trajectory Chart (`MRRTrendCard`):** 6-month dual area chart with Recharts (`AreaChart`), customized tooltips formatted in `formatINR()`, and run-rate percentage.
+  - **Receivables Aging Recharts Bar Chart (`AgingBucketsCard`):** Upgraded aging card with an interactive Recharts bar chart risk-colored per bucket (Current, 1–30, 31–60, 61–90, 90+ days) and toggle between Chart and Table views.
+  - **Revenue by Plan Recharts Bar Chart (`RevenueByPlanCard`):** Upgraded with Recharts horizontal bar chart showcasing each catalog tier's recurring revenue contribution.
+  - **Period Range Filter:** Added period selector (`7d`, `30d`, `90d`, `1Y`, `All`) with dynamic database-side aggregation.
+  - **Renewal Horizon Selector:** Added `7d`, `30d`, and `90d` horizon buttons with aggregate forecasted renewal revenue calculation.
+- **Shared TanStack Table Hardening (`src/shared/ui/data-table.tsx`):**
+  - Added click-to-sort with sort indicators (`SortAscIcon`, `SortDescIcon`, `SortNeutralIcon`).
+  - Added filter search clear button (`✕`).
+  - Added page size options (`5`, `10`, `25`, `50` per page).
+  - Added sticky header with backdrop blur.
+  - Added dedicated error state with `onRetry` fallback action.
+- **Customer Portal UI/UX (`src/modules/portal`, `src/app/portal`):**
+  - Built comprehensive customer self-service portal at `/portal` inside `PortalShell`.
+  - Added tabbed navigation: Subscriptions Overview, Invoice History `DataTable`, and Billing & Wire Details.
+  - Built GST tax invoice print-preview modal dialog with direct print action (`window.print()`).
+- **Quality Gates:**
+  - `npm run typecheck` $\rightarrow$ 0 errors.
+  - `npm run lint` $\rightarrow$ 0 warnings, 0 errors.
+  - `npm run build` $\rightarrow$ Compiled successfully across all routes.

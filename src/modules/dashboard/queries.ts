@@ -184,11 +184,21 @@ export interface MRRMovement {
   netMRRChange: number;
 }
 
+export interface MRRTrendItem {
+  monthKey: string;
+  monthLabel: string;
+  mrr: number;
+  revenue: number;
+}
+
 export async function getDashboardKPIs(filter?: DashboardFilterInput): Promise<DashboardKPIs> {
-  void filter;
   const mrrResult = await mrr(prisma);
   const calculatedMRR = Number(mrrResult.mrr ?? 0);
   const calculatedARR = calculatedMRR * 12;
+
+  const days = filter?.periodDays && filter.periodDays !== "all"
+    ? parseInt(filter.periodDays, 10)
+    : null;
 
   const summaryResult = await prisma.$queryRaw<
     Array<{
@@ -198,7 +208,20 @@ export async function getDashboardKPIs(filter?: DashboardFilterInput): Promise<D
       overdue_count: bigint | number;
       overdue_amount: Prisma.Decimal | number | null;
     }>
-  >(Prisma.sql`
+  >(days ? Prisma.sql`
+    SELECT
+      (SELECT COUNT(*) FROM subscriptions WHERE status = 'ACTIVE') AS active_subs,
+      (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE paid_at >= (CURRENT_DATE - (${days} * INTERVAL '1 day'))) AS revenue_received,
+      (SELECT COALESCE(SUM(grand_total - amount_paid), 0) 
+       FROM invoices 
+       WHERE status = 'CONFIRMED' AND (grand_total - amount_paid) > 0) AS amount_owed,
+      (SELECT COUNT(*) 
+       FROM invoices 
+       WHERE status = 'CONFIRMED' AND due_date < CURRENT_DATE AND (grand_total - amount_paid) > 0) AS overdue_count,
+      (SELECT COALESCE(SUM(grand_total - amount_paid), 0) 
+       FROM invoices 
+       WHERE status = 'CONFIRMED' AND due_date < CURRENT_DATE AND (grand_total - amount_paid) > 0) AS overdue_amount
+  ` : Prisma.sql`
     SELECT
       (SELECT COUNT(*) FROM subscriptions WHERE status = 'ACTIVE') AS active_subs,
       (SELECT COALESCE(SUM(amount), 0) FROM payments) AS revenue_received,
@@ -224,6 +247,61 @@ export async function getDashboardKPIs(filter?: DashboardFilterInput): Promise<D
     mrr: calculatedMRR,
     arr: calculatedARR,
   };
+}
+
+export async function getMRRTrend(): Promise<MRRTrendItem[]> {
+  const result = await prisma.$queryRaw<
+    Array<{
+      month_key: string;
+      month_label: string;
+      mrr: Prisma.Decimal | number | null;
+      revenue: Prisma.Decimal | number | null;
+    }>
+  >(Prisma.sql`
+    WITH months AS (
+      SELECT date_trunc('month', d)::date AS month_start
+      FROM generate_series(
+        date_trunc('month', CURRENT_DATE) - INTERVAL '5 months',
+        date_trunc('month', CURRENT_DATE),
+        INTERVAL '1 month'
+      ) d
+    )
+    SELECT
+      to_char(m.month_start, 'YYYY-MM') AS month_key,
+      to_char(m.month_start, 'Mon') AS month_label,
+      COALESCE((
+        SELECT SUM(p.amount)
+        FROM payments p
+        WHERE p.paid_at >= m.month_start
+          AND p.paid_at < (m.month_start + INTERVAL '1 month')
+      ), 0) AS revenue,
+      COALESCE((
+        SELECT SUM(
+          sl.quantity * sl.unit_price * (
+            CASE pl.period
+              WHEN 'DAILY' THEN 30.0
+              WHEN 'WEEKLY' THEN (52.0 / 12.0)
+              WHEN 'MONTHLY' THEN 1.0
+              WHEN 'YEARLY' THEN (1.0 / 12.0)
+              ELSE 1.0
+            END
+          )
+        )
+        FROM subscriptions s
+        JOIN plans pl ON pl.id = s.plan_id
+        JOIN subscription_lines sl ON sl.subscription_id = s.id
+        WHERE s.status = 'ACTIVE'
+      ), 0) AS mrr
+    FROM months m
+    ORDER BY m.month_start ASC
+  `);
+
+  return result.map((r) => ({
+    monthKey: r.month_key,
+    monthLabel: r.month_label,
+    mrr: Number(r.mrr ?? 0),
+    revenue: Number(r.revenue ?? 0),
+  }));
 }
 
 export async function getAgingBuckets(): Promise<AgingBucketItem[]> {
@@ -363,8 +441,8 @@ export async function getRenewalForecast(daysAhead: number = 30): Promise<Renewa
       c.company_name,
       prod.name AS product_name,
       p.period::text AS period,
-      s.expiry_date,
-      (s.expiry_date - CURRENT_DATE) AS days_remaining,
+      COALESCE(s.next_billing_date, s.expiry_date) AS expiry_date,
+      (COALESCE(s.next_billing_date, s.expiry_date) - CURRENT_DATE) AS days_remaining,
       COALESCE(SUM(sl.quantity * sl.unit_price), 0) AS estimated_amount
     FROM subscriptions s
     JOIN customers c ON s.customer_id = c.id
@@ -372,9 +450,9 @@ export async function getRenewalForecast(daysAhead: number = 30): Promise<Renewa
     JOIN products prod ON p.product_id = prod.id
     JOIN subscription_lines sl ON s.id = sl.subscription_id
     WHERE s.status = 'ACTIVE'
-      AND s.expiry_date BETWEEN CURRENT_DATE AND (CURRENT_DATE + (${daysAhead} * INTERVAL '1 day'))
-    GROUP BY s.id, s.number, c.company_name, prod.name, p.period, s.expiry_date
-    ORDER BY s.expiry_date ASC
+      AND COALESCE(s.next_billing_date, s.expiry_date) BETWEEN CURRENT_DATE AND (CURRENT_DATE + (${daysAhead} * INTERVAL '1 day'))
+    GROUP BY s.id, s.number, c.company_name, prod.name, p.period, s.next_billing_date, s.expiry_date
+    ORDER BY COALESCE(s.next_billing_date, s.expiry_date) ASC
     LIMIT 20
   `);
 

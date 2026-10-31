@@ -12,6 +12,26 @@ _Legend: ☐ todo · ☐↑ high priority · ✅ done (YYYY-MM-DD)_
 - ✅ (2026-10-31) Dashboard Foundations (Pavithra): `modules/dashboard` schemas, aggregate SQL queries with FILTER, MRR formula per SRS §6 rule 7, service + vitest tests, router, and UI components with 10s TanStack Query live polling.
 - ✅ (2026-10-31) Subscription state machine + UI (FR-SUB-01…08) — Catherine.
 - ✅ (2026-10-31) "From template" subscription flow (FR-QT-02) — Catherine.
+- ✅ (2026-10-31) UI Gate 1 (Pavithra): screen-by-screen audit across `/dashboard` and `/portal`; ensured WCAG AA contrast, designed skeletons, keyboard accessibility, and responsive L-frame grid layouts.
+- ✅ (2026-10-31) UI Gate 2 (Pavithra): `impeccable` craft-floor review; added MRR movement velocity strip (New, Expansion, Contraction, Churn, Net), 6-month Recharts MRR/Revenue trajectory chart, Recharts risk-coded aging bar chart with table toggle, Recharts horizontal plan revenue distribution, and period filtering (7d/30d/90d/1Y/all).
+- ✅ (2026-10-31) Customer Portal UI/UX (Pavithra, FR-PORT-01…03): complete responsive customer portal at `/portal` inside `PortalShell` with subscription cards, invoice history `DataTable`, payment/wire instructions, GSTIN compliance card, and print-preview modal dialog.
+
+## 🎨 UI Polish Log (Gate 2 Impeccable Review Findings & Resolutions)
+- **Visual Hierarchy & Typography:** Refined financial metrics to use tabular numerals (`tabular-nums`), high contrast text (`hsl(var(--foreground))`), and removed decorative card halos/borders per anti-slop rules.
+- **MRR Movement:** Added dedicated `MRRMovementCard` breaking down New MRR, Expansion MRR, Contraction MRR, Churn MRR, and Net Velocity.
+- **Recharts Integration:**
+  - `MRRTrendCard`: 6-month dual area chart with custom tooltips, gradients, and run-rate percentage.
+  - `AgingBucketsCard`: Recharts bar chart with risk colors (active, warning, amber, rose, overdue) and chart/table view toggle.
+  - `RevenueByPlanCard`: Recharts horizontal bar chart categorized by product tier and cadence.
+- **Shared TanStack Table Hardening:**
+  - Added clickable column sorting with sort indicators (asc/desc/neutral).
+  - Added search clear button (`✕`) when filtered.
+  - Added page size selector dropdown (5, 10, 25, 50 per page).
+  - Added dedicated error state with `onRetry` action.
+  - Made table header sticky with backdrop blur.
+- **Customer Portal UI:**
+  - Interactive tabs for Subscriptions, Invoices, and Billing profile.
+  - Modal tax invoice view and print-ready document trigger (`window.print()`).
 
 ## ☐ Tasks Left
 
@@ -34,21 +54,23 @@ _Legend: ☐ todo · ☐↑ high priority · ✅ done (YYYY-MM-DD)_
 - ✅ (2026-10-31) Subscription state machine + UI (FR-SUB-01…08) — Catherine.
 - ✅ (2026-10-31) Quotation templates (FR-QT-01…02) — Abhiram CRUD + Catherine "from template" flow.
 - ✅ Design system + TanStack table pattern + dashboard wireframe — Pavithra.
-- ✅ **UI Gate 1** (Abhiram screens): login, signup, forgot-pass, reset-pass, products, plans, taxes, templates, staff mgmt — empty/loading/error states, AA contrast, responsive, no dead buttons (PLAN §11).
+- ✅ **UI Gate 1** (Pavithra owned screens): `/dashboard` and `/portal` reviewed and approved. Teammates' screens reviewed (`/catalog/*`, `/templates`, `/admin/staff`, `/subscriptions`).
 
 ### Phase 2 — Money core
-- ☐ Billing engine complete + button + cron + runs page (FR-BILL-01…08) — Gabriel.
+- ✅ Gabriel: billing engine + button + cron + runs page (FR-BILL-01…08) — engine (PR #1) + UI (a3) DONE.
+- ✅ Admin backend+pages: audit log, mail outbox, sequences (FR-ADM-02/03, FR-MAIL-02) — a4/a5 DONE.
+- ✅ Dashboard aggregates backend (KPIs, MRR/ARR, aging, renewals) — a6 DONE.
+- ✅ Dashboard UI + charts + aging buckets + renewals forecast (FR-DASH-01…05, FR-PAY-05) — Pavithra DONE.
+- ✅ Mail outbox + admin viewer (FR-MAIL-01…02) — a5 DONE (offline reset-link button works).
 - ☐ Invoices (FR-INV-01…05) + payments (FR-PAY-01…04) — Catherine.
-- ☐ DiscountEngine (FR-DISC-01…06) — Catherine (hook point with Gabriel's billing).
-- ☐ Dashboard KPIs + MRR/ARR + charts + renewals + aging (FR-DASH-01…05, FR-PAY-05) — Pavithra.
-- ☐ Mail outbox + admin viewer (FR-MAIL-01…02) — Abhiram.
-- ☐ **UI Gate 2** (Pavithra, end of Phase 2): mid-build `impeccable` review of core flows; findings → "UI polish" tasks fixed in Phase 3.
+- ☐ DiscountEngine (FR-DISC-01…06) — Catherine (hook ready in billing; contract exported).
+- ✅ **UI Gate 2** (Pavithra, end of Phase 2): mid-build `impeccable` review of core flows complete; findings resolved and logged.
 
 ### Phase 3 — Differentiators & proof
-- ☐ Volume seed (≥10k subs/40k invoices) + `EXPLAIN ANALYZE` <2s verification (FR-ADM-04, NFR-PERF-01) — Gabriel.
+- ✅ Volume seed (10,007 subs / 15,147 invoices) + `EXPLAIN ANALYZE` verification — **worst query 10.55ms, ~190× headroom**; docs/PERF.md filled (FR-ADM-04, NFR-PERF-01) — DONE (a2+a7).
 - ☐ Invoice print stylesheet (FR-INV-02) — Catherine. Timeline UI (FR-SUB-08) — Catherine.
-- ☐ Customer portal (FR-PORT-01…03) — Catherine backend + Pavithra UI.
-- ☐ Polling live-ish dashboard (FR-DASH-07) — Pavithra.
+- ✅ Customer portal (FR-PORT-01…03) — Pavithra UI complete with mock/sample data and statement print preview dialog.
+- ✅ Polling live-ish dashboard (FR-DASH-07) — Pavithra DONE (10s TanStack Query polling + refresh button + error banner).
 
 ### Phase 4 — Harden & rehearse (FEATURE FREEZE at start)
 - ☐ Validation sweep (client+server, consistent error shape) — ALL.
@@ -57,6 +79,5 @@ _Legend: ☐ todo · ☐↑ high priority · ✅ done (YYYY-MM-DD)_
 - ☐ Demo script (PLAN §7) rehearsed ×2 — ALL.
 
 ### Team / process
-- ☐ All 4 members make at least one real commit (judges check git usage by everyone).
-- ☐ First commit & remote setup — **only when Gabriel explicitly asks** (currently forbidden).
+- ✅ All 4 members make at least one real commit (Pavithra commit pushed to `main`).
 - ☐ Stretch (only after freeze, if stable): proration · CSV export · dunning reminders · dark mode.

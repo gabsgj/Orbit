@@ -42,3 +42,14 @@ _Chronological, timestamped (YYYY-MM-DD). Log every user prompt/instruction here
 18. **"anythting to pull?"** — Checked: local=remote (0 behind). Cleaned stale local ref to feat/billing-gabriel (already deleted on GitHub). Noted repo has delete_branch_on_merge=false.
 19. **"what's next?"** — Answered: lane code-complete, waiting on Abhiram/Catherine pushes; proposed CI pipeline (born from the npm-ci lesson).
 20. **"now?"** — Interpreted as go-ahead for CI. Discovered 6 new commits (Abhiram: auth/catalog/templates/staff FR-AUTH/CAT/QT/ADM-01; Catherine: subscriptions state machine phase-1) — pulled, integration-steward gate run on main: **typecheck ✓ lint ✓ 112 tests ✓ build ✓ (21 routes)**. Built `.github/workflows/ci.yml` (postgres:18 service, npm ci, migrate, typecheck, eslint --max-warnings=0, vitest, build) + README badge. **First CI run FAILED in 27s — caught lockfile still missing @emnapi/* (Pavithra's deps never regen'd lockfile). Regenerated package-lock, verified npm ci clean; second run GREEN (2m8s).** CI now gates every push/PR automatically.
+
+21. **"ORBIT – CONTINUE, IMPROVE AND COMPLETE MY EXISTING WORK"** — Pavithra S Rajesh instructed to continue from existing work on `main`:
+    - Improve existing UI (hierarchy, typography, spacing, contrast, transitions, professional financial SaaS, adhere to `docs/DESIGN.md` and craft floor).
+    - Finance Dashboard: KPI cards (active subs, revenue received, amount owed, overdue invoices, date filters + summaries), MRR & ARR (MRR, ARR, new/expansion/contraction/churn MRR per SRS formula: daily×30, weekly×52/12, monthly×1, yearly/12, ACTIVE subs only), Recharts (MRR trend, revenue by plan, invoice aging with polished axes/legends/tooltips/responsiveness), Renewal forecast (7-day and 30-day horizons), 10s polling, tRPC aggregate queries only (<2s @ 10k subs).
+    - Shared TanStack Table: polish sticky headers, search/filters, sorting, keyset/page pagination, total count, skeletons, empty/error states, keyboard accessibility; preserve API.
+    - Aging buckets view: current, 1–30, 31–60, 61–90, 90+ days.
+    - Customer Portal UI/UX: subscription overview, current plan & details, status, billing info, invoice history, payment info, responsive, empty/loading/error states.
+    - UI Excellence Program: Gate 1 review on owned screens, Gate 2 impeccable pass logging findings to `.aimem/tasks.md` "UI polish", prepare Gate 3.
+    - Strict boundaries: modify ONLY Pavithra's owned work (shared/ui, AppShell, PortalShell, modules/dashboard, portal UI). Zero changes to teammates' backends or DB schemas.
+    - Git discipline: stay on `main`, zero force-push, NEVER commit or push without explicit approval.
+    - Documentation & educational explanations for hackathon judges.

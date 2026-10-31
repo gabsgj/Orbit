@@ -3,3 +3,4 @@
  * (enforced by eslint no-restricted-imports; see docs/PLAN.md §1).
  */
 export { portalRouter } from "./router";
+export * from "./components";

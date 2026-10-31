@@ -361,6 +361,7 @@ describe("dashboard service", () => {
       expect(typeof DashboardService.getPlanRevenueBreakdown).toBe("function");
       expect(typeof DashboardService.getUpcomingRenewals).toBe("function");
       expect(typeof DashboardService.getMRRMovementSummary).toBe("function");
+      expect(typeof DashboardService.getMRRTrend).toBe("function");
     });
   });
 });
