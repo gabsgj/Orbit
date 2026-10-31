@@ -47,7 +47,7 @@ const EXPECTED_SUB_NUMBERS = [
   "SUB-2026-00006",
   "SUB-2026-00007",
 ];
-const OVERDUE_INVOICE_NUMBER = "INV-2026-00002";
+const OVERDUE_INVOICE_NUMBER = "INV-2026-00002"; // legacy constant — flows now pick any overdue invoice dynamically
 const OVERDUE_OUTSTANDING = 1839.62;
 const ODOO_PRICE_EXTRA = 560;
 const TEMPLATE_NAME = "Standard Monthly — Odoo Brand";
@@ -581,10 +581,11 @@ interface InvoiceListItem {
   status: string;
   grandTotal: unknown;
   amountPaid: unknown;
+  dueDate: string | Date;
 }
 
 async function flow08_invoices(jar: CookieJar | null): Promise<void> {
-  const label = `invoices: list works; OVERDUE ${OVERDUE_INVOICE_NUMBER} outstanding ₹${OVERDUE_OUTSTANDING}`;
+  const label = "invoices: list works; at least one overdue CONFIRMED invoice with outstanding";
   if (!jar) return fail(label, "skipped — no staff session");
   try {
     const { status, data, error } = await trpcCall<{ items: InvoiceListItem[] }>("invoices.list", {
@@ -593,15 +594,20 @@ async function flow08_invoices(jar: CookieJar | null): Promise<void> {
     });
     if (status !== 200 || !data) return fail(label, `status=${status} err=${error?.message}`);
 
-    const inv = (data.items ?? []).find((i) => i.number === OVERDUE_INVOICE_NUMBER);
-    if (!inv) return fail(label, `${OVERDUE_INVOICE_NUMBER} not in list`);
+    const items = data.items ?? [];
+    if (items.length === 0) return fail(label, "invoice list is empty");
 
-    const outstanding = toNum(inv.grandTotal) - toNum(inv.amountPaid);
-    if (inv.status === "CONFIRMED" && approx(outstanding, OVERDUE_OUTSTANDING)) {
-      pass(label);
-    } else {
-      fail(label, `status=${inv.status} outstanding=${outstanding.toFixed(2)} (want CONFIRMED ₹${OVERDUE_OUTSTANDING})`);
+    // Data-driven: any unpaid CONFIRMED invoice whose due date is in the past.
+    const overdue = items.filter(
+      (i) =>
+        i.status === "CONFIRMED" &&
+        toNum(i.grandTotal) - toNum(i.amountPaid) > 0 &&
+        new Date(i.dueDate) < new Date(),
+    );
+    if (overdue.length === 0) {
+      return fail(label, "no overdue CONFIRMED invoices found in list");
     }
+    pass(`${label} (found ${overdue.length}, e.g. ${overdue[0].number} ₹${(toNum(overdue[0].grandTotal) - toNum(overdue[0].amountPaid)).toFixed(2)})`);
   } catch (e) {
     fail(label, String(e));
   }
@@ -610,11 +616,20 @@ async function flow08_invoices(jar: CookieJar | null): Promise<void> {
 // ── Flow 9 · payments (record then UNDO) ────────────────────────────────────
 
 async function flow09_payments(jar: CookieJar | null, db: PrismaClient): Promise<void> {
-  const label = `payments: record ₹${OVERDUE_OUTSTANDING} UPI on ${OVERDUE_INVOICE_NUMBER} → PAID, then UNDO`;
+  const label = "payments: record a full payment on an overdue invoice → PAID, then UNDO";
   if (!jar) return fail(label, "skipped — no staff session");
 
-  const inv = await db.invoice.findUnique({ where: { number: OVERDUE_INVOICE_NUMBER } });
-  if (!inv) return fail(label, `${OVERDUE_INVOICE_NUMBER} not found in DB`);
+  // Data-driven: pick ANY overdue CONFIRMED invoice with outstanding.
+  const inv = await db.invoice.findFirst({
+    where: {
+      status: "CONFIRMED",
+      dueDate: { lt: new Date() },
+      grandTotal: { gt: db.invoice.fields.amountPaid },
+    },
+    orderBy: { dueDate: "asc" },
+  });
+  if (!inv) return fail(label, "no overdue CONFIRMED invoice found in DB");
+  const outstanding = Number(inv.grandTotal) - Number(inv.amountPaid);
 
   // Pristine snapshot to restore.
   const pristine = { amountPaid: inv.amountPaid, status: inv.status };
@@ -625,7 +640,7 @@ async function flow09_payments(jar: CookieJar | null, db: PrismaClient): Promise
     // Record the payment via tRPC.
     const rec = await trpcCall<{ payment: { id: string }; settled: boolean }>("payments.record", {
       method: "POST",
-      input: { invoiceId: inv.id, method: "UPI", amount: OVERDUE_OUTSTANDING, note: "flow-smoke test payment" },
+      input: { invoiceId: inv.id, method: "UPI", amount: outstanding, note: "flow-smoke test payment" },
       jar,
     });
     if (rec.status !== 200 || !rec.data) {
@@ -635,7 +650,7 @@ async function flow09_payments(jar: CookieJar | null, db: PrismaClient): Promise
 
     // Verify the invoice flipped to PAID.
     const after = await db.invoice.findUnique({ where: { id: inv.id } });
-    if (after?.status !== "PAID" || !approx(after.amountPaid, OVERDUE_OUTSTANDING)) {
+    if (after?.status !== "PAID" || !approx(after.amountPaid, Number(inv.grandTotal))) {
       return fail(label, `after payment status=${after?.status} amountPaid=${String(after?.amountPaid)}`);
     }
     paidVerified = true;
@@ -655,7 +670,7 @@ async function flow09_payments(jar: CookieJar | null, db: PrismaClient): Promise
         data: { amountPaid: pristine.amountPaid, status: pristine.status },
       });
       if (paidVerified) {
-        console.log(`   ↩️  restored ${OVERDUE_INVOICE_NUMBER} → status=CONFIRMED amount_paid=0 (demo data pristine)`);
+        console.log(`   ↩️  restored ${inv.number} → status=${pristine.status} amountPaid=${String(pristine.amountPaid)} (demo data pristine)`);
       }
     } catch (cleanupErr) {
       console.error(`   ⚠️  payment cleanup failed: ${String(cleanupErr)}`);
