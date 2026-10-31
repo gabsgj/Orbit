@@ -79,9 +79,9 @@ non-obvious decision — I must be able to explain every line to the judges.
 ## My task checklist (phased — details in `docs/PLAN.md` §3)
 
 ### Phase 1 — Foundations
-- [ ] SubscriptionStateMachine service + full transition unit tests
-- [ ] Subscription create/edit UI shell + list with status badges
-- [ ] "From template" flow (uses Abhiram's `templates.getWithLines`)
+- [x] SubscriptionStateMachine service + full transition unit tests
+- [x] Subscription create/edit UI shell + list with status badges
+- [x] "From template" flow (uses Abhiram's `templates.getWithLines`)
 
 ### Phase 2 — Money core
 - [ ] Invoice service + list/detail UI, confirm/cancel actions, filters + pagination + totals footer

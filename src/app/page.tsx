@@ -15,7 +15,7 @@ export default function Home() {
           <div className="inline-flex items-center gap-2">
             <h1 className="text-4xl font-extrabold tracking-tight">Orbit</h1>
             <Badge variant="active" className="text-xs">
-              Phase 0 Complete
+              Phase 1 Live
             </Badge>
           </div>
           <p className="text-base text-[hsl(var(--muted-foreground))]">
@@ -24,9 +24,14 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <Link href="/dashboard" className="w-full sm:w-auto">
+          <Link href="/subscriptions" className="w-full sm:w-auto">
             <Button size="lg" className="w-full sm:w-auto font-medium">
-              Open Finance Dashboard
+              Subscriptions
+            </Button>
+          </Link>
+          <Link href="/dashboard" className="w-full sm:w-auto">
+            <Button size="lg" variant="outline" className="w-full sm:w-auto font-medium">
+              Finance Dashboard
             </Button>
           </Link>
           <Link href="/portal" className="w-full sm:w-auto">

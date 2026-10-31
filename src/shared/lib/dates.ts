@@ -52,3 +52,21 @@ export function addDays(d: Date, days: number): Date {
   out.setDate(out.getDate() + days);
   return out;
 }
+
+/**
+ * Format date for input elements (YYYY-MM-DD).
+ */
+export function toISODate(date: Date): string {
+  return date.toISOString().split("T")[0];
+}
+
+/**
+ * Check if a date is before today (start of day).
+ */
+export function isPastDue(dueDate: Date, asOf: Date = new Date()): boolean {
+  const d = new Date(dueDate);
+  d.setHours(0, 0, 0, 0);
+  const now = new Date(asOf);
+  now.setHours(0, 0, 0, 0);
+  return d < now;
+}
