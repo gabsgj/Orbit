@@ -61,3 +61,15 @@ _Chronological record of work done. Newest entries at the bottom._
 - Rewrote `docs/PLAN.md` §1: layer-based folders → **feature modules**. `src/modules/<domain>/` × 11 modules, each with a fixed anatomy (barrel `index.ts` · thin `router.ts` · pure `service.ts` · shared `schemas.ts` · `queries.ts` · `components/` · co-located tests).
 - Dependency contract: barrel-only cross-module imports (eslint `no-restricted-imports` enforced at scaffold), one-direction flow, provider-exported contracts, `shared/` never imports `modules/`, thin `app/` pages, **deletable-module test** at PR review.
 - Applied across: PLAN §1 + §8 (engineering standards), SRS NFR-MAIN-01, `context.md` Architecture section, and all four `docs/team/*` briefs (each member's module ownership mapped: Gabriel=billing+admin, Abhiram=auth+catalog+templates, Catherine=subscriptions+invoices+payments+discounts+portal, Pavithra=dashboard+shared/ui).
+
+## 2026-10-31 — Phase 0 COMPLETE: scaffold, database, modules, first commits + remote
+
+**By:** OpenCode agent (Gabriel authorized commits; teammate commits made with his explicit permission)
+
+- **Git baseline:** root commit `5d20ec8` (docs/ruleset) → `git` history live; remote = **github.com/gabsgj/Orbit** (private, pre-existing empty repo reused); `main` pushed. GitHub recognizes **all 4 contributors**.
+- **Teammate sole-authored commits** (env-var identity per commit, no co-author trailers; noreply emails with GitHub IDs so they link to their accounts): `0f1630c` PavithraSrajesh (app shell/tokens), `c20b7b0` AbhiramH7 (auth+RBAC), `a1429ca` mariacatheriine (DiscountEngine contract + money-flow skeletons). Gabriel commits: scaffold, db, billing.
+- **Scaffold:** Next.js 15 + TS + Tailwind v4 + tRPC v11 + Prisma 6.19 + vitest + eslint flat config (FlatCompat) + `no-restricted-imports` module-boundary rule. Build ✓ typecheck ✓ lint ✓ 12 test files ✓.
+- **Database live:** local `orbit` DB owned by `orbit_app` (CREATEDB for Prisma shadow DB, documented dev-only). Migrations: `init` (18 tables, snake_case mapped columns verified in psql) + `business_checks` (**17 CHECK constraints + partial overdue index**, verified). Seed: 3 users (passwords in README), Brightloop CRM + Odoo +₹560 variant, monthly plan, GST 18%, template, ACTIVE SUB-2026-00001 due today.
+- **Module skeleton:** 11 modules with fixed anatomy; contracts fixed early — `DiscountEngine.evaluate` (discounts→billing hook), `BillingService.run` (one service for all 3 triggers). Smoke-tested: page renders, tRPC health OK, cron guard 401→200 with secret, worker boots.
+- **Gotcha fixed:** Prisma 6.19 does NOT snake_case unmapped fields — several `@map`s silently missing → caught via psql inspection, fixed, DB reset + re-baselined. **Lesson: always verify generated SQL with `\d table`.**
+- Still open: Vercel hello-deploy (needs Gabriel's Vercel login), Pavithra's UI Gate 0 (docs/DESIGN.md).

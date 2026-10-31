@@ -17,11 +17,14 @@ _Legend: ☐ todo · ☐↑ high priority · ✅ done (YYYY-MM-DD)_
 - ✅ SRS: `docs/SRS.md` (12 modules, FR IDs, priorities P0/P1/P2, NFRs, state machines, business rules, traceability).
 - ✅ Plan: `docs/PLAN.md` (architecture, 4-way task split, build order, timeline, risks, demo script).
 
-### Phase 0 — Setup & Schema (NEXT, blocks everything)
-- ☐↑ Scaffold repo (Next.js+TS+tRPC+Prisma+Tailwind+shadcn), `.env.example`, hello-deploy to Vercel (Gabriel).
-- ☐↑ Schema v1 huddle: walk `docs/ER.md`, freeze; author `prisma/schema.prisma` + first migration (Gabriel, ALL review).
-- ☐↑ Local PostgreSQL: create `brightloop` DB + least-privilege user; minimal seed (admin, demo product/plan) (Gabriel).
-- ☐ **UI Gate 0** (Pavithra, `design-taste-frontend`): art direction → `docs/DESIGN.md` (tokens, type scale, layout grid, anti-slop "we will NOT do" list) + Tailwind/shadcn theme + AppShell/PortalShell skeleton.
+### Phase 0 — Setup & Schema ✅ (2026-10-31, except noted)
+- ✅ Scaffold repo (Next.js+TS+tRPC+Prisma+Tailwind+eslint module boundaries), `.env.example`, README quick-start (Gabriel).
+- ✅ Schema v1: `prisma/schema.prisma` (18 tables per ER) + `init` migration + `business_checks` (17 CHECKs + partial index) (Gabriel).
+- ✅ Local PostgreSQL: `orbit` DB + `orbit_app` user (CREATEDB dev-only, documented); demo seed (3 users, catalog, ACTIVE sub due today) (Gabriel).
+- ✅ Module skeleton ×11 + contracts (DiscountEngine, BillingService) + shared kernel (trpc/requireRole, prisma, auth config) + worker/cron stubs.
+- ✅ First commits + remote github.com/gabsgj/Orbit (private); all 4 contributors visible on GitHub.
+- ☐ **UI Gate 0** (Pavithra, `design-taste-frontend`): art direction → `docs/DESIGN.md` + tokens into globals.css + AppShell/PortalShell.
+- ☐ Vercel hello-deploy (needs Gabriel's Vercel login; bonus mirror only).
 
 ### Phase 1 — Foundations (per PLAN §2/§3: Gabriel=billing skeleton+seeds, Abhiram=auth+catalog, Catherine=subscriptions, Pavithra=design system+dashboard wire)
 - ☐ Auth+RBAC (FR-AUTH-01…07) · staff mgmt (FR-ADM-01) — Abhiram.

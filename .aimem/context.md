@@ -70,7 +70,9 @@ Coding standards, logic, modularity, frontend design, scalability, security, usa
 - 2026-10-31 — Installed skills to use: `design-taste-frontend`, `impeccable`, `postgresql-optimization` (see `.agents/skills/`).
 - 2026-10-31 — **Git cadence (binding, team agreement):** every member commits + pushes **at least every 30 minutes** of work on their own `feat/<module>-<name>` branch; never `main`. Recorded in `docs/team/README.md`; each member brief carries a standing authorization so their agent may commit/push when the member asks (satisfies `AGENTS.md` §6 explicit-ask rule).
 - 2026-10-31 — **Team kickoff briefs:** `docs/team/{gabriel,abhiram,catherine,pavithra}.md` — paste-ready first-person kickoff prompts so each member starts their own AI agent with full shared context.
-- 2026-10-31 — **Git authorization granted by Gabriel:** agent may commit (baseline + checkpoints). Agent may also commit/push **as** teammates `mariacatheriine`, `abhiramh7`, `PavithraSrajesh` — **only with Gabriel's explicit permission each time** (git `--author` / per-commit identity). Remote/push setup still requires explicit ask (no remote exists yet).
+- 2026-10-31 — **Git authorization granted by Gabriel:** agent may commit (baseline + checkpoints). Agent may also commit/push **as** teammates `mariacatheriine` (GH id 183214524), `AbhiramH7` (id 205494575, login capitalized), `PavithraSrajesh` (id 183044855) — **only with Gabriel's explicit permission each time**. Done once: 3 sole-authored Phase-0 commits (2026-10-31).
+- 2026-10-31 — **Remote:** github.com/gabsgj/Orbit (private, `main` pushed; all 4 contributors visible). Local DB: `orbit` owned by `orbit_app` (CREATEDB dev-only for Prisma shadow DB). Dev logins in README.
+- 2026-10-31 — **Prisma gotcha:** 6.19 does not snake_case unmapped fields; some `@map`s silently dropped → verify generated DDL via psql `\d table` after every schema change.
 
 ## Architecture — ✅ LOCKED (2026-10-31): HIGHLY MODULAR feature modules
 - `src/modules/<domain>/` — 11 modules: auth, catalog, templates, subscriptions, billing, invoices, payments, discounts, dashboard, portal, admin.
