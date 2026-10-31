@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Orbit logo">
+  <!-- Orbit mark: a ledger-ink square with an orbit ring and its satellite.
+       Achromatic Ledger thesis: ink ground (#0f172a), one data-chroma stroke (#1d5fbf). -->
+  <rect width="64" height="64" rx="14" fill="#0f172a"/>
+  <!-- orbit path: an ellipse tilted like a ring around the core -->
+  <ellipse cx="32" cy="32" rx="20" ry="9.5" fill="none" stroke="#1d5fbf" stroke-width="3"
+           transform="rotate(-24 32 32)"/>
+  <!-- the core (the recurring-revenue core the ring circles) -->
+  <circle cx="32" cy="32" r="6.5" fill="#f8fafc"/>
+  <!-- the satellite: one period on its billing orbit, marked solid chroma -->
+  <circle cx="46.6" cy="20.2" r="3.6" fill="#1d5fbf"/>
+</svg>

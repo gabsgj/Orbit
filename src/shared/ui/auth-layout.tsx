@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogoMark } from "./logo";
 
 /**
  * AuthLayout — the ledger "folio" for all auth surfaces (Gate-3/landing world).
@@ -20,8 +21,8 @@ export function AuthLayout({
     <div className="grid min-h-screen bg-[hsl(var(--background))] lg:grid-cols-[44%_56%]">
       {/* brand panel */}
       <aside className="relative hidden flex-col justify-between border-r border-[hsl(var(--border))] bg-[hsl(var(--card))] p-10 lg:flex">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-md bg-[hsl(var(--primary))] text-sm font-bold text-[hsl(var(--primary-foreground))]">O</span>
+        <Link href="/" className="flex items-center gap-2" aria-label="Orbit home">
+          <LogoMark size={32} />
           <span className="text-base font-bold tracking-tight">Orbit</span>
         </Link>
 
@@ -54,8 +55,8 @@ export function AuthLayout({
       {/* form panel */}
       <main className="flex items-center justify-center p-6">
         <div className="w-full max-w-md">
-          <Link href="/" className="mb-8 flex items-center gap-2 lg:hidden">
-            <span className="grid h-8 w-8 place-items-center rounded-md bg-[hsl(var(--primary))] text-sm font-bold text-[hsl(var(--primary-foreground))]">O</span>
+          <Link href="/" className="mb-8 flex items-center gap-2 lg:hidden" aria-label="Orbit home">
+            <LogoMark size={32} />
             <span className="text-base font-bold tracking-tight">Orbit</span>
           </Link>
           <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-8 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">

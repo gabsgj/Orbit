@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogoMark } from "@/shared/ui/logo";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -185,8 +186,8 @@ export default function LandingPage() {
       {/* ── nav ── */}
       <header className="sticky top-0 z-40 border-b border-[hsl(var(--border))] bg-[hsl(var(--background))]/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="grid h-7 w-7 place-items-center rounded-md bg-[hsl(var(--primary))] text-sm font-bold text-[hsl(var(--primary-foreground))]">O</span>
+          <Link href="/" className="flex items-center gap-2" aria-label="Orbit home">
+            <LogoMark size={28} />
             <span className="text-[15px] font-bold tracking-tight">Orbit</span>
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-[hsl(var(--muted-foreground))] md:flex">
@@ -449,7 +450,7 @@ export default function LandingPage() {
       <footer className="border-t border-[hsl(var(--border))]">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-5 py-8 text-sm text-[hsl(var(--muted-foreground))] md:flex-row md:items-center">
           <div className="flex items-center gap-2">
-            <span className="grid h-6 w-6 place-items-center rounded bg-[hsl(var(--primary))] text-xs font-bold text-[hsl(var(--primary-foreground))]">O</span>
+            <LogoMark size={24} />
             <span><strong className="font-semibold text-[hsl(var(--foreground))]">Orbit</strong> — subscription management for Brightloop Software</span>
           </div>
           <p className="font-mono text-xs">
