@@ -229,16 +229,16 @@ PAID is terminal. PAID set automatically when amount_paid ≥ grand_total.
 
 ## 7. Traceability — problem statement scenes → requirements
 
-| PDF scene | FRs | Primary owner |
-|---|---|---|
-| 1. A new customer signs up | FR-AUTH-01…07 | Abhiram |
-| 2. Launching a new plan | FR-CAT-01…05 | Abhiram |
-| 3. Turning a quote into a subscription | FR-QT-01…02, FR-SUB-01…08 | Catherine |
-| 4. Billing day | FR-BILL-01…08, FR-INV-01…05 | Gabriel + Catherine |
-| 5. A customer asks for a better price | FR-DISC-01…06 | Catherine |
-| 6. The money comes in | FR-PAY-01…06 | Catherine |
-| 7. The finance lead | FR-DASH-01…07 | Pavithra |
-| (cross-cutting) portal, mail, admin, seeds, deploy | FR-PORT/MAIL/ADM | Abhiram + Pavithra + Gabriel |
+| PDF scene | FRs | Primary owner | Status (2026-10-31) |
+|---|---|---|---|
+| 1. A new customer signs up | FR-AUTH-01…07 | Abhiram | Done |
+| 2. Launching a new plan | FR-CAT-01…05 | Abhiram | Done |
+| 3. Turning a quote into a subscription | FR-QT-01…02, FR-SUB-01…08 | Catherine | In progress (Catherine) |
+| 4. Billing day | FR-BILL-01…08, FR-INV-01…05 | Gabriel + Catherine | Core done (billing engine + button; invoices UI Catherine in progress) |
+| 5. A customer asks for a better price | FR-DISC-01…06 | Catherine | Contract ready (engine Catherine) |
+| 6. The money comes in | FR-PAY-01…06 | Catherine | In progress |
+| 7. The finance lead | FR-DASH-01…07 | Pavithra | Backend done / UI in progress (Pavithra) |
+| (cross-cutting) portal, mail, admin, seeds, deploy | FR-PORT/MAIL/ADM | Abhiram + Pavithra + Gabriel | In progress |
 
 ## 8. Out of scope (explicit — no scope creep)
 Real payment gateway · real SMTP (P2 behind env) · multi-currency (INR only) · proration

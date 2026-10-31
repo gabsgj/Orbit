@@ -49,8 +49,8 @@ _Legend: ☐ todo · ☐↑ high priority · ✅ done (YYYY-MM-DD)_
 - ✅ Abhiram: auth hardening + RBAC + staff mgmt → catalog CRUD (brief: docs/team/abhiram.md).
 - ✅ Catherine: subscription state machine + UI shell (brief: docs/team/catherine.md).
 - ✅ Pavithra: UI Gate 0 → docs/DESIGN.md + design system + table pattern + dashboard wireframe (brief: docs/team/pavithra.md).
-- ✅ Auth+RBAC (FR-AUTH-01…07) · staff mgmt (FR-ADM-01) — Abhiram.
-- ✅ Catalog: products/variants/plans/taxes (FR-CAT-01…05) — Abhiram.
+- ✅ (2026-10-31) Auth+RBAC (FR-AUTH-01…07) · staff mgmt (FR-ADM-01) — Abhiram.
+- ✅ (2026-10-31) Catalog: products/variants/plans/taxes (FR-CAT-01…05) — Abhiram.
 - ✅ (2026-10-31) Subscription state machine + UI (FR-SUB-01…08) — Catherine.
 - ✅ (2026-10-31) Quotation templates (FR-QT-01…02) — Abhiram CRUD + Catherine "from template" flow.
 - ✅ Design system + TanStack table pattern + dashboard wireframe — Pavithra.
@@ -62,6 +62,8 @@ _Legend: ☐ todo · ☐↑ high priority · ✅ done (YYYY-MM-DD)_
 - ✅ Dashboard aggregates backend (KPIs, MRR/ARR, aging, renewals) — a6 DONE.
 - ✅ Dashboard UI + charts + aging buckets + renewals forecast (FR-DASH-01…05, FR-PAY-05) — Pavithra DONE.
 - ✅ Mail outbox + admin viewer (FR-MAIL-01…02) — a5 DONE (offline reset-link button works).
+- ✅ (2026-10-31) Mail dispatcher (FR-MAIL-03): env-gated SMTP dispatcher in `modules/auth/dispatcher.ts` — b2 DONE.
+- ✅ (2026-10-31) Audit helper (FR-ADM-03 wiring): `shared/lib/audit.ts` with typed action constants — b3 DONE.
 - ☐ Invoices (FR-INV-01…05) + payments (FR-PAY-01…04) — Catherine.
 - ☐ DiscountEngine (FR-DISC-01…06) — Catherine (hook ready in billing; contract exported).
 - ✅ **UI Gate 2** (Pavithra, end of Phase 2): mid-build `impeccable` review of core flows complete; findings resolved and logged.
