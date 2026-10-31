@@ -23,7 +23,7 @@ declare module "next-auth/jwt" {
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
-  pages: { signIn: "/login" },
+  pages: { signIn: "/login", signOut: "/signout" },
   providers: [
     CredentialsProvider({
       name: "Email & Password",
