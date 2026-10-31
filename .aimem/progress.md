@@ -98,6 +98,16 @@ _Chronological record of work done. Newest entries at the bottom._
 
 ## 2026-10-31 — UI Gate 0 COMPLETE & Finance Dashboard Foundations (Pavithra S Rajesh)
 
+## 2026-10-31 — Hosted mirror (Neon) provisioned
+
+**By:** OpenCode agent (Gabriel's lane — deploy pipeline; Neon URL provided by Gabriel)
+
+- Neon DB verified (PG 18.6, us-east-1, pooled URL, empty) → `prisma migrate deploy` applied both migrations (**17 CHECK constraints live**) → `npm run db:seed` loaded the demo dataset (7 subs, 2 invoices, 4 users, sequences synced). Verified via psql counts.
+- `docs/DEPLOY.md` Status table added: steps 1–2 ✅; step 3 (Vercel import) **blocked on Gabriel's Vercel login**; env-var table + smoke checklist ready.
+- **Security flag raised (twice):** the Neon password was shared in chat → rotate in Neon console → update Vercel env vars. Never committed to git; no `.env.production` written.
+
+## 2026-10-31 — Admin UI pages (parallel agent a5-adminui)
+
 **By:** Pavithra S Rajesh (Experience & Insights Lead) on `main`
 
 - **UI Gate 0 (Phase 0) Delivered & Locked:**

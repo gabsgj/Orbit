@@ -50,6 +50,21 @@ cat vercel.json
 - [ ] Vercel Dashboard → **Cron** shows the `5 0 * * *` entry; after first fire, a `CRON_VERCEL` row exists in `billing_runs`.
 - [ ] Local demo still boots offline (`npm run dev` against local Postgres) — **the mirror must never break this.**
 
+## Status (2026-10-31)
+
+| Step | State |
+|---|---|
+| 1 · Neon project + pooled URL (us-east-1, PG 18.6) | ✅ Provided |
+| 2 · `prisma migrate deploy` → Neon | ✅ Applied — both migrations, **17 CHECK constraints** live |
+| 2 · `npm run db:seed` → Neon | ✅ Demo dataset live (7 subs, 2 invoices, 4 users, sequences) |
+| 3 · Vercel import + env vars | ⏳ **Blocked: needs Gabriel's Vercel login** (`vercel login` or dashboard import of `gabsgj/Orbit`) |
+| 4 · Cron registration | ⏳ Auto on Vercel import (vercel.json committed) |
+| 5 · Smoke checklist | ⏳ After deploy |
+
+> **🔐 Security:** the Neon password was shared in chat — **rotate it now**: Neon
+> console → project → Roles → `neondb_owner` → Reset password → update it in
+> Vercel env vars. It is never committed to git.
+
 ## Troubleshooting
 
 | Symptom | Cause | Fix |

@@ -73,6 +73,7 @@ Coding standards, logic, modularity, frontend design, scalability, security, usa
 - 2026-10-31 — **Git authorization granted by Gabriel:** agent may commit (baseline + checkpoints). Agent may also commit/push **as** teammates `mariacatheriine` (GH id 183214524), `AbhiramH7` (id 205494575, login capitalized), `PavithraSrajesh` (id 183044855) — **only with Gabriel's explicit permission each time**. Done once: 3 sole-authored Phase-0 commits (2026-10-31).
 - 2026-10-31 — **Remote:** github.com/gabsgj/Orbit (private, `main` pushed; all 4 contributors visible). Local DB: `orbit` owned by `orbit_app` (CREATEDB dev-only for Prisma shadow DB). Dev logins in README.
 - 2026-10-31 — **Prisma gotcha:** 6.19 does not snake_case unmapped fields; some `@map`s silently dropped → verify generated DDL via psql `\d table` after every schema change.
+- 2026-10-31 — **SCOPE CONSTRAINT (Gabriel, binding):** the agent does **only Gabriel's lane** (platform, billing engine, seeds, perf, deploy, integration steward). No work on Abhiram's (auth/catalog/templates), Catherine's (subscriptions/invoices/payments/discounts/portal-backend) or Pavithra's (design/dashboard-UI/portal-UI) FRs — earlier outbox + dashboard-backend crossover acknowledged; teammates own their lanes from here.
 
 ## Architecture — ✅ LOCKED (2026-10-31): HIGHLY MODULAR feature modules
 - `src/modules/<domain>/` — 11 modules: auth, catalog, templates, subscriptions, billing, invoices, payments, discounts, dashboard, portal, admin.
