@@ -3,6 +3,7 @@ import {
   PortalSubscription,
   PortalInvoice,
   PortalCustomerProfile,
+  SubscriptionActionInput,
 } from "./schemas";
 
 /**
@@ -23,6 +24,9 @@ export const DEMO_SUBSCRIPTIONS: PortalSubscription[] = [
     monthlyLineValue: 5560,
     quantity: 5,
     unitPrice: 1112,
+    pausable: true,
+    renewable: true,
+    closableEarly: false,
   },
   {
     id: "sub-demo-2",
@@ -37,6 +41,9 @@ export const DEMO_SUBSCRIPTIONS: PortalSubscription[] = [
     monthlyLineValue: 2400,
     quantity: 1,
     unitPrice: 2400,
+    pausable: false,
+    renewable: true,
+    closableEarly: true,
   },
 ];
 
@@ -212,6 +219,9 @@ export async function getCustomerSubscriptions(
         monthlyLineValue,
         quantity,
         unitPrice,
+        pausable: s.plan.pausable,
+        renewable: s.plan.renewable,
+        closableEarly: s.plan.closableEarly,
       };
     });
   } catch {
@@ -255,5 +265,156 @@ export async function getCustomerInvoices(
     }));
   } catch {
     return DEMO_INVOICES;
+  }
+}
+
+/**
+ * Handles customer-initiated subscription actions (FR-PORT-03, DEMO Act 8).
+ * Checks plan flags (pausable, renewable, closableEarly) before executing updates.
+ */
+export async function requestSubscriptionAction(
+  prisma: PrismaClient,
+  userId: string | undefined,
+  input: SubscriptionActionInput
+): Promise<{ success: boolean; message: string; newStatus?: string }> {
+  try {
+    const sub = await prisma.subscription.findUnique({
+      where: { id: input.subscriptionId },
+      include: { plan: true, customer: true },
+    });
+
+    if (!sub) {
+      return {
+        success: false,
+        message: "Subscription record not found.",
+      };
+    }
+
+    // Verify ownership if user is signed in
+    if (userId && sub.customer.userId !== userId) {
+      return {
+        success: false,
+        message: "Unauthorized: this subscription does not belong to your account.",
+      };
+    }
+
+    if (input.action === "PAUSE") {
+      if (!sub.plan.pausable) {
+        return {
+          success: false,
+          message: "This subscription plan does not permit pausing (FR-SUB-04).",
+        };
+      }
+      if (sub.status !== "ACTIVE") {
+        return {
+          success: false,
+          message: `Cannot pause subscription in ${sub.status} state. Only ACTIVE subscriptions can be paused.`,
+        };
+      }
+
+      await prisma.subscription.update({
+        where: { id: sub.id },
+        data: {
+          status: "PAUSED",
+          pausedOn: new Date(),
+        },
+      });
+
+      return {
+        success: true,
+        message: `Subscription ${sub.number} paused successfully. Billing cycle is on hold.`,
+        newStatus: "PAUSED",
+      };
+    }
+
+    if (input.action === "RESUME") {
+      if (sub.status !== "PAUSED") {
+        return {
+          success: false,
+          message: `Cannot resume subscription in ${sub.status} state. Only PAUSED subscriptions can be resumed.`,
+        };
+      }
+
+      const now = new Date();
+      await prisma.subscription.update({
+        where: { id: sub.id },
+        data: {
+          status: "ACTIVE",
+          pausedOn: null,
+          nextBillingDate:
+            sub.nextBillingDate && sub.nextBillingDate <= now
+              ? now
+              : sub.nextBillingDate,
+        },
+      });
+
+      return {
+        success: true,
+        message: `Subscription ${sub.number} resumed successfully. Active recurring billing restored.`,
+        newStatus: "ACTIVE",
+      };
+    }
+
+    if (input.action === "RENEW") {
+      if (!sub.plan.renewable) {
+        return {
+          success: false,
+          message: "This plan does not support customer-initiated renewal.",
+        };
+      }
+
+      const nextExpiry = new Date(sub.expiryDate);
+      nextExpiry.setFullYear(nextExpiry.getFullYear() + 1);
+
+      await prisma.subscription.update({
+        where: { id: sub.id },
+        data: {
+          expiryDate: nextExpiry,
+        },
+      });
+
+      return {
+        success: true,
+        message: `Subscription ${sub.number} renewed successfully. Active through ${
+          nextExpiry.toISOString().split("T")[0]
+        }.`,
+        newStatus: sub.status,
+      };
+    }
+
+    if (input.action === "CLOSE") {
+      if (!sub.plan.closableEarly) {
+        return {
+          success: false,
+          message: "This plan does not permit early closure before the expiry date (FR-SUB-05).",
+        };
+      }
+
+      await prisma.subscription.update({
+        where: { id: sub.id },
+        data: {
+          status: "CLOSED",
+          nextBillingDate: null,
+        },
+      });
+
+      return {
+        success: true,
+        message: `Subscription ${sub.number} has been closed per your request.`,
+        newStatus: "CLOSED",
+      };
+    }
+
+    return {
+      success: true,
+      message: `Request registered for subscription ${sub.number}.`,
+    };
+  } catch (err) {
+    const errorMsg =
+      err instanceof Error ? err.message : "Unknown error occurred";
+    return {
+      success: false,
+      message: `Unable to process request: ${errorMsg}`,
+    };
   }
 }

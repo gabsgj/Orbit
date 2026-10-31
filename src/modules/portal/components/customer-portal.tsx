@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/sha
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Dialog } from "@/shared/ui/dialog";
+import { Input } from "@/shared/ui/input";
 import { DataTable } from "@/shared/ui/data-table";
 import { formatINR, formatDate } from "@/shared/lib/money";
 import { trpc } from "@/shared/trpc/react";
@@ -44,20 +45,52 @@ export function CustomerPortal({
 }: CustomerPortalProps) {
   const [activeTab, setActiveTab] = React.useState<"subscriptions" | "invoices" | "billing">("subscriptions");
   const [selectedInvoice, setSelectedInvoice] = React.useState<PortalInvoice | null>(null);
+  const [actionTargetSub, setActionTargetSub] = React.useState<{
+    sub: PortalSubscription;
+    action: "PAUSE" | "RESUME" | "RENEW" | "CLOSE";
+  } | null>(null);
+  const [actionReason, setActionReason] = React.useState("");
+  const [feedbackMessage, setFeedbackMessage] = React.useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   // Live queries via tRPC portalRouter (FR-PORT-01, FR-PORT-02)
   const { data: remoteProfile } = trpc.portal.myProfile.useQuery(undefined, {
     enabled: !propCustomer,
   });
 
-  const { data: remoteSubs, isLoading: isSubsLoading } = trpc.portal.mySubscriptions.useQuery(undefined, {
+  const {
+    data: remoteSubs,
+    isLoading: isSubsLoading,
+    refetch: refetchSubs,
+  } = trpc.portal.mySubscriptions.useQuery(undefined, {
     enabled: !propSubscriptions,
     refetchInterval: 10000,
   });
 
-  const { data: remoteInvoices, isLoading: isInvoicesLoading } = trpc.portal.myInvoices.useQuery(undefined, {
+  const {
+    data: remoteInvoices,
+    isLoading: isInvoicesLoading,
+  } = trpc.portal.myInvoices.useQuery(undefined, {
     enabled: !propInvoices,
     refetchInterval: 10000,
+  });
+
+  const requestActionMutation = trpc.portal.requestAction.useMutation({
+    onSuccess: (res) => {
+      if (res.success) {
+        setFeedbackMessage({ type: "success", text: res.message });
+        refetchSubs();
+        setActionTargetSub(null);
+        setActionReason("");
+      } else {
+        setFeedbackMessage({ type: "error", text: res.message });
+      }
+    },
+    onError: (err) => {
+      setFeedbackMessage({ type: "error", text: err.message });
+    },
   });
 
   const customer: PortalCustomerProfile = {
@@ -81,6 +114,15 @@ export function CustomerPortal({
   const overdueInvoices = invoices.filter(
     (i) => i.status === "CONFIRMED" && new Date(i.dueDate) < new Date() && i.grandTotal > i.amountPaid
   );
+
+  const handleExecuteAction = async () => {
+    if (!actionTargetSub) return;
+    await requestActionMutation.mutateAsync({
+      subscriptionId: actionTargetSub.sub.id,
+      action: actionTargetSub.action,
+      reason: actionReason || undefined,
+    });
+  };
 
   const invoiceColumns: ColumnDef<PortalInvoice>[] = [
     {
@@ -171,6 +213,33 @@ export function CustomerPortal({
 
   return (
     <div className="space-y-6">
+      {/* ── Status Feedback Banner ──────────────────────────────────────── */}
+      {feedbackMessage && (
+        <div
+          className={`rounded-[var(--radius-xs)] border p-3 flex items-center justify-between text-xs ${
+            feedbackMessage.type === "success"
+              ? "border-[hsl(var(--status-active-ink))]/30 bg-[hsl(var(--status-active-ink))]/10 text-[hsl(var(--foreground))]"
+              : "border-[hsl(var(--status-overdue-ink))]/30 bg-[hsl(var(--status-overdue-ink))]/10 text-[hsl(var(--status-overdue-ink))]"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {feedbackMessage.type === "success" ? (
+              <CheckIcon size={14} className="text-[hsl(var(--status-active-ink))]" />
+            ) : (
+              <AlertTriangleIcon size={14} className="text-[hsl(var(--status-overdue-ink))]" />
+            )}
+            <span>{feedbackMessage.text}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setFeedbackMessage(null)}
+            className="text-xs hover:opacity-75 font-semibold px-2 py-0.5"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* ── Customer Account Banner ─────────────────────────────────────── */}
       <div className="rounded-[var(--radius)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 shadow-xs">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -291,7 +360,16 @@ export function CustomerPortal({
                         {sub.productName}
                       </CardTitle>
                     </div>
-                    <Badge variant={sub.status === "ACTIVE" ? "active" : "neutral"} className="text-[10px]">
+                    <Badge
+                      variant={
+                        sub.status === "ACTIVE"
+                          ? "active"
+                          : sub.status === "PAUSED"
+                          ? "warning"
+                          : "neutral"
+                      }
+                      className="text-[10px]"
+                    >
                       {sub.status}
                     </Badge>
                   </div>
@@ -333,16 +411,46 @@ export function CustomerPortal({
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs pt-1">
+                  {/* Plan action buttons (FR-PORT-03, DEMO Act 8) */}
+                  <div className="flex flex-wrap items-center justify-between text-xs pt-1 gap-2">
                     <span className="text-[11px] text-[hsl(var(--muted-foreground))] flex items-center gap-1">
                       <ClockIcon size={12} />
                       Active since {formatDate(sub.startDate)}
                     </span>
 
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="h-7 text-xs px-2.5">
-                        Manage Plan
-                      </Button>
+                    <div className="flex items-center gap-2">
+                      {sub.status === "ACTIVE" && sub.pausable && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setActionTargetSub({ sub, action: "PAUSE" })}
+                          className="h-7 text-xs px-2.5 text-[hsl(var(--status-warning-ink))] hover:bg-[hsl(var(--status-warning-ink))]/10"
+                        >
+                          Request Pause
+                        </Button>
+                      )}
+
+                      {sub.status === "PAUSED" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setActionTargetSub({ sub, action: "RESUME" })}
+                          className="h-7 text-xs px-2.5 text-[hsl(var(--status-active-ink))] hover:bg-[hsl(var(--status-active-ink))]/10"
+                        >
+                          Resume Plan
+                        </Button>
+                      )}
+
+                      {sub.renewable && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setActionTargetSub({ sub, action: "RENEW" })}
+                          className="h-7 text-xs px-2.5"
+                        >
+                          Renew
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -455,7 +563,62 @@ export function CustomerPortal({
         </div>
       )}
 
-      {/* ── Invoice Print Preview Dialog ──────────────────────────────── */}
+      {/* ── Subscription Action Modal Dialog (FR-PORT-03) ──────────────── */}
+      <Dialog
+        open={Boolean(actionTargetSub)}
+        onClose={() => setActionTargetSub(null)}
+        title={
+          actionTargetSub
+            ? `${actionTargetSub.action} Subscription ${actionTargetSub.sub.number}`
+            : "Subscription Action"
+        }
+      >
+        {actionTargetSub && (
+          <div className="space-y-4 text-xs">
+            <p className="text-[hsl(var(--muted-foreground))]">
+              {actionTargetSub.action === "PAUSE"
+                ? `Pausing ${actionTargetSub.sub.productName} will suspend recurring invoice generation starting from your next scheduled cycle.`
+                : actionTargetSub.action === "RESUME"
+                ? `Resuming ${actionTargetSub.sub.productName} will reactivate recurring billing and reset the billing schedule.`
+                : `Submit a renewal request for ${actionTargetSub.sub.productName}.`}
+            </p>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-medium text-[hsl(var(--foreground))]">
+                Optional Reason or Note for Billing Desk:
+              </label>
+              <Input
+                value={actionReason}
+                onChange={(e) => setActionReason(e.target.value)}
+                placeholder="e.g., Seasonal suspension, upgrading team capacity..."
+                className="text-xs h-8"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[hsl(var(--border))]">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setActionTargetSub(null)}
+                className="text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleExecuteAction}
+                isLoading={requestActionMutation.isPending}
+                className="text-xs"
+              >
+                Confirm {actionTargetSub.action}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Dialog>
+
+      {/* ── Invoice Print Preview Dialog (Gate 3 & Demo Act 8) ──────────── */}
       <Dialog
         open={Boolean(selectedInvoice)}
         onClose={() => setSelectedInvoice(null)}
@@ -523,7 +686,7 @@ export function CustomerPortal({
               </table>
             </div>
 
-            <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center justify-between pt-2 border-t border-[hsl(var(--border))]">
               <Button
                 variant="outline"
                 size="sm"

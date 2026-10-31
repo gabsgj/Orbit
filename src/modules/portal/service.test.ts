@@ -7,31 +7,28 @@ import {
   getCustomerSubscriptions,
   getCustomerInvoices,
   getCustomerProfile,
+  requestSubscriptionAction,
 } from "./service";
 import type { PrismaClient } from "@prisma/client";
 
 describe("portal service unit tests", () => {
   describe("calculateMonthlyLineValue (SRS §1.3 and §6 rule 7)", () => {
     it("normalizes daily subscription line values (quantity × unitPrice × 30)", () => {
-      // 2 units at ₹100/day = ₹200/day × 30 = ₹6,000/month
       const mrr = calculateMonthlyLineValue(2, 100, "DAILY");
       expect(mrr).toBe(6000);
     });
 
     it("normalizes weekly subscription line values (quantity × unitPrice × 52/12)", () => {
-      // 1 unit at ₹1,200/week = ₹1,200 × (52/12) = ₹5,200/month
       const mrr = calculateMonthlyLineValue(1, 1200, "WEEKLY");
       expect(mrr).toBe(5200);
     });
 
     it("normalizes monthly subscription line values (quantity × unitPrice × 1)", () => {
-      // 3 units at ₹1,500/month = ₹4,500/month
       const mrr = calculateMonthlyLineValue(3, 1500, "MONTHLY");
       expect(mrr).toBe(4500);
     });
 
     it("normalizes yearly subscription line values (quantity × unitPrice / 12)", () => {
-      // 1 unit at ₹120,000/year = ₹10,000/month
       const mrr = calculateMonthlyLineValue(1, 120000, "YEARLY");
       expect(mrr).toBe(10000);
     });
@@ -76,6 +73,96 @@ describe("portal service unit tests", () => {
 
       const invs = await getCustomerInvoices(throwingPrisma);
       expect(invs).toEqual(DEMO_INVOICES);
+    });
+  });
+
+  describe("requestSubscriptionAction (FR-PORT-03 and DEMO Act 8)", () => {
+    it("returns error if subscription does not exist", async () => {
+      const mockPrisma = {
+        subscription: {
+          findUnique: async () => null,
+        },
+      } as unknown as PrismaClient;
+
+      const result = await requestSubscriptionAction(mockPrisma, undefined, {
+        subscriptionId: "a0000000-0000-0000-0000-000000000001",
+        action: "PAUSE",
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain("not found");
+    });
+
+    it("rejects PAUSE if plan.pausable is false (FR-SUB-04)", async () => {
+      const mockPrisma = {
+        subscription: {
+          findUnique: async () => ({
+            id: "sub-1",
+            number: "SUB-001",
+            status: "ACTIVE",
+            customer: { userId: "user-1" },
+            plan: { pausable: false, renewable: true, closableEarly: false },
+          }),
+        },
+      } as unknown as PrismaClient;
+
+      const result = await requestSubscriptionAction(mockPrisma, "user-1", {
+        subscriptionId: "a0000000-0000-0000-0000-000000000001",
+        action: "PAUSE",
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain("does not permit pausing");
+    });
+
+    it("rejects CLOSE if plan.closableEarly is false (FR-SUB-05)", async () => {
+      const mockPrisma = {
+        subscription: {
+          findUnique: async () => ({
+            id: "sub-1",
+            number: "SUB-001",
+            status: "ACTIVE",
+            customer: { userId: "user-1" },
+            plan: { pausable: true, renewable: true, closableEarly: false },
+          }),
+        },
+      } as unknown as PrismaClient;
+
+      const result = await requestSubscriptionAction(mockPrisma, "user-1", {
+        subscriptionId: "a0000000-0000-0000-0000-000000000001",
+        action: "CLOSE",
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain("does not permit early closure");
+    });
+
+    it("successfully pauses an active pausable subscription", async () => {
+      let updatedData: unknown = null;
+      const mockPrisma = {
+        subscription: {
+          findUnique: async () => ({
+            id: "sub-1",
+            number: "SUB-2026-00001",
+            status: "ACTIVE",
+            customer: { userId: "user-1" },
+            plan: { pausable: true, renewable: true, closableEarly: true },
+          }),
+          update: async ({ data }: { data: unknown }) => {
+            updatedData = data;
+            return {};
+          },
+        },
+      } as unknown as PrismaClient;
+
+      const result = await requestSubscriptionAction(mockPrisma, "user-1", {
+        subscriptionId: "a0000000-0000-0000-0000-000000000001",
+        action: "PAUSE",
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.newStatus).toBe("PAUSED");
+      expect(updatedData).toMatchObject({ status: "PAUSED" });
     });
   });
 });

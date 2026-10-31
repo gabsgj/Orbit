@@ -1,14 +1,18 @@
 import { router, publicProcedure } from "@/shared/trpc";
-import { PortalFilterInputSchema } from "./schemas";
+import {
+  PortalFilterInputSchema,
+  SubscriptionActionInputSchema,
+} from "./schemas";
 import {
   getCustomerSubscriptions,
   getCustomerInvoices,
   getCustomerProfile,
+  requestSubscriptionAction,
 } from "./service";
 
 /**
  * portal router — customer-scoped data access (PLAN §5: portal.*).
- * Scopes all queries to the authenticated user's customer record (FR-PORT-01).
+ * Scopes all queries and actions to the authenticated customer (FR-PORT-01, FR-PORT-03).
  * Falls back to demo customer fixtures for offline demonstration resilience.
  */
 export const portalRouter = router({
@@ -41,6 +45,16 @@ export const portalRouter = router({
         ctx.prisma,
         ctx.session?.user?.id,
         input?.customerId
+      );
+    }),
+
+  requestAction: publicProcedure
+    .input(SubscriptionActionInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      return requestSubscriptionAction(
+        ctx.prisma,
+        ctx.session?.user?.id,
+        input
       );
     }),
 });

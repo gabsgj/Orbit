@@ -6,6 +6,14 @@ export const PortalFilterInputSchema = z.object({
 
 export type PortalFilterInput = z.infer<typeof PortalFilterInputSchema>;
 
+export const SubscriptionActionInputSchema = z.object({
+  subscriptionId: z.string().uuid(),
+  action: z.enum(["PAUSE", "RESUME", "RENEW", "CLOSE"]),
+  reason: z.string().max(250).optional(),
+});
+
+export type SubscriptionActionInput = z.infer<typeof SubscriptionActionInputSchema>;
+
 export interface PortalSubscription {
   id: string;
   number: string;
@@ -19,6 +27,9 @@ export interface PortalSubscription {
   monthlyLineValue: number;
   quantity: number;
   unitPrice: number;
+  pausable: boolean;
+  renewable: boolean;
+  closableEarly: boolean;
 }
 
 export interface PortalInvoice {

@@ -294,3 +294,24 @@ _Chronological record of work done. Newest entries at the bottom._
   - `npm run lint` → 0 warnings, 0 errors.
   - `npx vitest run src/modules/portal/service.test.ts` → 6/6 tests passing.
   - `npm run build` → 21/21 routes compiled and prerendered cleanly.
+
+
+## 2026-10-31 — Customer Actions (FR-PORT-03) & Invoice Print Stylesheet (Gate 3)
+
+**By:** Pavithra S Rajesh (Experience & Insights Lead) on `main`
+
+- **Customer-Initiated Plan Actions (FR-PORT-03, DEMO Act 8):**
+  - Implemented `portal.requestAction` procedure in `modules/portal/router.ts` and `service.ts` supporting `PAUSE`, `RESUME`, `RENEW`, and `CLOSE`.
+  - Added enforcement of plan-level flags: `plan.pausable` (FR-SUB-04), `plan.renewable`, and `plan.closableEarly` (FR-SUB-05).
+  - Added modal action dialog with optional reason notes in `customer-portal.tsx`.
+  - Added visual feedback alert banners with auto-dismiss.
+- **Dedicated Invoice Print Stylesheet (UI Gate 3, DEMO Act 8):**
+  - Enhanced `src/app/globals.css` with `@media print` rules: A4 portrait sizing, 1.5cm margins, complete suppression of chrome, headers, footers, buttons, and dialog backdrops.
+  - Formatted the statement print modal to render full-bleed, borderless, paper-ready tax invoices.
+- **Expanded Unit Test Suite:**
+  - Expanded `src/modules/portal/service.test.ts` to 10 unit tests covering plan-flag guards (pausable rejection, closableEarly rejection, successful pause status transition).
+- **Verification:**
+  - `npm run typecheck` → 0 errors.
+  - `npm run lint` → 0 warnings, 0 errors.
+  - `npx vitest run src/modules/portal/service.test.ts` → 10/10 tests passing.
+  - `npm run build` → 21/21 routes compiled and prerendered cleanly.
