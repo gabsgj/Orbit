@@ -5,12 +5,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [citext]
 }
 
 // ── Enums ────────────────────────────────────────────────────────────────────
@@ -90,8 +92,10 @@ enum OutboxKind {
 
 model User {
   id           String   @id @default(uuid()) @db.Uuid
-  /// Lowercased at the service layer before write — uniqueness is case-insensitive by convention.
-  email        String   @unique
+  /// Case-insensitive at the DATABASE level (citext) — the unique index treats
+  /// 'Admin@Orbit.Local' and 'admin@orbit.local' as the same address (FR-AUTH-01).
+  /// The service layer still lowercases before write as belt-and-braces.
+  email        String   @unique @db.Citext
   passwordHash String   @map("password_hash")
   role         Role
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
