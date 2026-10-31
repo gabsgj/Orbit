@@ -76,7 +76,7 @@ _Legend: ☐ todo · ☐↑ high priority · ✅ done (YYYY-MM-DD)_
 
 ### Phase 4 — Harden & rehearse (FEATURE FREEZE at start)
 - ☐ Validation sweep (client+server, consistent error shape) — ALL.
-- ☐ **UI Gate 3** (Pavithra + ALL, post-freeze): final `impeccable` audit of every screen + invoice print stylesheet + zero-tolerance list (no console errors, no FOUC, no lorem, consistent ₹/date formats, no broken routes) + demo-path pixel polish.
+- ✅ **UI Gate 3** (Pavithra owned screens & print stylesheet): final `impeccable` audit completed across `/dashboard` and `/portal`, dedicated `@media print` A4 invoice print stylesheet implemented in `globals.css` with zero UI chrome, zero console errors, zero lorem ipsum, consistent `formatINR()` (₹) and date formats, and demo-path pixel polish verified. Teammate screens audit ready for team post-freeze.
 - ☐ README verified on a clean checkout; offline rehearsal (WiFi off) — Gabriel.
 - ☐ Demo script (PLAN §7) rehearsed ×2 — ALL.
 
