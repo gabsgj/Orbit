@@ -7,6 +7,7 @@ export {
   confirmInvoice,
   cancelInvoice,
   sendInvoice,
+  sendReminder,
   InvoiceError,
   LEGAL_INVOICE_TRANSITIONS,
 } from "./service";
@@ -15,6 +16,7 @@ export {
   confirmInvoiceSchema,
   cancelInvoiceSchema,
   sendInvoiceSchema,
+  sendReminderSchema,
   invoiceStatusSchema,
 } from "./schemas";
 export type {

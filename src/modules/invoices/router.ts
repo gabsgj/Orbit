@@ -6,18 +6,24 @@ import {
   confirmInvoiceSchema,
   cancelInvoiceSchema,
   sendInvoiceSchema,
+  sendReminderSchema,
 } from "./schemas";
 import {
   confirmInvoice,
   cancelInvoice,
   sendInvoice,
+  sendReminder,
   InvoiceError,
 } from "./service";
 import { findInvoiceById, listInvoices } from "./queries";
 
 function mapInvoiceError(err: unknown): never {
   if (err instanceof InvoiceError) {
-    if (err.code === "ILLEGAL_TRANSITION" || err.code === "INVOICE_HAS_PAYMENTS") {
+    if (
+      err.code === "ILLEGAL_TRANSITION" ||
+      err.code === "INVOICE_HAS_PAYMENTS" ||
+      err.code === "NOT_OVERDUE"
+    ) {
       throw new TRPCError({ code: "CONFLICT", message: err.message });
     }
     if (err.code === "NOT_FOUND") {
@@ -89,6 +95,26 @@ export const invoicesRouter = router({
     .mutation(async ({ ctx, input }) => {
       try {
         return await sendInvoice(ctx.prisma, input);
+      } catch (err) {
+        mapInvoiceError(err);
+      }
+    }),
+
+  // FR-PAY-06: offline dunning — stage a REMINDER in the mail outbox.
+  sendReminder: protectedProcedure
+    .use(requireRole("ADMIN", "STAFF"))
+    .input(sendReminderSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const userId = ctx.session?.user?.id;
+        if (!userId) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "User not authenticated." });
+        }
+        return await sendReminder(ctx.prisma, {
+          invoiceId: input.invoiceId,
+          sentByUserId: userId,
+          baseUrl: process.env.NEXTAUTH_URL ?? "http://localhost:3000",
+        });
       } catch (err) {
         mapInvoiceError(err);
       }

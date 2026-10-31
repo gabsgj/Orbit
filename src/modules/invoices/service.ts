@@ -1,6 +1,8 @@
 import type { Prisma, PrismaClient, InvoiceStatus } from "@prisma/client";
 import { findInvoiceById } from "./queries";
 import { formatINR, formatDate } from "@/shared/lib/money";
+import { dateOnly } from "@/shared/lib/dates";
+import { logAudit } from "@/shared/lib/audit";
 
 type Tx = Prisma.TransactionClient | PrismaClient;
 
@@ -118,4 +120,104 @@ export async function sendInvoice(tx: Tx, input: { invoiceId: string }) {
     outboxId: outbox.id,
     toEmail,
   };
+}
+
+/**
+ * Send payment reminder: stages a professional overdue notice in email_outbox
+ * (FR-PAY-06 — offline dunning; kind=REMINDER, queued until SMTP is configured).
+ *
+ * Guard mirrors SRS §6 rule 6 exactly: an invoice is overdue (and therefore
+ * dunnable) only when status = CONFIRMED ∧ due_date < today ∧ outstanding > 0.
+ */
+export async function sendReminder(
+  tx: Tx,
+  input: { invoiceId: string; sentByUserId: string; baseUrl?: string },
+) {
+  const inv = await findInvoiceById(tx, input.invoiceId);
+  if (!inv) {
+    throw new InvoiceError("NOT_FOUND", "Invoice not found.", { id: input.invoiceId });
+  }
+
+  // Rule 6 guard — every violation gets a clear, specific error message.
+  if (inv.status !== "CONFIRMED") {
+    throw new InvoiceError(
+      "NOT_OVERDUE",
+      `Cannot send a reminder for invoice ${inv.number}: status is ${inv.status}. Only CONFIRMED (posted) invoices can be overdue.`,
+      { status: inv.status },
+    );
+  }
+
+  const outstanding = Math.max(0, Number(inv.grandTotal) - Number(inv.amountPaid));
+  if (outstanding <= 0) {
+    throw new InvoiceError(
+      "NOT_OVERDUE",
+      `Cannot send a reminder for invoice ${inv.number}: nothing is outstanding (already fully paid).`,
+      { grandTotal: inv.grandTotal, amountPaid: inv.amountPaid },
+    );
+  }
+
+  const today = dateOnly(new Date());
+  if (dateOnly(new Date(inv.dueDate)) >= today) {
+    throw new InvoiceError(
+      "NOT_OVERDUE",
+      `Cannot send a reminder for invoice ${inv.number}: it is not overdue yet (due ${formatDate(inv.dueDate)}).`,
+      { dueDate: inv.dueDate },
+    );
+  }
+
+  const toEmail = inv.customer.user.email;
+  const subject = `Payment reminder: Invoice ${inv.number} is overdue`;
+  const outstandingStr = formatINR(outstanding);
+  const grandTotalStr = formatINR(inv.grandTotal);
+  const dueDateStr = formatDate(inv.dueDate);
+  const termsDays = inv.subscription.paymentTermsDays;
+  // baseUrl is accepted for signature parity with other mail services (reset
+  // links, portal deep links); the offline reminder body needs no link today.
+  void input.baseUrl;
+
+  const bodyHtml = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <h2>Payment Reminder — Invoice ${inv.number}</h2>
+      <p>Dear ${inv.customer.companyName},</p>
+      <p>
+        This is a friendly reminder that invoice <strong>${inv.number}</strong> for
+        <strong>${grandTotalStr}</strong> was due on <strong>${dueDateStr}</strong> and
+        remains unpaid. The outstanding balance is <strong>${outstandingStr}</strong>.
+      </p>
+      <p>
+        Our records show the payment terms for this subscription are net ${termsDays} days.
+        Kindly arrange payment at your earliest convenience to keep your subscription in good standing.
+      </p>
+      <p>If you have already made the payment, please disregard this notice.</p>
+      <p>Thank you for partnering with Brightloop Software.</p>
+    </div>
+  `.trim();
+
+  const outbox = await tx.emailOutbox.create({
+    data: {
+      toEmail,
+      subject,
+      bodyHtml,
+      kind: "REMINDER",
+    },
+  });
+
+  // shared/lib/audit.ts has no REMINDER_SENT constant and shared/ is off-limits
+  // to this change — AuditLog.action is a free text column, so we log the
+  // canonical string directly (cast to satisfy the const-object type).
+  await logAudit(tx, {
+    userId: input.sentByUserId,
+    entity: "invoice",
+    entityId: inv.id,
+    action: "REMINDER_SENT" as never,
+    meta: {
+      invoiceNumber: inv.number,
+      toEmail,
+      outboxId: outbox.id,
+      outstanding,
+      dueDate: dateOnly(new Date(inv.dueDate)).toISOString().slice(0, 10),
+    },
+  });
+
+  return { ok: true as const, outboxId: outbox.id };
 }

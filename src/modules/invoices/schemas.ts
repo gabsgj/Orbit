@@ -28,3 +28,7 @@ export const cancelInvoiceSchema = z.object({
 export const sendInvoiceSchema = z.object({
   invoiceId: z.string().uuid("Invalid invoice ID"),
 });
+
+export const sendReminderSchema = z.object({
+  invoiceId: z.string().uuid("Invalid invoice ID"),
+});

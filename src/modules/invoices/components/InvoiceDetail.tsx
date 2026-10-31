@@ -5,6 +5,7 @@ import { trpc } from "@/shared/trpc/react";
 import { InvoiceStatusBadge } from "./InvoiceStatusBadge";
 import { formatINR, formatDate } from "@/shared/lib/money";
 import { isPastDue } from "@/shared/lib/dates";
+import { Button } from "@/shared/ui";
 
 interface InvoiceDetailProps {
   invoiceId: string;
@@ -49,6 +50,16 @@ export function InvoiceDetail({ invoiceId, onBack, onRecordPayment }: InvoiceDet
     onError: (err) => setActionError(err.message),
   });
 
+  const reminderMutation = trpc.invoices.sendReminder.useMutation({
+    onSuccess: () => {
+      setSuccessMsg("Reminder staged in mail outbox.");
+      setActionError(null);
+      utils.invoices.get.invalidate({ id: invoiceId });
+      utils.invoices.list.invalidate();
+    },
+    onError: (err) => setActionError(err.message),
+  });
+
   if (isLoading) {
     return <div className="h-64 rounded-lg bg-slate-100 animate-pulse" />;
   }
@@ -69,7 +80,8 @@ export function InvoiceDetail({ invoiceId, onBack, onRecordPayment }: InvoiceDet
   const grandTotal = Number(inv.grandTotal);
   const amountPaid = Number(inv.amountPaid);
   const outstanding = Math.max(0, grandTotal - amountPaid);
-  const overdue = inv.status === "CONFIRMED" && isPastDue(inv.dueDate);
+  // SRS §6 rule 6: CONFIRMED ∧ due_date < today ∧ outstanding > 0
+  const overdue = inv.status === "CONFIRMED" && isPastDue(inv.dueDate) && outstanding > 0;
 
   const handlePrint = () => {
     window.print();
@@ -144,6 +156,18 @@ export function InvoiceDetail({ invoiceId, onBack, onRecordPayment }: InvoiceDet
 
           {inv.status === "CONFIRMED" && (
             <>
+              {/* FR-PAY-06: dunning reminder — visible only when overdue (rule 6) */}
+              {overdue && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => reminderMutation.mutate({ invoiceId: inv.id })}
+                  isLoading={reminderMutation.isPending}
+                >
+                  ⚠ Send reminder
+                </Button>
+              )}
               {outstanding > 0 && onRecordPayment && (
                 <button
                   type="button"
