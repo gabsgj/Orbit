@@ -73,3 +73,14 @@ _Chronological record of work done. Newest entries at the bottom._
 - **Module skeleton:** 11 modules with fixed anatomy; contracts fixed early — `DiscountEngine.evaluate` (discounts→billing hook), `BillingService.run` (one service for all 3 triggers). Smoke-tested: page renders, tRPC health OK, cron guard 401→200 with secret, worker boots.
 - **Gotcha fixed:** Prisma 6.19 does NOT snake_case unmapped fields — several `@map`s silently missing → caught via psql inspection, fixed, DB reset + re-baselined. **Lesson: always verify generated SQL with `\d table`.**
 - Still open: Vercel hello-deploy (needs Gabriel's Vercel login), Pavithra's UI Gate 0 (docs/DESIGN.md).
+
+## 2026-10-31 — Phase 1 (Gabriel lane): BillingService + NumberingService — PR #1
+
+**By:** OpenCode agent (Gabriel's lane, on branch `feat/billing-gabriel`)
+
+- **Test infra:** `orbit_test` DB created + migrated (`TEST_DATABASE_URL` override); vitest `fileParallelism:false` (shared DB).
+- **NumberingService** (modules/admin): UPSERT+increment in caller tx (row-lock serializes issuers) → gapless `PREFIX-YEAR-00042`. 3 tests (format, per-type/year independence, 5-way concurrency).
+- **shared/lib/dates:** `addPeriod` (month-end clamp: Jan31+1M→Feb28), `dateOnly` — **UTC-midnight day-anchor** (fixes a real bug: Prisma serializes Date→UTC, so local-midnight anchors shifted a day in the DB; UTC-midnight round-trips perfectly and is timezone-independent).
+- **BillingService.run** (SRS M5, PLAN §4): pg_try_advisory_xact_lock serializes runs; due-selection via (status,next_billing_date) index; catch-up loop invoices every missed period (≤12, one per period); **idempotency** = UNIQUE(subscription_id,period_start) + P2002→"skipped", with **per-subscription SAVEPOINT** undoing the 25P02 aborted state (per-period isolation); snapshot lines (frozen unit_price) + per-line tax (exact Decimals) + DiscountEngine hook (contract ready for Catherine); gapless INV numbers; auto_close + status history; anchor advance; billing_runs audit (RUNNING→DONE).
+- **Router:** billing.run (ADMIN/STAFF) + billing.runs audit list.
+- **Proof:** 13 test files green (10 billing tests vs orbit_test: snapshot, idempotency, visible-skip via partial-history collision, catch-up, concurrency, auto-close, month-end, Decimal math); smoke vs dev DB → run1 created INV-2026-00001 ₹1839.62 CONFIRMED, run2 created 0. typecheck/lint/build ✓. **PR #1 open** (awaiting teammate review per standards).
