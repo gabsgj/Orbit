@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LogoMark } from "@/shared/ui/logo";
 import { GitHubIcon, FidgetSpinner, StickMan } from "@/shared/ui/easter-eggs";
+import { DemoCredentials } from "@/shared/ui/demo-credentials";
 import {
   SubscriptionLifecycleDiagram,
   BillingFlowDiagram,
@@ -185,7 +186,7 @@ export default function LandingPage() {
         <Link
           href="/"
           aria-label="Orbit home"
-          className="flex items-center gap-2 rounded-full bg-[hsl(var(--card))]/60 px-4 py-2 shadow-[var(--shadow-soft)] ring-1 ring-white/50 backdrop-blur-xl backdrop-saturate-150 transition hover:bg-[hsl(var(--card))]/80 sm:px-6 sm:py-2.5"
+          className="flex items-center gap-2 rounded-full bg-[hsl(var(--card))]/35 px-4 py-2 shadow-[var(--shadow-soft)] ring-1 ring-white/40 backdrop-blur-2xl backdrop-saturate-150 transition hover:bg-[hsl(var(--card))]/60 sm:px-6 sm:py-2.5"
         >
           <LogoMark size={32} className="sm:hidden" />
           <LogoMark size={40} className="hidden sm:block" />
@@ -193,7 +194,7 @@ export default function LandingPage() {
         </Link>
 
         {/* actions pill */}
-        <nav className="flex items-center gap-1 rounded-full bg-[hsl(var(--card))]/60 p-1.5 shadow-[var(--shadow-soft)] ring-1 ring-white/50 backdrop-blur-xl backdrop-saturate-150">
+        <nav className="flex items-center gap-1 rounded-full bg-[hsl(var(--card))]/35 p-1.5 shadow-[var(--shadow-soft)] ring-1 ring-white/40 backdrop-blur-2xl backdrop-saturate-150">
           <div className="hidden items-center md:flex">
             {[
               ["#scenes", "The month"],
@@ -227,8 +228,53 @@ export default function LandingPage() {
       </header>
 
       {/* ── hero ── */}
-      <section className="mx-auto grid max-w-7xl gap-10 px-6 pb-16 pt-32 md:grid-cols-[46%_54%] md:gap-8 md:pt-32">
-        <div className="flex flex-col justify-center">
+      <section className="relative mx-auto grid max-w-7xl gap-10 overflow-hidden px-6 pb-16 pt-32 md:grid-cols-[46%_54%] md:gap-8 md:pt-32">
+        {/* orbital vector art — crisp geometry behind the hero */}
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <svg
+            className="absolute left-1/2 top-1/2 h-[900px] w-[1400px] -translate-x-1/2 -translate-y-1/2"
+            viewBox="0 0 1400 900"
+            fill="none"
+          >
+            {/* orbit ellipse 1 — rotated -18° */}
+            <g transform="rotate(-18 700 450)">
+              <ellipse cx="700" cy="450" rx="520" ry="180" stroke="hsl(var(--tint-blue))" strokeWidth="1.5" />
+              {/* satellite dot on this ellipse path */}
+              <circle cx="1220" cy="450" r="5" fill="hsl(var(--primary))" />
+            </g>
+            {/* orbit ellipse 2 — rotated -28° */}
+            <g transform="rotate(-28 700 450)">
+              <ellipse cx="700" cy="450" rx="420" ry="140" stroke="hsl(var(--tint-blue))" strokeWidth="1.5" />
+              {/* satellite dot on this ellipse path */}
+              <circle cx="700" cy="310" r="4.5" fill="hsl(var(--primary))" />
+            </g>
+            {/* orbit ellipse 3 — rotated -18°, wider */}
+            <g transform="rotate(-18 700 450)">
+              <ellipse cx="700" cy="450" rx="640" ry="240" stroke="hsl(var(--tint-blue))" strokeWidth="1" />
+            </g>
+          </svg>
+          {/* animated orbiting dot — wrapper tilted -18°, inner spins 24s linear infinite */}
+          <div
+            className="absolute left-1/2 top-1/2"
+            style={{ transform: "rotate(-18deg)", transformOrigin: "0 0" }}
+          >
+            <style>{`
+              @keyframes orbit-sat-spin { to { transform: rotate(360deg); } }
+              .orbit-sat-wrapper {
+                animation: orbit-sat-spin 24s linear infinite;
+                transform-origin: 0 0;
+              }
+            `}</style>
+            <div className="orbit-sat-wrapper">
+              <div
+                className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--primary))]"
+                style={{ transform: "translate(520px, -5px)" }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="relative flex flex-col justify-center">
           <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full bg-[hsl(var(--tint-blue))] px-3.5 py-1.5 text-xs font-semibold text-[hsl(var(--tint-blue-ink))]">
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[hsl(var(--chart-1))]" />
             Idempotent billing engine, enforced by the database
@@ -270,7 +316,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="flex flex-col justify-center">
+        <div className="relative flex flex-col justify-center">
           <LedgerInvoice />
           <p className="mt-3 text-center text-xs text-[hsl(var(--muted-foreground))]">
             Live artifact from the demo dataset, every number computed by the engine
@@ -529,39 +575,135 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── footer ── */}
+      {/* ── demo access ── */}
+      <section className="border-t border-[hsl(var(--border))] bg-[hsl(var(--background))]">
+        <div className="mx-auto max-w-2xl px-6 py-16">
+          <DemoCredentials />
+        </div>
+      </section>
+
+      {/* ── footer — Faizur-style grand footer ── */}
       <footer className="border-t border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 py-8 text-center text-sm text-[hsl(var(--muted-foreground))] md:flex-row md:text-left">
-          <div className="flex items-center gap-3">
-            <LogoMark size={34} />
-            <div>
-              <p className="font-semibold text-[hsl(var(--foreground))]">Orbit</p>
-              <p className="text-xs">subscription management for Brightloop Software</p>
+        {/* top zone: tagline / links / arrow cards */}
+        <div className="mx-auto max-w-7xl px-6 pb-10 pt-14">
+          <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
+            {/* LEFT — tagline block with fidget at far-left */}
+            <div className="flex items-start gap-4">
+              <span
+                className="mt-1 shrink-0 text-[hsl(var(--muted-foreground))]"
+                title="A fidget spinner, because billing should spin this smoothly"
+                aria-label="Easter egg: a spinning fidget"
+              >
+                <FidgetSpinner />
+              </span>
+              <div>
+                <p className="text-xl font-bold leading-snug tracking-tight sm:text-2xl">
+                  The ledger that bills itself — and never bills twice.
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
+                  Subscription management for Brightloop Software, offline-first on your own PostgreSQL.
+                </p>
+              </div>
+            </div>
+
+            {/* MIDDLE — link columns */}
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Explore</p>
+                <ul className="mt-3 space-y-2 text-sm">
+                  {[
+                    ["#scenes", "The month"],
+                    ["#engine", "Engine"],
+                    ["#diagrams", "Diagrams"],
+                    ["#proof", "Proof"],
+                    ["#stack", "Stack"],
+                  ].map(([href, label]) => (
+                    <li key={href}>
+                      <a href={href} className="text-[hsl(var(--muted-foreground))] transition hover:text-[hsl(var(--foreground))]">
+                        {label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Follow</p>
+                <ul className="mt-3 space-y-2 text-sm">
+                  <li>
+                    <a
+                      href="https://github.com/gabsgj/Orbit"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-[hsl(var(--muted-foreground))] transition hover:text-[hsl(var(--foreground))]"
+                    >
+                      <GitHubIcon size={14} />
+                      GitHub Source
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* RIGHT — arrow-link cards */}
+            <div className="flex flex-col gap-3">
+              <Link
+                href="/login"
+                className="group flex items-center justify-between rounded-[var(--radius-lg)] border border-[hsl(var(--border))] px-5 py-4 transition hover:bg-[hsl(var(--muted))]"
+              >
+                <span className="font-semibold">Enter Orbit →</span>
+                <span className="text-lg text-[hsl(var(--muted-foreground))] transition group-hover:translate-x-0.5 group-hover:text-[hsl(var(--foreground))]">↗</span>
+              </Link>
+              <Link
+                href="/signup"
+                className="group flex items-center justify-between rounded-[var(--radius-lg)] border border-[hsl(var(--border))] px-5 py-4 transition hover:bg-[hsl(var(--muted))]"
+              >
+                <span className="font-semibold">Start free →</span>
+                <span className="text-lg text-[hsl(var(--muted-foreground))] transition group-hover:translate-x-0.5 group-hover:text-[hsl(var(--foreground))]">↗</span>
+              </Link>
             </div>
           </div>
+        </div>
 
-          <div className="flex items-center gap-4 text-[hsl(var(--muted-foreground))]">
-            <span title="A fidget spinner, because billing should spin this smoothly" aria-label="Easter egg: a spinning fidget">
-              <FidgetSpinner />
-            </span>
-            <span title="The billing-day stick man. Hover him, he waves." aria-label="Easter egg: a stick man who waves on hover">
-              <StickMan />
-            </span>
-            <a
-              href="https://github.com/gabsgj/Orbit"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full px-3.5 py-2 font-medium ring-1 ring-[hsl(var(--border))] transition hover:bg-[hsl(var(--muted))]"
-              aria-label="Orbit source on GitHub"
-            >
-              <GitHubIcon size={16} />
-              <span className="text-xs font-semibold">Source</span>
-            </a>
+        {/* GIANT WORDMARK — clipped at the bottom, satellite dot orbiting the O */}
+        <div className="relative overflow-hidden">
+          {/* decorative orbit ring behind the wordmark */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <svg className="h-[130%] w-full" viewBox="0 0 1400 400" fill="none" preserveAspectRatio="xMidYMid slice">
+              <ellipse cx="700" cy="200" rx="620" ry="150" stroke="hsl(var(--tint-blue))" strokeWidth="1.5" transform="rotate(-14 700 200)" />
+            </svg>
           </div>
+          <div className="relative mx-auto max-w-7xl px-6">
+            <p
+              aria-hidden
+              className="translate-y-[12%] text-center font-extrabold leading-[0.85] tracking-[-0.05em] text-[hsl(var(--foreground))]"
+              style={{ fontSize: "clamp(6rem, 19vw, 22rem)", fontWeight: 800 }}
+            >
+              <span className="relative inline-block">
+                ORBIT
+                {/* satellite dot orbiting the O — positioned top-right of the O */}
+                <span className="absolute -top-[0.06em] left-[0.62em]">
+                  <LogoMark size={40} bare className="h-[0.14em] w-[0.14em] sm:h-[0.16em] sm:w-[0.16em]" />
+                </span>
+              </span>
+            </p>
+          </div>
+        </div>
 
-          <p className="font-mono text-xs">
-            offline-first · local PostgreSQL · zero dependencies
-          </p>
+        {/* bottom bar */}
+        <div className="border-t border-[hsl(var(--border))]">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-5 text-xs text-[hsl(var(--muted-foreground))]">
+            <p>Orbit ©2026 · Put your revenue in orbit</p>
+            <div className="flex items-center gap-2">
+              <p>Kochi · offline-first · zero dependencies</p>
+              <span
+                className="text-[hsl(var(--muted-foreground))]"
+                title="The billing-day stick man. Hover him, he waves."
+                aria-label="Easter egg: a stick man who waves on hover"
+              >
+                <StickMan size={22} />
+              </span>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
