@@ -4,6 +4,8 @@ _Chronological, timestamped (YYYY-MM-DD). Log every user prompt/instruction here
 
 ## 2026-10-31
 
+0. **"do the pending task and dont forget dont use force push ,only use normal push"** — Authorized implementation of the audited Identity & Catalog hardening items. Constraint retained: no force-push; use an ordinary push only after an explicit commit/push request.
+
 1. **Initial ruleset request** — Set up project ruleset/guidelines before the problem statement arrives:
    - Create `.gitignore` and `AGENTS.md`/`CLAUDE.md`. **Do not push or commit anything yet.**
    - Emphasize: database design & setup (top importance); model data through APIs with a local DB (PostgreSQL); minimal third-party APIs; real-time/dynamic data; robust input validation; proper git use; interactive clean UI; intuitive navigation.

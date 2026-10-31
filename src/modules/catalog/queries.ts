@@ -225,10 +225,17 @@ export async function deletePlan(db: Db, id: string) {
 // ── Taxes ─────────────────────────────────────────────────────────────────────
 
 export async function listTaxes(db: Db, opts: ListTaxesInput) {
-  return db.tax.findMany({
-    where: opts.isActive !== undefined ? { isActive: opts.isActive } : undefined,
-    orderBy: { name: "asc" },
+  const rows = await db.tax.findMany({
+    where: {
+      ...(opts.isActive !== undefined ? { isActive: opts.isActive } : {}),
+      ...(opts.search ? { name: { contains: opts.search, mode: "insensitive" } } : {}),
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    cursor: opts.cursor ? { id: opts.cursor } : undefined,
+    skip: opts.cursor ? 1 : 0,
+    take: opts.take + 1,
   });
+  return toPage(rows, opts.take);
 }
 
 export async function getTaxById(db: Db, id: string) {

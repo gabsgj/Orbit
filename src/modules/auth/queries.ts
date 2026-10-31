@@ -150,14 +150,18 @@ export async function consumeTokenAndResetPassword(
   newPasswordHash: string,
 ) {
   return db.$transaction(async (tx) => {
-    await tx.passwordResetToken.update({
-      where: { id: tokenId },
+    // The condition belongs in the write, not only in the earlier read. Two
+    // requests can both read an unused token; updateMany lets exactly one win.
+    const consumed = await tx.passwordResetToken.updateMany({
+      where: { id: tokenId, usedAt: null, expiresAt: { gt: new Date() } },
       data: { usedAt: new Date() },
     });
+    if (consumed.count !== 1) return false;
     await tx.user.update({
       where: { id: userId },
       data: { passwordHash: newPasswordHash },
     });
+    return true;
   });
 }
 

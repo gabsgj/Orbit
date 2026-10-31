@@ -203,6 +203,22 @@ describe("resetPassword — FR-AUTH-04 (single-use, expiry)", () => {
       resetPassword(testDb, { token: "deadbeef".repeat(8), newPassword: "NewPass#2" }),
     ).rejects.toMatchObject({ code: "INVALID_TOKEN" });
   });
+
+  it("allows only one concurrent use of the same reset token", async () => {
+    const email = uniqueEmail("concurrent");
+    await signup(testDb, { email, password: "OldPass#1", companyName: "Co" });
+    await forgotPassword(testDb, { email, baseUrl: "http://localhost:3000" });
+    const outbox = await testDb.emailOutbox.findFirst({ where: { toEmail: email } });
+    const rawToken = outbox!.bodyHtml.match(/token=([a-f0-9]+)/)![1]!;
+
+    const results = await Promise.allSettled([
+      resetPassword(testDb, { token: rawToken, newPassword: "NewPass#2" }),
+      resetPassword(testDb, { token: rawToken, newPassword: "OtherPass#3" }),
+    ]);
+
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect(results.filter((result) => result.status === "rejected")).toHaveLength(1);
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -264,5 +280,21 @@ describe("createStaff + deactivateStaff — FR-ADM-01", () => {
         requestingUserId: adminUser.id,
       }),
     ).rejects.toMatchObject({ code: "SELF_DEACTIVATE" });
+  });
+
+  it("does not allow an admin to deactivate a customer account", async () => {
+    let adminUser = await testDb.user.findFirst({ where: { role: "ADMIN" } });
+    if (!adminUser) {
+      adminUser = await testDb.user.create({
+        data: { email: uniqueEmail("admin"), passwordHash: "hash", role: "ADMIN" },
+      });
+    }
+    const customer = await signup(testDb, {
+      email: uniqueEmail("customer"), password: "Customer#1", companyName: "Co",
+    });
+
+    await expect(
+      deactivateStaff(testDb, { targetUserId: customer.userId, requestingUserId: adminUser.id }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 });

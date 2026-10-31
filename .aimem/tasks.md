@@ -78,6 +78,14 @@ _Legend: ☐ todo · ☐↑ high priority · ✅ done (YYYY-MM-DD)_
 - ☐ README verified on a clean checkout; offline rehearsal (WiFi off) — Gabriel.
 - ☐ Demo script (PLAN §7) rehearsed ×2 — ALL.
 
+### Identity & Catalog hardening follow-up (Abhiram, 2026-10-31)
+- ✅ Reset-token consumption is atomic: the transaction conditionally marks `used_at` only when unused and unexpired; concurrent-use regression test added.
+- ✅ Staff deactivation refuses CUSTOMER and ADMIN targets; only STAFF accounts are eligible.
+- ✅ Dashboard, portal, and the internal app shell now derive user identity/role from the authenticated server session; static demo identities removed.
+- ✅ Taxes list now has status/search filters and keyset pagination; its create form reuses `createTaxSchema` client-side.
+- ☐ **Gabriel coordination required:** create a reviewed migration making `users.email` `citext` with a unique constraint. Do not change `schema.prisma` directly.
+- ☐ Verify hardening against local PostgreSQL (`npm test`, typecheck, lint, build) after restoring dependencies; current audit environment has an incomplete `node_modules` install.
+
 ### Team / process
 - ✅ All 4 members make at least one real commit (Pavithra commit pushed to `main`).
 - ☐ Stretch (only after freeze, if stable): proration · CSV export · dunning reminders · dark mode.

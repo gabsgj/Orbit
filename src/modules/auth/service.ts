@@ -172,12 +172,18 @@ export async function resetPassword(
 
   const newPasswordHash = await bcrypt.hash(input.newPassword, BCRYPT_ROUNDS);
 
-  await consumeTokenAndResetPassword(
+  const consumed = await consumeTokenAndResetPassword(
     db,
     tokenRow.id,
     tokenRow.userId,
     newPasswordHash,
   );
+  if (!consumed) {
+    throw Object.assign(
+      new Error("Reset link is invalid, already used, or has expired. Request a new one."),
+      { code: "INVALID_TOKEN" },
+    );
+  }
 
   return { ok: true };
 }
@@ -241,6 +247,11 @@ export async function deactivateStaff(
       new Error("Admin accounts cannot be deactivated this way."),
       { code: "FORBIDDEN" },
     );
+  }
+  if (target.role !== "STAFF") {
+    throw Object.assign(new Error("Only staff accounts can be deactivated here."), {
+      code: "FORBIDDEN",
+    });
   }
   await deactivateUser(db, input.targetUserId);
   return { ok: true };

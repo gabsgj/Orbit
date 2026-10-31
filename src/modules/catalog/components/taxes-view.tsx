@@ -20,16 +20,28 @@ import {
   Skeleton,
 } from "@/shared/ui";
 import { PlusIcon, TrashIcon } from "@/shared/ui/icons";
+import { createTaxSchema } from "../schemas";
 
 export function TaxesView() {
   const [createModalOpen, setCreateModalOpen] = React.useState(false);
   const [name, setName] = React.useState("");
   const [ratePercent, setRatePercent] = React.useState("18.0");
   const [formError, setFormError] = React.useState<string | null>(null);
+  const [search, setSearch] = React.useState("");
+  const [status, setStatus] = React.useState<"active" | "archived" | "all">("active");
 
   const utils = api.useUtils();
 
-  const { data, isLoading, error } = api.catalog.taxes.list.useQuery({});
+  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    api.catalog.taxes.list.useInfiniteQuery(
+      {
+        take: 12,
+        search: search || undefined,
+        isActive: status === "all" ? undefined : status === "active",
+      },
+      { getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined },
+    );
+  const taxes = data?.pages.flatMap((page) => page.items) ?? [];
 
   const createTaxMutation = api.catalog.taxes.create.useMutation({
     onSuccess: () => {
@@ -48,21 +60,16 @@ export function TaxesView() {
 
   function handleCreateTax(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) {
-      setFormError("Tax name is required");
-      return;
-    }
-    const rate = parseFloat(ratePercent);
-    if (isNaN(rate) || rate <= 0 || rate > 100) {
-      setFormError("Rate percentage must be between 0 and 100");
-      return;
-    }
-
-    createTaxMutation.mutate({
+    const parsed = createTaxSchema.safeParse({
       name: name.trim(),
-      ratePercent: rate,
+      ratePercent: Number(ratePercent),
       isActive: true,
     });
+    if (!parsed.success) {
+      setFormError(parsed.error.errors[0]?.message ?? "Enter a valid tax rule.");
+      return;
+    }
+    createTaxMutation.mutate(parsed.data);
   }
 
   return (
@@ -86,6 +93,26 @@ export function TaxesView() {
         </Button>
       </div>
 
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Input
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Filter tax rules"
+          aria-label="Filter tax rules"
+          className="text-xs sm:max-w-xs"
+        />
+        <select
+          value={status}
+          onChange={(event) => setStatus(event.target.value as typeof status)}
+          aria-label="Filter tax status"
+          className="rounded-[var(--radius-sm)] border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-xs text-[hsl(var(--foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))]"
+        >
+          <option value="active">Active</option>
+          <option value="archived">Archived</option>
+          <option value="all">All statuses</option>
+        </select>
+      </div>
+
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -101,7 +128,7 @@ export function TaxesView() {
           description={error.message}
           action={<Button size="sm" onClick={() => utils.catalog.taxes.list.invalidate()}>Retry</Button>}
         />
-      ) : !data?.length ? (
+      ) : !taxes.length ? (
         <EmptyState
           title="No taxes defined"
           description="Create your first tax rate to apply onto invoice and subscription lines."
@@ -114,7 +141,7 @@ export function TaxesView() {
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {data.map((tax) => (
+          {taxes.map((tax) => (
             <Card key={tax.id} className="border-[hsl(var(--border))]">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
@@ -149,6 +176,19 @@ export function TaxesView() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {hasNextPage && (
+        <div className="flex justify-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchNextPage()}
+            isLoading={isFetchingNextPage}
+          >
+            Load more tax rules
+          </Button>
         </div>
       )}
 

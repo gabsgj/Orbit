@@ -2,6 +2,17 @@
 
 _Chronological record of work done. Newest entries at the bottom._
 
+## 2026-10-31 — Identity & Catalog hardening follow-up
+
+**By:** Abhiram H / Codex
+
+- Audited the completed auth, catalog, templates, staff, and outbox implementation against the assigned acceptance criteria.
+- Fixed reset-token consumption so the `used_at IS NULL AND expires_at > now()` predicate is part of the transactional write; a concurrent reset can now succeed exactly once. Added a concurrent-use regression test.
+- Restricted staff deactivation to STAFF records, preserving customer accounts and the existing self/admin protections.
+- Replaced hard-coded admin/customer identities in dashboard and portal pages with `getServerSession` guards; the `(app)` route group now uses `AppShell` with the real authenticated role so navigation filtering is meaningful.
+- Added tax search/status filters and keyset pagination, and reused `createTaxSchema` in the tax form.
+- Did not alter the Prisma schema: `users.email` is still TEXT rather than the required `citext`; this is explicitly queued for Gabriel because it needs a reviewed migration.
+
 ## 2026-10-31 ΓÇö Project bootstrap (ruleset phase)
 
 **By:** OpenCode agent (at Gabriel's request)
