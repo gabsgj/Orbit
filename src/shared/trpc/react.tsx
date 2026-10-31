@@ -9,6 +9,7 @@ import type { AppRouter } from "@/shared/trpc/root";
 
 /** Client-side tRPC + React Query. Wraps the app in src/app/layout.tsx. */
 export const trpc = createTRPCReact<AppRouter>();
+export const api = trpc;
 
 export function TRPCProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
