@@ -182,15 +182,10 @@ function NavLink({
         />
       )}
 
-      {/* Icon in pastel tile */}
-      <span
-        className={cn(
-          "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
-          isActive ? "bg-primary/15" : tint.bg
-        )}
-      >
+      {/* Icon — plain, no tile background (per design review) */}
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center">
         <Icon
-          size={16}
+          size={17}
           className={isActive ? "text-primary" : tint.ink}
         />
       </span>
@@ -354,6 +349,17 @@ export function AppShell({
               title="Open Customer Portal view in new tab"
             >
               <span>Customer Portal ↗</span>
+            </Link>
+
+            {/* Sign out — always visible (topbar, every viewport) */}
+            <Link
+              href="/api/auth/signout"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-destructive"
+              title="Sign out"
+              aria-label="Sign out"
+            >
+              <LogOutIcon size={14} />
+              <span className="hidden md:inline">Sign out</span>
             </Link>
 
             {onRunBilling && (
