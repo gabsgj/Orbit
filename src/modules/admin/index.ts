@@ -10,3 +10,4 @@ export type { Page } from "./queries";
 export type { AuditLogInput, OutboxInput, OutboxByIdInput } from "./schemas";
 export { AuditLogList } from "./components/audit-log-list";
 export { OutboxList } from "./components/outbox-list";
+export { StaffView } from "./components/staff-view";
