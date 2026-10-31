@@ -1,8 +1,6 @@
 # ============================================================================
 # Make-a-Ton 9.0 — Odoo x Make-a-Ton Kochi Hackathon
 # Generic .gitignore — prune sections that don't apply once the stack is fixed.
-# NOTE: .aimem/ is intentionally NOT ignored — it is shared team/agent memory
-# and must be committed so all 4 members and every agent stay in sync.
 # ============================================================================
 
 # ---------- Secrets & environment (NEVER commit these) ----------
@@ -115,6 +113,4 @@ temp/
 .docusaurus/
 storybook-static/
 .taste-skill/
-
-
-.aimem/prompts.md
+.aimem/
