@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — PLACEHOLDER for UI Gate 0 (docs/PLAN.md §11).
+ * Pavithra replaces this block from docs/DESIGN.md after running the
+ * design-taste-frontend skill. Keep HSL channel variables shadcn-compatible.
+ */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
+  --primary: 222 47% 11%;
+  --primary-foreground: 0 0% 98%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+  --border: 0 0% 90%;
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-border: hsl(var(--border));
+  --radius-md: var(--radius);
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
