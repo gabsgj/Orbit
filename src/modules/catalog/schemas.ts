@@ -61,6 +61,20 @@ export const updateVariantSchema = z.object({
   priceExtra: z.number().nonnegative("Price extra must be ≥ 0"),
 });
 
+export const setPriceExtraSchema = z.object({
+  variantId: z.string().uuid(),
+  priceExtra: z.number().nonnegative("Price extra must be ≥ 0"),
+});
+
+export const createVariantForProductSchema = z.object({
+  productId: z.string().uuid(),
+  attributeValueId: z.string().uuid(),
+  priceExtra: z.number().nonnegative("Price extra must be ≥ 0").default(0),
+});
+
+export type SetPriceExtraInput = z.infer<typeof setPriceExtraSchema>;
+export type CreateVariantForProductInput = z.infer<typeof createVariantForProductSchema>;
+
 export type CreateVariantInput = z.infer<typeof createVariantSchema>;
 export type UpdateVariantInput = z.infer<typeof updateVariantSchema>;
 

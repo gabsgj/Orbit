@@ -11,6 +11,8 @@ export {
   createAttributeValueSchema,
   createVariantSchema,
   updateVariantSchema,
+  setPriceExtraSchema,
+  createVariantForProductSchema,
   createPlanSchema,
   updatePlanSchema,
   listPlansSchema,
@@ -27,6 +29,8 @@ export type {
   CreateAttributeValueInput,
   CreateVariantInput,
   UpdateVariantInput,
+  SetPriceExtraInput,
+  CreateVariantForProductInput,
   CreatePlanInput,
   UpdatePlanInput,
   ListProductsInput,
@@ -40,3 +44,4 @@ export type {
 export { ProductsView } from "./components/products-view";
 export { PlansView } from "./components/plans-view";
 export { TaxesView } from "./components/taxes-view";
+export { VariantsPanel } from "./components/variants-panel";

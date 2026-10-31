@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { router, publicProcedure, requireRole } from "@/shared/trpc";
@@ -10,6 +11,8 @@ import {
   createAttributeValueSchema,
   createVariantSchema,
   updateVariantSchema,
+  setPriceExtraSchema,
+  createVariantForProductSchema,
   listPlansSchema,
   createPlanSchema,
   updatePlanSchema,
@@ -118,6 +121,11 @@ export const catalogRouter = router({
       .input(createAttributeValueSchema)
       .mutation(({ input }) => addAttributeValue(prisma, input)),
 
+    createValue: publicProcedure
+      .use(requireRole("ADMIN", "STAFF"))
+      .input(createAttributeValueSchema)
+      .mutation(({ input }) => addAttributeValue(prisma, input)),
+
     deleteValue: publicProcedure
       .use(requireRole("ADMIN"))
       .input(z.object({ id: z.string().uuid() }))
@@ -146,6 +154,36 @@ export const catalogRouter = router({
       .use(requireRole("ADMIN"))
       .input(z.object({ id: z.string().uuid() }))
       .mutation(({ input }) => removeVariant(prisma, input.id)),
+
+    setPriceExtra: publicProcedure
+      .use(requireRole("ADMIN", "STAFF"))
+      .input(setPriceExtraSchema)
+      .mutation(({ input }) =>
+        editVariant(prisma, { id: input.variantId, priceExtra: input.priceExtra }),
+      ),
+
+    createForProduct: publicProcedure
+      .use(requireRole("ADMIN", "STAFF"))
+      .input(createVariantForProductSchema)
+      .mutation(async ({ input }) => {
+        try {
+          return await addVariant(prisma, input);
+        } catch (err) {
+          // P2002: the (productId, attributeValueId) unique constraint fired —
+          // the DB itself is the last line of defense (ER.md).
+          if (
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === "P2002"
+          ) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message:
+                "A variant with this attribute value already exists for this product.",
+            });
+          }
+          throw err;
+        }
+      }),
   },
 
   // ── Plans (FR-CAT-03, FR-CAT-04) ──────────────────────────────────────────

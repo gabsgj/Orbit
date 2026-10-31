@@ -19,13 +19,13 @@ import {
   EmptyState,
   Skeleton,
 } from "@/shared/ui";
-import { PlusIcon, TrashIcon } from "@/shared/ui/icons";
+import { ChevronRightIcon, PlusIcon, TrashIcon } from "@/shared/ui/icons";
+import { VariantsPanel } from "./variants-panel";
 
 export function ProductsView() {
   const [search, setSearch] = React.useState("");
   const [createModalOpen, setCreateModalOpen] = React.useState(false);
-  const [variantModalOpen, setVariantModalOpen] = React.useState(false);
-  const [selectedProductId, setSelectedProductId] = React.useState<string | null>(null);
+  const [expandedIds, setExpandedIds] = React.useState<Set<string>>(new Set());
 
   // Form states for new product
   const [name, setName] = React.useState("");
@@ -35,20 +35,12 @@ export function ProductsView() {
   const [notes, setNotes] = React.useState("");
   const [formError, setFormError] = React.useState<string | null>(null);
 
-  // Form states for new variant (FR-CAT-02: Brand / priceExtra e.g. Odoo +560)
-  const [attrName, setAttrName] = React.useState("Brand");
-  const [attrValue, setAttrValue] = React.useState("");
-  const [priceExtra, setPriceExtra] = React.useState("0");
-  const [variantError, setVariantError] = React.useState<string | null>(null);
-
   const utils = api.useUtils();
 
   const { data, isLoading, error } = api.catalog.products.list.useQuery({
     search: search || undefined,
     take: 50,
   });
-
-  const attributesQuery = api.catalog.attributes.list.useQuery();
 
   const createProductMutation = api.catalog.products.create.useMutation({
     onSuccess: () => {
@@ -57,18 +49,6 @@ export function ProductsView() {
       resetForm();
     },
     onError: (err) => setFormError(err.message),
-  });
-
-  const createAttributeMutation = api.catalog.attributes.create.useMutation();
-  const createAttributeValueMutation = api.catalog.attributes.addValue.useMutation();
-  const createVariantMutation = api.catalog.variants.create.useMutation({
-    onSuccess: () => {
-      utils.catalog.products.list.invalidate();
-      setVariantModalOpen(false);
-      setAttrValue("");
-      setPriceExtra("0");
-    },
-    onError: (err) => setVariantError(err.message),
   });
 
   const archiveMutation = api.catalog.products.archive.useMutation({
@@ -98,58 +78,6 @@ export function ProductsView() {
       notes: notes.trim() || undefined,
       isActive: true,
     });
-  }
-
-  async function handleCreateVariant(e: React.FormEvent) {
-    e.preventDefault();
-    if (!selectedProductId) return;
-    if (!attrValue.trim()) {
-      setVariantError("Attribute value (e.g. Odoo) is required");
-      return;
-    }
-
-    try {
-      // Find or create attribute (e.g. Brand)
-      const existingAttrs = attributesQuery.data || [];
-      let targetAttrId: string;
-      const foundAttr = existingAttrs.find(
-        (a) => a.name.toLowerCase() === attrName.toLowerCase(),
-      );
-
-      if (foundAttr) {
-        targetAttrId = foundAttr.id;
-      } else {
-        const createdAttr = await createAttributeMutation.mutateAsync({ name: attrName });
-        targetAttrId = createdAttr.id;
-        await utils.catalog.attributes.list.invalidate();
-      }
-
-      // Find or create attribute value
-      let targetValId: string;
-      const foundVal = foundAttr?.values?.find(
-        (v) => v.value.toLowerCase() === attrValue.toLowerCase(),
-      );
-
-      if (foundVal) {
-        targetValId = foundVal.id;
-      } else {
-        const createdVal = await createAttributeValueMutation.mutateAsync({
-          attributeId: targetAttrId,
-          value: attrValue.trim(),
-        });
-        targetValId = createdVal.id;
-      }
-
-      // Create product variant with price extra
-      await createVariantMutation.mutateAsync({
-        productId: selectedProductId,
-        attributeValueId: targetValId,
-        priceExtra: parseFloat(priceExtra) || 0,
-      });
-    } catch (err: unknown) {
-      const e = err as { message?: string };
-      setVariantError(e.message || "Failed to create variant");
-    }
   }
 
   return (
@@ -246,44 +174,53 @@ export function ProductsView() {
               </CardHeader>
 
               <CardContent className="space-y-3 pt-0">
-                {/* Variants List */}
-                <div className="rounded-[var(--radius-xs)] border border-[hsl(var(--border))] bg-[hsl(var(--muted))]/30 p-2.5 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-[hsl(var(--foreground))] uppercase tracking-wider">
+                {/* Variants — expandable panel (FR-CAT-02) */}
+                <div className="rounded-[var(--radius-xs)] border border-[hsl(var(--border))] bg-[hsl(var(--muted))]/30">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExpandedIds((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(prod.id)) next.delete(prod.id);
+                        else next.add(prod.id);
+                        return next;
+                      });
+                    }}
+                    className="flex w-full items-center justify-between px-2.5 py-2 text-left hover:bg-[hsl(var(--muted))]/50 transition-colors rounded-[var(--radius-xs)]"
+                  >
+                    <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[hsl(var(--foreground))] uppercase tracking-wider">
+                      <ChevronRightIcon
+                        size={11}
+                        className={`transition-transform ${expandedIds.has(prod.id) ? "rotate-90" : ""}`}
+                      />
                       Variants ({prod.variants.length})
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedProductId(prod.id);
-                        setVariantModalOpen(true);
-                      }}
-                      className="text-[11px] text-[hsl(var(--chart-1))] hover:underline flex items-center gap-1 font-medium"
-                    >
-                      <PlusIcon size={11} /> Add Variant
-                    </button>
-                  </div>
-
-                  {prod.variants.length === 0 ? (
-                    <p className="text-[11px] text-[hsl(var(--muted-foreground))] italic">
-                      No variants configured
-                    </p>
-                  ) : (
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {prod.variants.map((v) => (
-                        <span
-                          key={v.id}
-                          className="inline-flex items-center gap-1 rounded bg-[hsl(var(--background))] border border-[hsl(var(--border))] px-2 py-0.5 text-[11px] text-[hsl(var(--foreground))]"
-                        >
-                          <span className="font-medium">{v.attributeValue.attribute.name}:</span>
-                          <span>{v.attributeValue.value}</span>
-                          {Number(v.priceExtra) > 0 && (
-                            <span className="text-[hsl(var(--status-active-ink))] font-medium tabular-nums">
-                              (+₹{Number(v.priceExtra)})
-                            </span>
-                          )}
-                        </span>
-                      ))}
+                    {!expandedIds.has(prod.id) && prod.variants.length > 0 && (
+                      <span className="flex flex-wrap gap-1">
+                        {prod.variants.slice(0, 3).map((v) => (
+                          <span
+                            key={v.id}
+                            className="inline-flex items-center gap-0.5 rounded bg-[hsl(var(--background))] border border-[hsl(var(--border))] px-1.5 py-0 text-[10px] text-[hsl(var(--muted-foreground))]"
+                          >
+                            {v.attributeValue.value}
+                            {Number(v.priceExtra) > 0 && (
+                              <span className="text-[hsl(var(--status-active-ink))] font-medium tabular-nums">
+                                +₹{Number(v.priceExtra)}
+                              </span>
+                            )}
+                          </span>
+                        ))}
+                        {prod.variants.length > 3 && (
+                          <span className="text-[10px] text-[hsl(var(--muted-foreground))]">
+                            +{prod.variants.length - 3} more
+                          </span>
+                        )}
+                      </span>
+                    )}
+                  </button>
+                  {expandedIds.has(prod.id) && (
+                    <div className="border-t border-[hsl(var(--border))] px-2.5 py-2">
+                      <VariantsPanel productId={prod.id} />
                     </div>
                   )}
                 </div>
@@ -404,83 +341,6 @@ export function ProductsView() {
         </DialogContent>
       </Dialog>
 
-      {/* Add Variant Modal */}
-      <Dialog open={variantModalOpen} onOpenChange={setVariantModalOpen}>
-        <DialogContent>
-          <form onSubmit={handleCreateVariant}>
-            <DialogHeader>
-              <DialogTitle>Add Product Variant (FR-CAT-02)</DialogTitle>
-              <DialogDescription>
-                Attach attribute-based modifiers (e.g. Brand: Odoo with extra ₹560).
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-[hsl(var(--foreground))]">Attribute Name</label>
-                  <Input
-                    placeholder="e.g. Brand, Edition, Tier"
-                    value={attrName}
-                    onChange={(e) => setAttrName(e.target.value)}
-                    className="text-xs"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-[hsl(var(--foreground))]">Attribute Value</label>
-                  <Input
-                    required
-                    placeholder="e.g. Odoo, Enterprise"
-                    value={attrValue}
-                    onChange={(e) => setAttrValue(e.target.value)}
-                    className="text-xs"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[hsl(var(--foreground))]">Price Extra (₹)</label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  required
-                  placeholder="e.g. 560"
-                  value={priceExtra}
-                  onChange={(e) => setPriceExtra(e.target.value)}
-                  className="text-xs tabular-nums"
-                />
-                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
-                  Added on top of base sales price during quotation and billing generation.
-                </p>
-              </div>
-
-              {variantError && (
-                <div className="rounded-[var(--radius-xs)] bg-[hsl(var(--status-overdue-bg))] p-2 text-xs text-[hsl(var(--status-overdue-ink))]">
-                  {variantError}
-                </div>
-              )}
-            </div>
-
-            <DialogFooter>
-              <Button type="button" variant="outline" size="sm" onClick={() => setVariantModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                isLoading={
-                  createAttributeMutation.isPending ||
-                  createAttributeValueMutation.isPending ||
-                  createVariantMutation.isPending
-                }
-              >
-                Add Variant
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
