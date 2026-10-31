@@ -38,7 +38,14 @@ export function CustomerPortal({
   invoices: propInvoices,
   isLoading: propLoading = false,
 }: CustomerPortalProps) {
-  const [activeTab, setActiveTab] = React.useState<"subscriptions" | "invoices" | "billing">("subscriptions");
+  // Deep-linkable tabs: /portal#invoices and /portal#billing land on the right
+  // tab (portal-shell nav links use those hashes).
+  const initialTab = typeof window !== "undefined" && window.location.hash
+    ? (window.location.hash.replace("#", "") as "subscriptions" | "invoices" | "billing")
+    : "subscriptions";
+  const [activeTab, setActiveTab] = React.useState<"subscriptions" | "invoices" | "billing">(
+    ["subscriptions", "invoices", "billing"].includes(initialTab) ? initialTab : "subscriptions",
+  );
   const [selectedInvoice, setSelectedInvoice] = React.useState<PortalInvoice | null>(null);
   const [actionTargetSub, setActionTargetSub] = React.useState<{
     sub: PortalSubscription;

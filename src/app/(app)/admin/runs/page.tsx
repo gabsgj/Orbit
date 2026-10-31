@@ -5,7 +5,7 @@
  * Reuses trpc.billing.runs (same procedure as the Billing page).
  */
 import { trpc } from "@/shared/trpc/react";
-import { Badge, Card, CardHeader, EmptyState, statusTone, Table, TBody, TD, TH, THead, TR } from "@/shared/ui";
+import { Badge, Card, CardHeader, EmptyState, Skeleton, statusTone, Table, TBody, TD, TH, THead, TR } from "@/shared/ui";
 import { formatDate } from "@/shared/lib/money";
 
 export default function BillingRunsPage() {
@@ -26,7 +26,13 @@ export default function BillingRunsPage() {
           title="Run history"
           description="Newest first. A run that found nothing new to bill reports all due subscriptions as skipped."
         />
-        {q.data && q.data.length === 0 ? (
+        {q.isLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </div>
+        ) : q.data && q.data.length === 0 ? (
           <EmptyState
             title="No billing runs yet"
             hint="Run a billing day from the Billing page, or wait for the scheduler."

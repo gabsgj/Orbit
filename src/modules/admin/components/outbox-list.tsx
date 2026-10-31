@@ -9,7 +9,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { keepPreviousData } from "@tanstack/react-query";
 import { trpc } from "@/shared/trpc/react";
-import { Badge, Button, EmptyState, Table, TBody, TD, TH, THead, TR } from "@/shared/ui";
+import { Badge, Button, EmptyState, Skeleton, Table, TBody, TD, TH, THead, TR } from "@/shared/ui";
 import { formatDate } from "@/shared/lib/money";
 import type { OutboxKind } from "@prisma/client";
 
@@ -42,7 +42,13 @@ export function OutboxList() {
 
   return (
     <div className="space-y-4">
-      {items.length === 0 && !q.isLoading ? (
+      {q.isLoading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full" />
+          ))}
+        </div>
+      ) : items.length === 0 ? (
         <EmptyState
           title="No mail staged"
           hint="The outbox fills when invoices are sent or resets are requested."

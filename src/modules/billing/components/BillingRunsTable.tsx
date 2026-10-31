@@ -5,7 +5,7 @@
  * Polls every 10s so cron runs appear live during the demo (FR-DASH-07).
  */
 import { trpc } from "@/shared/trpc/react";
-import { Badge, EmptyState, Table, TBody, TD, TH, THead, TR, statusTone } from "@/shared/ui";
+import { Badge, EmptyState, Skeleton, Table, TBody, TD, TH, THead, TR, statusTone } from "@/shared/ui";
 import { formatDate } from "@/shared/lib/money";
 import type { BillingTriggerType } from "@prisma/client";
 
@@ -20,7 +20,15 @@ export function BillingRunsTable() {
     refetchInterval: 10_000,
   });
 
-  if (q.isLoading) return null;
+  if (q.isLoading) {
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-10 w-full" />
+        ))}
+      </div>
+    );
+  }
 
   const runs = q.data ?? [];
 
