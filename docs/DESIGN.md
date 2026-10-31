@@ -223,3 +223,30 @@ As required by `docs/PLAN.md` §11 and `AGENTS.md` §5, this is our binding anti
 - [ ] Zero console errors, zero FOUC, zero lorem ipsum.
 - [ ] Demo path rehearsal across the 9 acts.
 
+
+---
+
+## Appendix A — Landing page & auth folios (2026-10-31, replacement world)
+
+The public landing page (`src/app/page.tsx`) and the four auth screens are a
+**Persuade-mode sibling world** of the Operate-mode app, under the same
+Achromatic Ledger thesis. Direction: **"The ledger that bills itself"** — the
+page is an open working ledger of a subscription business: invoices, statuses
+and totals rendered as the ledger's own entries, never as screenshots inside
+cards. See `.impeccable/surfaces/src-app-page-tsx.md` for the full direction
+contract (thesis, own-world, story, first viewport, form `seed:ec780f680c0db427`).
+
+System rules added:
+- **Ledger spread hero:** 44/62 split — offer + actions left, a live invoice
+  artifact (LedgerInvoice) right; status strip on top, constraint footnote below.
+- **Rule-line structure:** sections separated by 1px hairlines and tone steps;
+  no decorative cards anywhere (feature scenes use a 1px-joined grid, not cards).
+- **Proof band:** dark ink `#0f172a` section with tabular-nums figures — the
+  only dark surface on the page.
+- **Auth folio (`shared/ui/auth-layout.tsx`):** 44/56 split — quiet brand panel
+  (ledger motif + three product facts) left, bordered form sheet right; shared
+  field/label/button classes (`authFieldClass` etc.) keep all four auth pages
+  identical in grammar.
+- **Type discipline:** headlines `[text-wrap:balance]`, body `[text-wrap:pretty]`,
+  tabular-nums on every figure, mono strictly for code/constraints, no
+  kicker/eyebrow labels, no gradient text, no emoji bullets.

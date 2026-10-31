@@ -1,14 +1,15 @@
 "use client";
 
 /**
- * Login page — /login (next-auth signIn page override).
- * Uses next-auth's signIn("credentials"). Client validation backed by loginSchema.
+ * Login — /login (next-auth signIn override). The ledger folio (shared AuthLayout).
+ * Client validation backed by loginSchema; server errors name the problem.
  */
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { loginSchema } from "@/modules/auth/client";
+import { AuthLayout, authFieldClass, authLabelClass, authButtonClass } from "@/shared/ui/auth-layout";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (result?.error) {
-      setServerError("Invalid email or password. Please try again.");
+      setServerError("Invalid email or password. Check your credentials and try again.");
     } else {
       router.push("/dashboard");
       router.refresh();
@@ -51,109 +52,61 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--background))] p-4">
-      <div className="w-full max-w-sm">
-        {/* Brand */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-[var(--radius-xs)] bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-lg font-bold">
-            O
-          </div>
-          <h1 className="text-xl font-bold tracking-tight text-[hsl(var(--foreground))]">
-            Sign in to Orbit
-          </h1>
-          <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
-            Brightloop Software subscription platform
-          </p>
+    <AuthLayout title="Sign in to Orbit" subtitle="Your subscriptions, invoices and billing day — one ledger away.">
+      <form onSubmit={onSubmit} noValidate className="space-y-5">
+        <div>
+          <label htmlFor="email" className={authLabelClass}>Email address</label>
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@company.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={authFieldClass}
+          />
+          {fieldErrors.email && <p className="mt-1 text-xs text-[hsl(var(--destructive))]">{fieldErrors.email}</p>}
         </div>
 
-        {/* Card */}
-        <div className="rounded-[var(--radius)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-sm">
-          <form onSubmit={onSubmit} noValidate className="space-y-4">
-            {/* Email */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-[hsl(var(--foreground))]"
-              >
-                Email address
-              </label>
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-[var(--radius-sm)] border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--placeholder-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-1"
-              />
-              {fieldErrors.email && (
-                <p className="text-xs text-[hsl(var(--destructive))]">
-                  {fieldErrors.email}
-                </p>
-              )}
-            </div>
-
-            {/* Password */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-[hsl(var(--foreground))]"
-                >
-                  Password
-                </label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] underline underline-offset-2"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-[var(--radius-sm)] border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--placeholder-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-1"
-              />
-              {fieldErrors.password && (
-                <p className="text-xs text-[hsl(var(--destructive))]">
-                  {fieldErrors.password}
-                </p>
-              )}
-            </div>
-
-            {/* Server error */}
-            {serverError && (
-              <div className="rounded-[var(--radius-xs)] bg-[hsl(var(--status-overdue-bg))] px-3 py-2 text-xs text-[hsl(var(--status-overdue-ink))]">
-                {serverError}
-              </div>
-            )}
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-[var(--radius-sm)] bg-[hsl(var(--primary))] px-4 py-2.5 text-sm font-semibold text-[hsl(var(--primary-foreground))] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-1"
+        <div>
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className={authLabelClass}>Password</label>
+            <Link
+              href="/forgot-password"
+              className="text-xs font-medium text-[hsl(var(--muted-foreground))] underline underline-offset-2 hover:text-[hsl(var(--foreground))]"
             >
-              {loading ? "Signing in…" : "Sign in"}
-            </button>
-          </form>
+              Forgot password?
+            </Link>
+          </div>
+          <input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={authFieldClass}
+          />
+          {fieldErrors.password && <p className="mt-1 text-xs text-[hsl(var(--destructive))]">{fieldErrors.password}</p>}
         </div>
 
-        {/* Sign up link */}
-        <p className="mt-4 text-center text-sm text-[hsl(var(--muted-foreground))]">
-          New to Brightloop?{" "}
-          <Link
-            href="/signup"
-            className="font-medium text-[hsl(var(--foreground))] hover:underline"
-          >
-            Create a customer account
-          </Link>
-        </p>
-      </div>
-    </div>
+        {serverError && (
+          <div className="rounded-[var(--radius-xs)] border border-[hsl(var(--status-overdue-ink))]/20 bg-[hsl(var(--status-overdue-bg))] px-3 py-2 text-xs font-medium text-[hsl(var(--status-overdue-ink))]">
+            {serverError}
+          </div>
+        )}
+
+        <button type="submit" disabled={loading} className={authButtonClass}>
+          {loading ? "Signing in…" : "Sign in"}
+        </button>
+      </form>
+
+      <p className="mt-6 border-t border-[hsl(var(--border))] pt-4 text-center text-sm text-[hsl(var(--muted-foreground))]">
+        New to Brightloop?{" "}
+        <Link href="/signup" className="font-semibold text-[hsl(var(--foreground))] hover:underline">
+          Create a customer&nbsp;account
+        </Link>
+      </p>
+    </AuthLayout>
   );
 }

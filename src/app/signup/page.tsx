@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Signup page — /signup (customer self-registration, FR-AUTH-01/02).
- * Calls trpc.auth.signup. On success, auto-signs in via next-auth.
+ * Signup — /signup (customer self-registration, FR-AUTH-01/02). Ledger folio.
+ * Calls trpc.auth.signup; on success auto-signs in via next-auth.
  */
 import { useState } from "react";
 import { signIn } from "next-auth/react";
@@ -10,12 +10,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/shared/trpc/react";
 import { signupSchema } from "@/modules/auth/client";
+import { AuthLayout, authFieldClass, authLabelClass, authButtonClass } from "@/shared/ui/auth-layout";
 
 const POLICY_RULES = [
   { id: "length", label: "More than 8 characters" },
-  { id: "upper", label: "At least one uppercase letter (A–Z)" },
-  { id: "lower", label: "At least one lowercase letter (a–z)" },
-  { id: "special", label: "At least one special character (!@#$…)" },
+  { id: "upper", label: "One uppercase letter (A–Z)" },
+  { id: "lower", label: "One lowercase letter (a–z)" },
+  { id: "special", label: "One special character (!@#$…)" },
 ];
 
 function checkPolicy(password: string) {
@@ -47,9 +48,7 @@ export default function SignupPage() {
     },
     onError: (err) => {
       if (err.data?.code === "CONFLICT") {
-        setServerError(
-          "An account with this email already exists. Try signing in instead.",
-        );
+        setServerError("An account with this email already exists. Try signing in instead.");
       } else {
         setServerError("Something went wrong. Please try again.");
       }
@@ -79,146 +78,81 @@ export default function SignupPage() {
   const policy = checkPolicy(password);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--background))] p-4">
-      <div className="w-full max-w-sm">
-        {/* Brand */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-[var(--radius-xs)] bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-lg font-bold">
-            O
+    <AuthLayout title="Create your account" subtitle="Start your subscription with Brightloop Software — invoiced monthly, never twice.">
+      <form onSubmit={onSubmit} noValidate className="space-y-5">
+        <div>
+          <label htmlFor="companyName" className={authLabelClass}>Company name</label>
+          <input
+            id="companyName"
+            type="text"
+            autoComplete="organization"
+            placeholder="Acme Corp"
+            value={companyName}
+            onChange={(e) => setCompanyName(e.target.value)}
+            className={authFieldClass}
+          />
+          {fieldErrors.companyName && <p className="mt-1 text-xs text-[hsl(var(--destructive))]">{fieldErrors.companyName}</p>}
+        </div>
+
+        <div>
+          <label htmlFor="email" className={authLabelClass}>Email address</label>
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@company.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={authFieldClass}
+          />
+          {fieldErrors.email && <p className="mt-1 text-xs text-[hsl(var(--destructive))]">{fieldErrors.email}</p>}
+        </div>
+
+        <div>
+          <label htmlFor="password" className={authLabelClass}>Password</label>
+          <input
+            id="password"
+            type="password"
+            autoComplete="new-password"
+            placeholder="Choose a strong password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={authFieldClass}
+          />
+          {fieldErrors.password && <p className="mt-1 text-xs text-[hsl(var(--destructive))]">{fieldErrors.password}</p>}
+
+          {password.length > 0 && (
+            <ul className="mt-3 space-y-1.5 rounded-[var(--radius-xs)] border border-[hsl(var(--border))] bg-[hsl(var(--muted))]/60 p-3 text-xs">
+              {POLICY_RULES.map((rule) => {
+                const met = policy[rule.id as keyof typeof policy];
+                return (
+                  <li key={rule.id} className={met ? "font-medium text-[hsl(var(--status-active-ink))]" : "text-[hsl(var(--muted-foreground))]"}>
+                    <span className="mr-1.5 inline-block w-3 text-center">{met ? "✓" : "○"}</span>
+                    {rule.label}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        {serverError && (
+          <div className="rounded-[var(--radius-xs)] border border-[hsl(var(--status-overdue-ink))]/20 bg-[hsl(var(--status-overdue-bg))] px-3 py-2 text-xs font-medium text-[hsl(var(--status-overdue-ink))]">
+            {serverError}
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-[hsl(var(--foreground))]">
-            Create your account
-          </h1>
-          <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
-            Start your subscription with Brightloop Software
-          </p>
-        </div>
+        )}
 
-        <div className="rounded-[var(--radius)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-sm">
-          <form onSubmit={onSubmit} noValidate className="space-y-4">
-            {/* Company name */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="companyName"
-                className="block text-sm font-medium text-[hsl(var(--foreground))]"
-              >
-                Company name
-              </label>
-              <input
-                id="companyName"
-                type="text"
-                autoComplete="organization"
-                placeholder="Acme Corp"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full rounded-[var(--radius-sm)] border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-1"
-              />
-              {fieldErrors.companyName && (
-                <p className="text-xs text-[hsl(var(--destructive))]">
-                  {fieldErrors.companyName}
-                </p>
-              )}
-            </div>
+        <button type="submit" disabled={signupMutation.isPending} className={authButtonClass}>
+          {signupMutation.isPending ? "Creating account…" : "Create account"}
+        </button>
+      </form>
 
-            {/* Email */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-[hsl(var(--foreground))]"
-              >
-                Email address
-              </label>
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@company.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-[var(--radius-sm)] border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-1"
-              />
-              {fieldErrors.email && (
-                <p className="text-xs text-[hsl(var(--destructive))]">
-                  {fieldErrors.email}
-                </p>
-              )}
-            </div>
-
-            {/* Password */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-[hsl(var(--foreground))]"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                placeholder="Choose a strong password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-[var(--radius-sm)] border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-1"
-              />
-              {fieldErrors.password && (
-                <p className="text-xs text-[hsl(var(--destructive))]">
-                  {fieldErrors.password}
-                </p>
-              )}
-
-              {/* Password policy live feedback */}
-              {password.length > 0 && (
-                <ul className="mt-2 space-y-1 rounded-[var(--radius-xs)] bg-[hsl(var(--muted))] p-2.5 text-xs">
-                  {POLICY_RULES.map((rule) => {
-                    const met = policy[rule.id as keyof typeof policy];
-                    return (
-                      <li
-                        key={rule.id}
-                        className={
-                          met
-                            ? "text-[hsl(var(--status-active-ink))]"
-                            : "text-[hsl(var(--muted-foreground))]"
-                        }
-                      >
-                        <span className="mr-1.5 inline-block w-3">
-                          {met ? "✓" : "○"}
-                        </span>
-                        {rule.label}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-
-            {/* Server error */}
-            {serverError && (
-              <div className="rounded-[var(--radius-xs)] bg-[hsl(var(--status-overdue-bg))] px-3 py-2 text-xs text-[hsl(var(--status-overdue-ink))]">
-                {serverError}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={signupMutation.isPending}
-              className="w-full rounded-[var(--radius-sm)] bg-[hsl(var(--primary))] px-4 py-2.5 text-sm font-semibold text-[hsl(var(--primary-foreground))] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-1"
-            >
-              {signupMutation.isPending ? "Creating account…" : "Create account"}
-            </button>
-          </form>
-        </div>
-
-        <p className="mt-4 text-center text-sm text-[hsl(var(--muted-foreground))]">
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="font-medium text-[hsl(var(--foreground))] hover:underline"
-          >
-            Sign in
-          </Link>
-        </p>
-      </div>
-    </div>
+      <p className="mt-6 border-t border-[hsl(var(--border))] pt-4 text-center text-sm text-[hsl(var(--muted-foreground))]">
+        Already have an account?{" "}
+        <Link href="/login" className="font-semibold text-[hsl(var(--foreground))] hover:underline">
+          Sign in
+        </Link>
+      </p>
+    </AuthLayout>
   );
 }

@@ -1,21 +1,21 @@
 "use client";
 
 /**
- * Reset Password page — /reset-password (FR-AUTH-04).
- * Reads `token` query param and validates with password policy.
- * Single-use sha256 token verification on server.
+ * Reset Password — /reset-password (FR-AUTH-04). Ledger folio.
+ * Reads `token` query param; single-use sha256 token verified on server.
  */
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/shared/trpc/react";
 import { resetPasswordSchema } from "@/modules/auth/client";
+import { AuthLayout, authFieldClass, authLabelClass, authButtonClass } from "@/shared/ui/auth-layout";
 
 const POLICY_RULES = [
   { id: "length", label: "More than 8 characters" },
-  { id: "upper", label: "At least one uppercase letter (A–Z)" },
-  { id: "lower", label: "At least one lowercase letter (a–z)" },
-  { id: "special", label: "At least one special character (!@#$…)" },
+  { id: "upper", label: "One uppercase letter (A–Z)" },
+  { id: "lower", label: "One lowercase letter (a–z)" },
+  { id: "special", label: "One special character (!@#$…)" },
 ];
 
 function checkPolicy(password: string) {
@@ -38,12 +38,9 @@ function ResetPasswordForm() {
   const [success, setSuccess] = useState(false);
 
   const resetMutation = api.auth.resetPassword.useMutation({
-    onSuccess: () => {
-      setSuccess(true);
-    },
-    onError: (err) => {
-      setServerError(err.message || "Failed to reset password. Link may be expired or already used.");
-    },
+    onSuccess: () => setSuccess(true),
+    onError: (err) =>
+      setServerError(err.message || "Failed to reset password. The link may be expired or already used."),
   });
 
   function onSubmit(e: React.FormEvent) {
@@ -69,14 +66,11 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="space-y-4 text-center">
-        <div className="rounded-[var(--radius-xs)] bg-[hsl(var(--status-overdue-bg))] p-3 text-xs text-[hsl(var(--status-overdue-ink))]">
-          Missing reset token. Please request a new password reset link.
+      <div className="space-y-5">
+        <div className="rounded-[var(--radius-xs)] border border-[hsl(var(--status-overdue-ink))]/20 bg-[hsl(var(--status-overdue-bg))] px-3 py-2 text-xs font-medium text-[hsl(var(--status-overdue-ink))]">
+          This reset link is missing its token. Request a fresh one below.
         </div>
-        <Link
-          href="/forgot-password"
-          className="inline-block w-full rounded-[var(--radius-sm)] bg-[hsl(var(--primary))] px-4 py-2.5 text-sm font-semibold text-[hsl(var(--primary-foreground))] hover:opacity-90"
-        >
+        <Link href="/forgot-password" className={`${authButtonClass} inline-block`}>
           Request new link
         </Link>
       </div>
@@ -85,20 +79,19 @@ function ResetPasswordForm() {
 
   if (success) {
     return (
-      <div className="space-y-4 text-center">
+      <div className="space-y-5 text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[hsl(var(--status-active-bg))] text-[hsl(var(--status-active-ink))]">
           <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         </div>
-        <h2 className="text-base font-semibold text-[hsl(var(--foreground))]">Password updated</h2>
-        <p className="text-xs text-[hsl(var(--muted-foreground))]">
-          Your password has been changed successfully. You can now sign in with your new credentials.
-        </p>
-        <Link
-          href="/login"
-          className="inline-block w-full rounded-[var(--radius-sm)] bg-[hsl(var(--primary))] px-4 py-2.5 text-sm font-semibold text-[hsl(var(--primary-foreground))] hover:opacity-90"
-        >
+        <div>
+          <h2 className="text-base font-semibold text-[hsl(var(--foreground))]">Password updated</h2>
+          <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+            You can now sign in with your new credentials.
+          </p>
+        </div>
+        <Link href="/login" className={`${authButtonClass} inline-block`}>
           Sign in
         </Link>
       </div>
@@ -106,11 +99,9 @@ function ResetPasswordForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-4">
-      <div className="space-y-1.5">
-        <label htmlFor="password" className="block text-sm font-medium text-[hsl(var(--foreground))]">
-          New password
-        </label>
+    <form onSubmit={onSubmit} noValidate className="space-y-5">
+      <div>
+        <label htmlFor="password" className={authLabelClass}>New password</label>
         <input
           id="password"
           type="password"
@@ -118,28 +109,17 @@ function ResetPasswordForm() {
           placeholder="New secure password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-[var(--radius-sm)] border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-1"
+          className={authFieldClass}
         />
-        {fieldErrors.password && (
-          <p className="text-xs text-[hsl(var(--destructive))]">
-            {fieldErrors.password}
-          </p>
-        )}
+        {fieldErrors.password && <p className="mt-1 text-xs text-[hsl(var(--destructive))]">{fieldErrors.password}</p>}
 
         {password.length > 0 && (
-          <ul className="mt-2 space-y-1 rounded-[var(--radius-xs)] bg-[hsl(var(--muted))] p-2.5 text-xs">
+          <ul className="mt-3 space-y-1.5 rounded-[var(--radius-xs)] border border-[hsl(var(--border))] bg-[hsl(var(--muted))]/60 p-3 text-xs">
             {POLICY_RULES.map((rule) => {
               const met = policy[rule.id as keyof typeof policy];
               return (
-                <li
-                  key={rule.id}
-                  className={
-                    met
-                      ? "text-[hsl(var(--status-active-ink))]"
-                      : "text-[hsl(var(--muted-foreground))]"
-                  }
-                >
-                  <span className="mr-1.5 inline-block w-3">{met ? "✓" : "○"}</span>
+                <li key={rule.id} className={met ? "font-medium text-[hsl(var(--status-active-ink))]" : "text-[hsl(var(--muted-foreground))]"}>
+                  <span className="mr-1.5 inline-block w-3 text-center">{met ? "✓" : "○"}</span>
                   {rule.label}
                 </li>
               );
@@ -148,10 +128,8 @@ function ResetPasswordForm() {
         )}
       </div>
 
-      <div className="space-y-1.5">
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-[hsl(var(--foreground))]">
-          Confirm new password
-        </label>
+      <div>
+        <label htmlFor="confirmPassword" className={authLabelClass}>Confirm new password</label>
         <input
           id="confirmPassword"
           type="password"
@@ -159,26 +137,20 @@ function ResetPasswordForm() {
           placeholder="Repeat new password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full rounded-[var(--radius-sm)] border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-1"
+          className={authFieldClass}
         />
         {fieldErrors.confirmPassword && (
-          <p className="text-xs text-[hsl(var(--destructive))]">
-            {fieldErrors.confirmPassword}
-          </p>
+          <p className="mt-1 text-xs text-[hsl(var(--destructive))]">{fieldErrors.confirmPassword}</p>
         )}
       </div>
 
       {serverError && (
-        <div className="rounded-[var(--radius-xs)] bg-[hsl(var(--status-overdue-bg))] px-3 py-2 text-xs text-[hsl(var(--status-overdue-ink))]">
+        <div className="rounded-[var(--radius-xs)] border border-[hsl(var(--status-overdue-ink))]/20 bg-[hsl(var(--status-overdue-bg))] px-3 py-2 text-xs font-medium text-[hsl(var(--status-overdue-ink))]">
           {serverError}
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={resetMutation.isPending}
-        className="w-full rounded-[var(--radius-sm)] bg-[hsl(var(--primary))] px-4 py-2.5 text-sm font-semibold text-[hsl(var(--primary-foreground))] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-1"
-      >
+      <button type="submit" disabled={resetMutation.isPending} className={authButtonClass}>
         {resetMutation.isPending ? "Resetting…" : "Reset password"}
       </button>
     </form>
@@ -187,26 +159,10 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--background))] p-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-[var(--radius-xs)] bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] text-lg font-bold">
-            O
-          </div>
-          <h1 className="text-xl font-bold tracking-tight text-[hsl(var(--foreground))]">
-            Set new password
-          </h1>
-          <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
-            Please enter your new credentials below
-          </p>
-        </div>
-
-        <div className="rounded-[var(--radius)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-sm">
-          <Suspense fallback={<div className="p-4 text-center text-xs text-[hsl(var(--muted-foreground))]">Loading...</div>}>
-            <ResetPasswordForm />
-          </Suspense>
-        </div>
-      </div>
-    </div>
+    <AuthLayout title="Set a new password" subtitle="Choose something strong — your billing depends on it.">
+      <Suspense fallback={<div className="p-4 text-center text-xs text-[hsl(var(--muted-foreground))]">Loading…</div>}>
+        <ResetPasswordForm />
+      </Suspense>
+    </AuthLayout>
   );
 }
