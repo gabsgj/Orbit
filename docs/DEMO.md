@@ -1,7 +1,8 @@
-# Orbit — Demo Rehearsal Kit (the 9-act script + offline proof)
+# Orbit — Demo Rehearsal Kit (9 acts + 2 appendix acts + offline proof)
 
 > Companion to `docs/PLAN.md` §7. This is the **exact** run-of-show: clicks,
 > quotable lines, what judges see, and the fallback for every act.
+> Acts 12–13 (appendix) are optional, time-permitting additions.
 > Rehearse twice with **WiFi OFF**. Total runtime target: **8–10 minutes**.
 
 **Pre-conditions (verified by `scripts/demo-check.sh`):**
@@ -216,6 +217,45 @@ Static audit of the shipped bundle — this is *why* the WiFi-off claim is safe:
 Act 4 rehearsal (2026-10-31): RUN 1 → **4 invoices created** (sub 00001 + sub 00002's
 3-period catch-up), RUN 2 → **0 created** — the idempotency mic-drop works end-to-end
 on the real dataset.
+
+---
+
+## Appendix — optional acts (time permitting)
+
+### Act 12 — Dunning reminder: chase the overdue invoice (≈30s)
+
+**Clicks:** As staff → Payments → "Overdue Invoices" tab → pick an overdue invoice →
+click the invoice number to open its detail → **"⚠ Send reminder"** button → confirm.
+Then: Admin → Mail Outbox → find the staged `REMINDER` mail → open it.
+
+**Say:** *"Overdue invoices don't chase themselves — except here, they kind of do. One
+click stages a professional payment reminder in the outbox. Offline, it's queued;
+with SMTP configured, it sends for real. The button only appears on invoices that
+are confirmed, outstanding, and past due — the service enforces all three."*
+
+**Judges see:** The reminder button on an overdue invoice, the success toast, then
+the staged `REMINDER` row in the outbox with the rendered email body (invoice number,
+customer name, outstanding amount, due date).
+
+**Fallback:** If no overdue invoice exists, run billing with a past `as_of` date
+first to generate one, or point at the seeded overdue invoice and say *"same flow."*
+
+### Act 13 — CSV export: take the data with you (≈20s)
+
+**Clicks:** Dashboard → top-right **"Export invoices CSV"** button → browser downloads
+the file → open it (or just point at the download bar). Then **"Export payments CSV"**
+→ same.
+
+**Say:** *"Every number on this dashboard can leave the building. Invoices and payments
+export as CSV — the finance lead gets their spreadsheet back, except now it's generated
+from the same indexed queries that power the live charts."*
+
+**Judges see:** Two CSV downloads — `invoices.csv` (number, customer, dates, status,
+totals) and `payments.csv` (date, invoice, method, amount, recorded-by).
+
+**Fallback:** If the browser blocks the download, the routes are plain GET endpoints
+— `curl -s localhost:3000/api/export/invoices | head -5` in a terminal shows the
+same CSV data.
 
 ---
 

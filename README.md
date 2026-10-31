@@ -52,10 +52,13 @@ npm run worker                # (second terminal) billing scheduler (node-cron)
 | `npm run dev` | Next.js dev server |
 | `npm run worker` | Local billing scheduler (node-cron). Rehearsal: `BILLING_CRON="0-59/2 * * * *" npm run worker` |
 | `npm run build` / `start` | Production build / serve |
-| `npm test` | vitest (service-level unit tests). **Note:** DB-backed suites (billing, numbering) need the `orbit_test` database — see [Test database](#test-database-for-db-backed-vitest-suites) below. |
+| `npm test` | vitest — 127 service-level unit tests across 17 files. **Note:** DB-backed suites (billing, numbering) need the `orbit_test` database — see [Test database](#test-database-for-db-backed-vitest-suites) below. |
 | `npm run typecheck` / `lint` | tsc / eslint (module-boundary rule enforced) |
 | `npm run db:migrate` / `db:seed` / `db:studio` | Prisma migrate / seed / Studio |
 | `npm run db:seed:volume` | 10k-subscription load generator (perf proof dataset). See [Load / perf proof](#load--perf-proof). |
+| `npx tsx scripts/auth-smoke.ts` | Auth E2E smoke test — 7 identity checks against the live dev server (signup page, wrong-password rejection, staff login+session, billing page access, outbox tRPC authorized/unauthorized, forgot-password outbox row). Exits non-zero on any failure. |
+| `npx tsx scripts/flow-smoke.ts` | 12-flow end-to-end verifier — walks every critical user journey (signup → catalog → template → subscription → billing → discount → invoice → payment → dashboard → portal → admin → outbox) and prints ✅/❌ per flow. |
+| `npx tsx scripts/send-mail.ts` | Outbox dispatcher CLI (FR-MAIL-03). Prints transport status (offline vs webhook), dispatches queued `email_outbox` rows when `SMTP_URL` is set, otherwise reports queue depth. |
 
 ## Test database (for DB-backed vitest suites)
 
@@ -119,7 +122,50 @@ prisma/                 schema (mirrors docs/ER.md) · migrations · seed
 ```
 
 Cross-module imports go through module barrels only — enforced by eslint
-(`no-restricted-imports`). Services are framework-free and unit-tested.
+(`no-restricted-imports`). Services are framework-free and unit-tested
+(127 unit tests + 7 auth-smoke checks + 12 flow-smoke checks = **142+ total**).
+
+## Routes (21 pages)
+
+| Route | What it does |
+|---|---|
+| `/` | Landing page — brand, quick links to main sections |
+| `/login` | Sign in (next-auth credentials) |
+| `/signup` | Customer self-registration with live password policy feedback |
+| `/forgot-password` | Request a password-reset link (staged in `email_outbox` offline) |
+| `/reset-password` | Set new password via single-use sha256 token |
+| `/dashboard` | Finance & recurring revenue dashboard — KPIs, MRR/ARR, movement, trend, aging, revenue-by-plan, renewal forecast, CSV export |
+| `/subscriptions` | Subscription list / detail / create — state machine with guarded transitions, timeline |
+| `/billing` | "Run billing day" button + billing runs audit history |
+| `/templates` | Quotation template CRUD — pre-fill subscriptions from saved templates |
+| `/invoices` | Invoice list / detail — confirm, cancel, send, print, record payment |
+| `/payments` | Payments ledger + overdue invoices with record-payment dialog |
+| `/discounts` | Discount rule CRUD (admin-only) — percent/fixed, scope, usage limits |
+| `/catalog/products` | Product & variant management — attributes, price_extra |
+| `/catalog/plans` | Plan CRUD — period, lifecycle flags (pausable, closable_early, renewable, auto_close) |
+| `/catalog/taxes` | Tax rate CRUD — assignable to subscription lines |
+| `/admin/staff` | Staff management (admin-only) — create/deactivate staff accounts |
+| `/admin/outbox` | Mail outbox — staged emails (RESET, INVOICE_SENT, REMINDER) |
+| `/admin/outbox/[id]` | Staged email detail — view body, follow action links offline |
+| `/admin/audit` | Global audit log — sensitive actions with actor, entity, timestamp, meta |
+| `/admin/runs` | Billing runs history — trigger type, invoices created, skipped, errors |
+| `/portal` | Customer portal — own subscriptions and invoices only, print, request pause/resume/renew |
+
+## Feature map
+
+| Module | FRs | What it covers |
+|---|---|---|
+| `auth` | FR-AUTH-01…07 | Signup, login, password policy, forgot/reset, RBAC, staff-only creation, customer scoping |
+| `catalog` | FR-CAT-01…05 | Products, attributes/variants, plans, taxes |
+| `templates` | FR-QT-01…02 | Quotation templates, pre-fill subscriptions |
+| `subscriptions` | FR-SUB-01…08 | State machine, status history, pause/resume/renew/close, timeline |
+| `billing` | FR-BILL-01…08 | Bulk generation, idempotency, advisory lock, catch-up, gapless sequences, runs audit |
+| `invoices` | FR-INV-01…05, FR-PAY-06 | State machine, confirm/cancel/send/print, snapshot lines, dunning reminders |
+| `discounts` | FR-DISC-01…06 | Rule CRUD (admin-only), auto-apply at billing, usage ledger, precedence |
+| `payments` | FR-PAY-01…05 | Record payment, overpayment guard, transactional amount_paid, overdue list, aging |
+| `dashboard` | FR-DASH-01…07 | KPIs, MRR/ARR, movement, trend, aging buckets, revenue-by-plan, renewal forecast, CSV export, live polling |
+| `portal` | FR-PORT-01…03 | Customer-scoped subscriptions/invoices, print, pause/resume/renew requests |
+| `admin` | FR-ADM-01…03, FR-MAIL-01…03 | Staff management, billing runs history, audit log, mail outbox viewer, SMTP dispatcher |
 
 ## Team
 
