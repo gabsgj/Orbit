@@ -2,8 +2,6 @@
 
 import * as React from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
-import { Badge } from "@/shared/ui/badge";
 import { DataTable } from "@/shared/ui/data-table";
 import { formatINR, formatDate } from "@/shared/lib/money";
 import type { RenewalForecastItem } from "../queries";
@@ -56,7 +54,7 @@ export function RenewalsCard({
     },
     {
       accessorKey: "expiryDate",
-      header: "Billing / Renewal Date",
+      header: "Renewal Date",
       cell: ({ row }) => (
         <span className="text-xs text-[hsl(var(--foreground))] tabular-nums">
           {formatDate(row.original.expiryDate)}
@@ -68,15 +66,20 @@ export function RenewalsCard({
       header: "Horizon",
       cell: ({ row }) => {
         const days = row.original.daysRemaining;
-        const variant = days <= 7 ? "warning" : "neutral";
+        const pillClass =
+          days <= 7
+            ? "bg-[hsl(var(--status-warning-bg))] text-[hsl(var(--status-warning-ink))]"
+            : "bg-[hsl(var(--status-neutral-bg))] text-[hsl(var(--status-neutral-ink))]";
         return (
-          <Badge variant={variant} className="text-[10px] py-0 px-2 font-medium">
+          <span
+            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${pillClass}`}
+          >
             {days === 0
               ? "Due today"
               : days < 0
               ? `${Math.abs(days)}d past due`
               : `in ${days} ${days === 1 ? "day" : "days"}`}
-          </Badge>
+          </span>
         );
       },
     },
@@ -92,20 +95,20 @@ export function RenewalsCard({
   ];
 
   return (
-    <Card className="border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 gap-2">
+    <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-[var(--shadow-soft)]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
         <div>
-          <CardTitle className="text-base font-semibold text-[hsl(var(--foreground))]">
-            Upcoming Renewal Forecast
-          </CardTitle>
-          <CardDescription className="text-xs">
-            Active subscriptions due for renewal or billing in the selected window (FR-DASH-05)
-          </CardDescription>
+          <h3 className="text-base font-semibold text-[hsl(var(--foreground))] [text-wrap:balance]">
+            Upcoming Renewals
+          </h3>
+          <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">
+            Active subscriptions due for renewal in the selected window
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <span className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase tracking-wider block">
+            <span className="text-xs text-[hsl(var(--muted-foreground))] block">
               Forecasted Revenue
             </span>
             <span className="text-sm font-bold tabular-nums text-[hsl(var(--foreground))]">
@@ -113,16 +116,16 @@ export function RenewalsCard({
             </span>
           </div>
 
-          {/* Horizon selector buttons */}
-          <div className="flex items-center rounded-[var(--radius-xs)] border border-[hsl(var(--border))] p-0.5 bg-[hsl(var(--background))]">
+          {/* Horizon selector — rounded-full pills */}
+          <div className="flex items-center rounded-full border border-[hsl(var(--border))] p-0.5 bg-[hsl(var(--card))]">
             {(["7", "30", "90"] as const).map((days) => (
               <button
                 key={days}
                 type="button"
                 onClick={() => onDaysAheadChange(days)}
-                className={`px-2.5 py-0.5 text-xs font-medium rounded-[calc(var(--radius-xs)-1px)] transition-colors ${
+                className={`px-2.5 py-1 text-xs font-medium rounded-full transition-colors ${
                   daysAhead === days
-                    ? "bg-[hsl(var(--card))] text-[hsl(var(--foreground))] shadow-xs font-semibold"
+                    ? "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
                     : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
                 }`}
               >
@@ -131,20 +134,18 @@ export function RenewalsCard({
             ))}
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent>
-        <DataTable
-          columns={columns}
-          data={renewals}
-          isLoading={isLoading}
-          searchPlaceholder="Filter upcoming renewals..."
-          emptyTitle="No renewals in this horizon"
-          emptyDescription={`There are no active subscriptions with renewal or billing dates falling in the next ${daysAhead} days.`}
-          pageSize={5}
-          pageSizeOptions={[5, 10, 25]}
-        />
-      </CardContent>
-    </Card>
+      <DataTable
+        columns={columns}
+        data={renewals}
+        isLoading={isLoading}
+        searchPlaceholder="Filter upcoming renewals..."
+        emptyTitle="No renewals in this horizon"
+        emptyDescription={`There are no active subscriptions with renewal dates falling in the next ${daysAhead} days.`}
+        pageSize={5}
+        pageSizeOptions={[5, 10, 25]}
+      />
+    </div>
   );
 }

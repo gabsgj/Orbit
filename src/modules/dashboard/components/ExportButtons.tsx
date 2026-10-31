@@ -1,13 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/shared/ui/button";
 
 /**
  * FR-DASH-06 (P2) — CSV export buttons for the finance dashboard.
  * Navigates to the streaming export routes; the browser handles the download.
- * Date-range filter state on the dashboard is view-level (period chips), so
- * exports cover the full filtered dataset via the route defaults.
  */
 
 function DownloadIcon({ size = 14, className = "" }: { size?: number; className?: string }) {
@@ -42,24 +39,22 @@ export function ExportButtons() {
 
   return (
     <div className="flex items-center gap-1.5">
-      <Button
-        variant="outline"
-        size="sm"
+      <button
+        type="button"
         onClick={handleExportInvoices}
-        className="h-7 text-xs px-2.5 gap-1.5"
+        className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-1 text-xs font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] transition-colors cursor-pointer"
       >
         <DownloadIcon size={12} />
-        Export invoices CSV
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
+        Invoices CSV
+      </button>
+      <button
+        type="button"
         onClick={handleExportPayments}
-        className="h-7 text-xs px-2.5 gap-1.5"
+        className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-1 text-xs font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] transition-colors cursor-pointer"
       >
         <DownloadIcon size={12} />
-        Export payments CSV
-      </Button>
+        Payments CSV
+      </button>
     </div>
   );
 }

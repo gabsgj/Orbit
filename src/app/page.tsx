@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LogoMark } from "@/shared/ui/logo";
+import { GitHubIcon, FidgetSpinner, StickMan } from "@/shared/ui/easter-eggs";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,12 +9,12 @@ export const metadata: Metadata = {
     "Orbit runs the full life of a subscription business: products and plans, quotation templates, subscription lifecycles, idempotent recurring billing, invoices, payments and revenue reporting, offline-first, on your own PostgreSQL.",
 };
 
-/* ─── tiny building blocks (ledger grammar: hairlines, chips, tabular figures) ─── */
+/* ─── shared bits ─── */
 
 function StatusChip({ tone, children }: { tone: "active" | "overdue" | "warning" | "neutral"; children: React.ReactNode }) {
   return (
     <span
-      className="inline-flex items-center rounded-[var(--radius-xs)] px-2 py-0.5 text-xs font-semibold uppercase tracking-wide"
+      className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
       style={{
         backgroundColor: `hsl(var(--status-${tone}-bg))`,
         color: `hsl(var(--status-${tone}-ink))`,
@@ -24,13 +25,11 @@ function StatusChip({ tone, children }: { tone: "active" | "overdue" | "warning"
   );
 }
 
-function Mono({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <code className={`font-mono text-[0.92em] text-[hsl(var(--chart-1))] ${className}`}>{children}</code>
-  );
+function Mono({ children }: { children: React.ReactNode }) {
+  return <code className="font-mono text-[0.92em] text-[hsl(var(--chart-1))]">{children}</code>;
 }
 
-/* ─── the live ledger invoice, the hero's working artifact ─── */
+/* ─── hero artifact: the live invoice, lifted like a card off the page ─── */
 
 function LedgerInvoice() {
   const lines = [
@@ -39,13 +38,12 @@ function LedgerInvoice() {
     { desc: "LAUNCH200, launch discount", qty: null, price: null, amount: "−200.00", discount: true },
   ];
   return (
-    <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
-      {/* status strip */}
-      <div className="flex items-center justify-between border-b border-[hsl(var(--border))] px-5 py-3">
+    <div className="rounded-[var(--radius-lg)] bg-[hsl(var(--card))] shadow-[var(--shadow-lift)] ring-1 ring-[hsl(var(--border))]">
+      <div className="flex items-center justify-between px-6 pt-5">
         <div className="flex items-center gap-2.5">
-          <span className="relative flex h-2 w-2">
+          <span className="relative flex h-2.5 w-2.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[hsl(var(--chart-1))] opacity-40" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-[hsl(var(--chart-1))]" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[hsl(var(--chart-1))]" />
           </span>
           <span className="text-xs font-medium text-[hsl(var(--muted-foreground))]">
             Billing run just completed, 00:05 UTC · automatic
@@ -54,10 +52,9 @@ function LedgerInvoice() {
         <StatusChip tone="active">Confirmed</StatusChip>
       </div>
 
-      {/* invoice head */}
-      <div className="flex items-start justify-between px-5 pt-4">
+      <div className="flex items-start justify-between px-6 pt-4">
         <div>
-          <p className="font-mono text-sm font-semibold text-[hsl(var(--foreground))]">INV-2026-00006</p>
+          <p className="font-mono text-base font-semibold">INV-2026-00006</p>
           <p className="mt-0.5 text-xs text-[hsl(var(--muted-foreground))]">Acme Stores Pvt Ltd · due Nov 15</p>
         </div>
         <p className="text-right text-xs text-[hsl(var(--muted-foreground))]">
@@ -67,47 +64,37 @@ function LedgerInvoice() {
         </p>
       </div>
 
-      {/* lines */}
-      <div className="px-5 py-4">
+      <div className="px-6 py-4">
         <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-[11px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
-              <th className="pb-2 font-semibold">Line</th>
-              <th className="pb-2 text-right font-semibold">Qty</th>
-              <th className="pb-2 text-right font-semibold">Price</th>
-              <th className="pb-2 text-right font-semibold">Amount</th>
-            </tr>
-          </thead>
           <tbody>
             {lines.map((l) => (
-              <tr key={l.desc} className="border-t border-[hsl(var(--border))]/60">
-                <td className={`py-2 pr-2 ${l.tax ? "text-[hsl(var(--muted-foreground))]" : ""} ${l.discount ? "text-[hsl(var(--status-active-ink))]" : ""}`}>
+              <tr key={l.desc} className="border-t border-[hsl(var(--border))]/60 first:border-0">
+                <td className={`py-2.5 pr-2 ${l.tax ? "text-[hsl(var(--muted-foreground))]" : ""} ${l.discount ? "font-medium text-[hsl(var(--status-active-ink))]" : ""}`}>
                   {l.desc}
                 </td>
-                <td className="py-2 text-right tabular-nums text-[hsl(var(--muted-foreground))]">{l.qty ?? "—"}</td>
-                <td className="py-2 text-right tabular-nums text-[hsl(var(--muted-foreground))]">{l.price ?? "—"}</td>
-                <td className="py-2 text-right tabular-nums font-medium">{l.amount}</td>
+                <td className="py-2.5 text-right tabular-nums text-[hsl(var(--muted-foreground))]">{l.qty ?? "—"}</td>
+                <td className="py-2.5 text-right tabular-nums text-[hsl(var(--muted-foreground))]">{l.price ?? "—"}</td>
+                <td className="py-2.5 text-right tabular-nums font-semibold">{l.amount}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="mt-2 flex items-baseline justify-between border-t-2 border-[hsl(var(--foreground))] pt-3">
-          <span className="text-sm font-semibold">Total</span>
-          <span className="tabular-nums text-xl font-bold tracking-tight">₹1,639.62</span>
+        <div className="mt-2 flex items-baseline justify-between rounded-[var(--radius-sm)] bg-[hsl(var(--tint-blue))] px-4 py-3">
+          <span className="text-sm font-semibold text-[hsl(var(--tint-blue-ink))]">Total due</span>
+          <span className="tabular-nums text-2xl font-bold tracking-tight text-[hsl(var(--tint-blue-ink))]">₹1,639.62</span>
         </div>
       </div>
 
-      {/* footer strip */}
-      <div className="border-t border-[hsl(var(--border))] bg-[hsl(var(--muted))]/40 px-5 py-2.5">
+      <div className="rounded-b-[var(--radius-lg)] border-t border-[hsl(var(--border))] bg-[hsl(var(--muted))]/50 px-6 py-3">
         <p className="font-mono text-xs text-[hsl(var(--muted-foreground))]">
-          UNIQUE(subscription_id, period_start), the database refuses a second invoice for this period
+          UNIQUE(subscription_id, period_start) — the database refuses a second invoice for this period
         </p>
       </div>
     </div>
   );
 }
 
-/* ─── sections ─── */
+/* ─── content ─── */
 
 const PAIN = [
   { what: "Subscriptions", how: "tracked in a spreadsheet" },
@@ -119,43 +106,43 @@ const PAIN = [
 
 const SCENES = [
   {
-    n: "01",
+    n: "01", tint: "blue",
     title: "Accounts & roles",
-    body: "Customers self-signup with a real password policy and hashed, single-use reset links staged in a mail outbox. Admin, staff and customer see three different systems behind one login, RBAC enforced server-side, citext-unique emails.",
+    body: "Customers self-signup with a real password policy and hashed, single-use reset links staged in a mail outbox. Admin, staff and customer see three different systems behind one login, RBAC enforced server-side, citext-unique&nbsp;emails.",
     proof: "Admin · Staff · Customer",
   },
   {
-    n: "02",
+    n: "02", tint: "green",
     title: "Catalog, plans & variants",
     body: "Products with attributes and variants, the Odoo brand adds ₹560 with price_extra. Plans carry billing period, minimum quantity, availability windows and per-plan flags: auto-close, closable-early, pausable, renewable.",
     proof: "4 plan flags · 2 tax profiles",
   },
   {
-    n: "03",
+    n: "03", tint: "lavender",
     title: "Quote → subscription",
     body: "Sales starts from a quotation template with pre-filled lines and a validity window, then walks one state machine: Draft → Quotation → Confirmed → Active → Closed, with every transition recorded by actor and timestamp.",
     proof: "Full status history",
   },
   {
-    n: "04",
+    n: "04", tint: "amber",
     title: "Billing day",
     body: "Hundreds of subscriptions due at once become invoices with snapshot lines, per-line tax, discounts and gapless numbers. Re-run the same day and the database reports “0 created · 4 skipped (already billed)”, nothing billed twice, nothing skipped, catch-up built in.",
     proof: "Idempotent by constraint",
   },
   {
-    n: "05",
+    n: "05", tint: "rose",
     title: "Discounts that apply themselves",
     body: "Admin-set rules, percent or fixed, minimums, date windows, usage limits, product or subscription scope. The next invoice carries the discount on its own line, stops on expiry or exhaustion, and keeps a usage ledger.",
     proof: "LAUNCH200 · SEAT10",
   },
   {
-    n: "06",
+    n: "06", tint: "teal",
     title: "Payments & dunning",
     body: "Record a payment by UPI, card, cash, transfer or cheque; the invoice flips to Paid inside the same transaction, overpayments rejected. Overdue invoices surface instantly, and one click stages a reminder in the outbox.",
     proof: "Overdue → reminder in 1 click",
   },
   {
-    n: "07",
+    n: "07", tint: "peach",
     title: "The finance lead",
     body: "Active subscriptions, revenue received, amount owed, overdue aging buckets, MRR and ARR with movement (new · expansion · contraction · churn), renewal forecast, revenue by plan, one summary, filterable, exportable to CSV.",
     proof: "MRR movement · aging · CSV",
@@ -163,20 +150,24 @@ const SCENES = [
 ];
 
 const STEPS = [
-  { k: "Catalog", d: "Admin adds products, variants, plans, taxes" },
-  { k: "Subscribe", d: "Template → quotation → confirmed → active" },
-  { k: "Bill", d: "Engine invoices every due period, idempotently" },
-  { k: "Collect", d: "Payments settle invoices; overdue gets chased" },
+  { k: "Catalog", d: "Admin adds products, variants, plans, taxes", tint: "blue" },
+  { k: "Subscribe", d: "Template → quotation → confirmed → active", tint: "lavender" },
+  { k: "Bill", d: "Engine invoices every due period, idempotently", tint: "amber" },
+  { k: "Collect", d: "Payments settle invoices; overdue gets chased", tint: "green" },
 ];
 
 const PROOF = [
   { v: "10,007", l: "subscriptions seeded for the perf proof" },
   { v: "10.55 ms", l: "slowest dashboard query (budget: 2 s)" },
-  { v: "17", l: "CHECK constraints holding business&nbsp;rules" },
+  { v: "17", l: "CHECK constraints holding business rules" },
   { v: "142", l: "automated tests on the billing core" },
   { v: "12/12", l: "end-to-end flows verified green" },
   { v: "0", l: "external dependencies, runs fully offline" },
 ];
+
+function tint(t: string, ink = false) {
+  return `hsl(var(--tint-${t}${ink ? "-ink" : ""}))`;
+}
 
 /* ─── page ─── */
 
@@ -184,11 +175,11 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
       {/* ── nav ── */}
-      <header className="sticky top-0 z-40 border-b border-[hsl(var(--border))] bg-[hsl(var(--background))]/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
-          <Link href="/" className="flex items-center gap-2" aria-label="Orbit home">
-            <LogoMark size={28} />
-            <span className="text-[15px] font-bold tracking-tight">Orbit</span>
+      <header className="sticky top-0 z-40 border-b border-[hsl(var(--border))] bg-[hsl(var(--background))]/85 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+          <Link href="/" className="flex items-center gap-2.5" aria-label="Orbit home">
+            <LogoMark size={38} />
+            <span className="text-xl font-bold tracking-tight">Orbit</span>
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-[hsl(var(--muted-foreground))] md:flex">
             <a href="#scenes" className="hover:text-[hsl(var(--foreground))]">The month</a>
@@ -197,23 +188,27 @@ export default function LandingPage() {
             <a href="#stack" className="hover:text-[hsl(var(--foreground))]">Stack</a>
           </nav>
           <div className="flex items-center gap-2">
-            <Link href="/login" className="rounded-[var(--radius-sm)] px-3 py-1.5 text-sm font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]">
+            <Link href="/login" className="rounded-full px-4 py-2 text-sm font-medium hover:bg-[hsl(var(--muted))]">
               Sign in
             </Link>
-            <Link href="/signup" className="rounded-[var(--radius-sm)] bg-[hsl(var(--primary))] px-3.5 py-1.5 text-sm font-semibold text-[hsl(var(--primary-foreground))] hover:opacity-90">
+            <Link href="/signup" className="rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-semibold text-[hsl(var(--primary-foreground))] shadow-[0_8px_20px_-8px_hsl(var(--primary)/0.7)] transition hover:translate-y-[-1px]">
               Start free
             </Link>
           </div>
         </div>
       </header>
 
-      {/* ── hero: the ledger spread ── */}
-      <section className="mx-auto grid max-w-6xl gap-10 px-5 pb-16 pt-14 md:grid-cols-[44%_56%] md:gap-8 md:pt-20">
+      {/* ── hero ── */}
+      <section className="mx-auto grid max-w-6xl gap-10 px-6 pb-16 pt-14 md:grid-cols-[46%_54%] md:gap-8 md:pt-20">
         <div className="flex flex-col justify-center">
-          <h1 className="text-[2.6rem] font-bold leading-[1.05] tracking-[-0.02em] md:text-6xl md:leading-[1.02] [text-wrap:balance]">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full bg-[hsl(var(--tint-blue))] px-3.5 py-1.5 text-xs font-semibold text-[hsl(var(--tint-blue-ink))]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--chart-1))]" />
+            Idempotent billing engine, enforced by the database
+          </div>
+          <h1 className="mt-5 text-[2.8rem] font-bold leading-[1.03] tracking-[-0.025em] [text-wrap:balance] md:text-[4.2rem]">
             Recurring billing that cannot bill you twice.
           </h1>
-          <p className="mt-5 max-w-[46ch] text-lg leading-relaxed text-[hsl(var(--muted-foreground))]">
+          <p className="mt-5 max-w-[46ch] text-lg leading-relaxed text-[hsl(var(--muted-foreground))] [text-wrap:pretty]">
             Orbit runs the full life of a subscription business: plans, subscriptions,
             recurring invoices, payments and revenue reporting, with an idempotent
             billing engine enforced by the database itself. Offline-first, on your
@@ -222,26 +217,26 @@ export default function LandingPage() {
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
               href="/signup"
-              className="rounded-[var(--radius-sm)] bg-[hsl(var(--primary))] px-5 py-3 text-sm font-semibold text-[hsl(var(--primary-foreground))] shadow-[0_8px_20px_-8px_rgba(15,23,42,0.5)] transition hover:translate-y-[-1px]"
+              className="rounded-full bg-[hsl(var(--primary))] px-6 py-3.5 text-sm font-semibold text-[hsl(var(--primary-foreground))] shadow-[0_12px_28px_-10px_hsl(var(--primary)/0.7)] transition hover:translate-y-[-1px]"
             >
               Start free, create your account
             </Link>
             <Link
               href="/login"
-              className="rounded-[var(--radius-sm)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-5 py-3 text-sm font-semibold hover:bg-[hsl(var(--muted))]"
+              className="rounded-full bg-[hsl(var(--card))] px-6 py-3.5 text-sm font-semibold ring-1 ring-[hsl(var(--border))] transition hover:bg-[hsl(var(--muted))]"
             >
               Enter Orbit →
             </Link>
           </div>
-          <div className="mt-10 grid grid-cols-3 divide-x divide-[hsl(var(--border))] border-t border-[hsl(var(--border))] pt-5">
+          <div className="mt-10 grid grid-cols-3 gap-3">
             {[
-              { v: "0", l: "duplicate invoices, ever" },
-              { v: "₹1,639.62", l: "invoice just generated →" },
-              { v: "100%", l: "offline, no internet needed" },
+              { v: "0", l: "duplicate invoices, ever", t: "green" },
+              { v: "₹1,639.62", l: "invoice just generated", t: "blue" },
+              { v: "100%", l: "offline, no internet", t: "lavender" },
             ].map((f) => (
-              <div key={f.l} className="px-4 first:pl-0">
-                <p className="tabular-nums text-xl font-bold tracking-tight">{f.v}</p>
-                <p className="mt-0.5 text-xs leading-snug text-[hsl(var(--muted-foreground))]">{f.l}</p>
+              <div key={f.l} className="rounded-[var(--radius-lg)] px-4 py-3.5" style={{ backgroundColor: tint(f.t) }}>
+                <p className="tabular-nums text-xl font-bold tracking-tight" style={{ color: tint(f.t, true) }}>{f.v}</p>
+                <p className="mt-0.5 text-xs font-medium leading-snug" style={{ color: tint(f.t, true) }}>{f.l}</p>
               </div>
             ))}
           </div>
@@ -255,12 +250,12 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── pain: how things run today ── */}
+      {/* ── pain ── */}
       <section className="border-y border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-        <div className="mx-auto max-w-6xl px-5 py-14">
+        <div className="mx-auto max-w-6xl px-6 py-14">
           <div className="grid gap-10 md:grid-cols-[38%_62%]">
             <div>
-              <h2 className="[text-wrap:balance] text-3xl font-bold tracking-[-0.02em]">How things run today.</h2>
+              <h2 className="text-3xl font-bold tracking-[-0.02em] [text-wrap:balance]">How things run today.</h2>
               <p className="mt-3 leading-relaxed text-[hsl(var(--muted-foreground))] [text-wrap:pretty]">
                 Renewals get missed, invoices go out wrong, and nobody can say how much
                 recurring revenue the company actually has. Orbit replaces that whole month.
@@ -278,36 +273,49 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── 7 scenes ── */}
-      <section id="scenes" className="mx-auto max-w-6xl px-5 py-16">
-        <h2 className="[text-wrap:balance] max-w-[20ch] text-3xl font-bold tracking-[-0.02em] md:text-4xl">
+      {/* ── 7 scenes, pastel cards (HORMN grammar) ── */}
+      <section id="scenes" className="mx-auto max-w-6xl px-6 py-16">
+        <h2 className="max-w-[20ch] text-3xl font-bold tracking-[-0.02em] [text-wrap:balance] md:text-4xl">
           One billing month at Brightloop, every scene, handled.
         </h2>
         <p className="mt-3 max-w-[62ch] leading-relaxed text-[hsl(var(--muted-foreground))]">
           From a new customer signing up to the finance lead closing the month:
           the seven moments that break a spreadsheet workflow, each a working part of Orbit.
         </p>
-        <div className="mt-10 grid gap-px overflow-hidden rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--border))] md:grid-cols-2">
+        <div className="mt-10 grid gap-4 md:grid-cols-2">
           {SCENES.map((s) => (
-            <article key={s.n} className="bg-[hsl(var(--card))] p-6">
-              <div className="flex items-baseline justify-between">
-                <span className="font-mono text-xs font-semibold text-[hsl(var(--chart-1))]">{s.n}</span>
-                <span className="rounded-[var(--radius-xs)] bg-[hsl(var(--muted))] px-2 py-0.5 font-mono text-xs text-[hsl(var(--muted-foreground))]">
+            <article
+              key={s.n}
+              className="group rounded-[var(--radius-lg)] p-6 transition hover:translate-y-[-2px]"
+              style={{ backgroundColor: tint(s.tint) }}
+            >
+              <div className="flex items-center justify-between">
+                <span
+                  className="grid h-9 w-9 place-items-center rounded-full font-mono text-sm font-bold"
+                  style={{ backgroundColor: "hsl(var(--card))", color: tint(s.tint, true) }}
+                >
+                  {s.n}
+                </span>
+                <span className="rounded-full px-2.5 py-1 font-mono text-xs font-medium" style={{ backgroundColor: "hsl(var(--card)/0.7)", color: tint(s.tint, true) }}>
                   {s.proof}
                 </span>
               </div>
-              <h3 className="mt-2 text-lg font-bold tracking-tight">{s.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">{s.body}</p>
+              <h3 className="mt-4 text-xl font-bold tracking-tight" style={{ color: tint(s.tint, true) }}>
+                {s.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed" style={{ color: tint(s.tint, true) }}>
+                {s.body}
+              </p>
             </article>
           ))}
         </div>
       </section>
 
-      {/* ── billing engine spotlight ── */}
+      {/* ── engine spotlight ── */}
       <section id="engine" className="border-y border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 md:grid-cols-2">
+        <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 md:grid-cols-2">
           <div>
-            <h2 className="[text-wrap:balance] text-3xl font-bold tracking-[-0.02em]">The engine is the product.</h2>
+            <h2 className="text-3xl font-bold tracking-[-0.02em] [text-wrap:balance]">The engine is the product.</h2>
             <p className="mt-3 leading-relaxed text-[hsl(var(--muted-foreground))]">
               Most subscription tools promise careful billing. Orbit makes it a
               database-level property you can demonstrate, not a convention you hope for.
@@ -319,14 +327,14 @@ export default function LandingPage() {
                 ["Never skipped", "The catch-up loop invoices every missed period after downtime, one invoice per period, capped at 12."],
                 ["Never partial", "Each subscription runs under a SAVEPOINT: one failure rolls back only that subscription, never the run."],
               ].map(([k, d]) => (
-                <li key={k as string} className="flex gap-3">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[hsl(var(--chart-1))]" />
+                <li key={k as string} className="flex gap-3 rounded-[var(--radius-lg)] bg-[hsl(var(--background))] p-4">
+                  <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[hsl(var(--chart-1))]" />
                   <p className="text-sm leading-relaxed"><strong className="font-semibold">{k}.</strong>{" "}<span className="text-[hsl(var(--muted-foreground))]">{d}</span></p>
                 </li>
               ))}
             </ul>
           </div>
-          <div className="flex flex-col justify-center rounded-lg border border-[hsl(var(--border))] bg-[#0f172a] p-6 font-mono text-[13px] leading-relaxed text-slate-300">
+          <div className="flex flex-col justify-center rounded-[var(--radius-lg)] bg-[#101b33] p-6 font-mono text-[13px] leading-relaxed text-slate-300 shadow-[var(--shadow-lift)]">
             <p className="text-slate-400">-- a billing run, replayed the same day</p>
             <p className="mt-3">orbit&gt; <span className="text-white">billing.run(asOf: today)</span></p>
             <p className="mt-1 text-emerald-400">{"{"} created: 4, skipped: 0, errors: 0 {"}"}</p>
@@ -341,47 +349,51 @@ export default function LandingPage() {
       </section>
 
       {/* ── how it works ── */}
-      <section className="mx-auto max-w-6xl px-5 py-16">
-        <h2 className="[text-wrap:balance] text-3xl font-bold tracking-[-0.02em]">From catalog to collected, in four moves.</h2>
-        <div className="mt-10 grid gap-px overflow-hidden rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--border))] md:grid-cols-4">
+      <section className="mx-auto max-w-6xl px-6 py-16">
+        <h2 className="text-3xl font-bold tracking-[-0.02em] [text-wrap:balance]">From catalog to collected, in four moves.</h2>
+        <div className="mt-10 grid gap-4 md:grid-cols-4">
           {STEPS.map((s, i) => (
-            <div key={s.k} className="relative bg-[hsl(var(--card))] p-6">
-              <span className="tabular-nums text-3xl font-bold text-[hsl(var(--muted-foreground))]">{i + 1}</span>
-              <h3 className="mt-2 font-bold tracking-tight">{s.k}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">{s.d}</p>
-              {i < 3 && <span className="absolute right-4 top-6 hidden text-[hsl(var(--muted-foreground))] md:block">→</span>}
+            <div key={s.k} className="relative rounded-[var(--radius-lg)] p-6" style={{ backgroundColor: tint(s.tint) }}>
+              <span className="grid h-10 w-10 place-items-center rounded-full bg-[hsl(var(--card))] tabular-nums text-lg font-bold" style={{ color: tint(s.tint, true) }}>
+                {i + 1}
+              </span>
+              <h3 className="mt-3 font-bold tracking-tight" style={{ color: tint(s.tint, true) }}>{s.k}</h3>
+              <p className="mt-1 text-sm leading-relaxed" style={{ color: tint(s.tint, true) }}>{s.d}</p>
+              {i < 3 && <span className="absolute right-4 top-6 hidden text-xl md:block" style={{ color: tint(s.tint, true) }}>→</span>}
             </div>
           ))}
         </div>
 
         {/* roles */}
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        <div className="mt-14 grid gap-4 md:grid-cols-3">
           {[
-            { r: "Admin", d: "Owns the system: products, plans, taxes, discount rules, staff, billing runs, outbox, audit trail." },
-            { r: "Staff", d: "Runs the month: quotations, subscriptions, invoices, payments, billing day — no staff mgmt, no discount rules." },
-            { r: "Customer", d: "A portal of their own: subscriptions, invoices, print, pause/resume/renew — only their data, ever." },
+            { r: "Admin", t: "blue", d: "Owns the system: products, plans, taxes, discount rules, staff, billing runs, outbox, audit&nbsp;trail." },
+            { r: "Staff", t: "green", d: "Runs the month: quotations, subscriptions, invoices, payments, billing day — no staff mgmt, no discount rules." },
+            { r: "Customer", t: "lavender", d: "A portal of their own: subscriptions, invoices, print, pause/resume/renew — only their data,&nbsp;ever." },
           ].map((x) => (
-            <div key={x.r} className="border-t-2 border-[hsl(var(--foreground))] pt-4">
-              <h3 className="font-bold tracking-tight">{x.r}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">{x.d}</p>
+            <div key={x.r} className="rounded-[var(--radius-lg)] bg-[hsl(var(--card))] p-6 shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--border))]">
+              <span className="inline-block rounded-full px-3 py-1 text-xs font-bold" style={{ backgroundColor: tint(x.t), color: tint(x.t, true) }}>
+                {x.r}
+              </span>
+              <p className="mt-3 text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">{x.d}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ── proof band ── */}
-      <section id="proof" className="border-y border-[hsl(var(--border))] bg-[#0f172a] text-slate-200">
-        <div className="mx-auto max-w-6xl px-5 py-14">
-          <h2 className="[text-wrap:balance] text-2xl font-bold tracking-[-0.02em] text-white md:text-3xl">
+      <section id="proof" className="border-y border-[hsl(var(--border))] bg-[#101b33] text-slate-200">
+        <div className="mx-auto max-w-6xl px-6 py-14">
+          <h2 className="text-2xl font-bold tracking-[-0.02em] text-white [text-wrap:balance] md:text-3xl">
             Prove it, don’t claim it.
           </h2>
           <p className="mt-2 max-w-[60ch] text-sm leading-relaxed text-slate-400">
             Every figure below is reproducible: volume-seed the database, run the EXPLAIN
             ANALYZE kit, or execute the flow verifier. Numbers ship with their scripts.
           </p>
-          <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-3">
+          <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3">
             {PROOF.map((p) => (
-              <div key={p.l}>
+              <div key={p.l} className="rounded-[var(--radius-lg)] bg-white/5 p-5 ring-1 ring-white/10">
                 <p className="tabular-nums text-3xl font-bold tracking-tight text-white md:text-4xl">{p.v}</p>
                 <p className="mt-1 text-sm leading-snug text-slate-400">{p.l}</p>
               </div>
@@ -391,10 +403,10 @@ export default function LandingPage() {
       </section>
 
       {/* ── stack / craft ── */}
-      <section id="stack" className="mx-auto max-w-6xl px-5 py-16">
+      <section id="stack" className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid gap-10 md:grid-cols-2">
           <div>
-            <h2 className="[text-wrap:balance] text-3xl font-bold tracking-[-0.02em]">Built like the ledger it keeps.</h2>
+            <h2 className="text-3xl font-bold tracking-[-0.02em] [text-wrap:balance]">Built like the ledger it keeps.</h2>
             <p className="mt-3 leading-relaxed text-[hsl(var(--muted-foreground))]">
               Local-first by design: the whole demo runs with the WiFi off — local
               PostgreSQL, a node-cron billing worker, and mail staged in an outbox
@@ -421,8 +433,8 @@ export default function LandingPage() {
 
       {/* ── final CTA ── */}
       <section className="border-t border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-        <div className="mx-auto max-w-6xl px-5 py-16 text-center">
-          <h2 className="[text-wrap:balance] mx-auto max-w-[22ch] text-3xl font-bold tracking-[-0.02em] md:text-4xl">
+        <div className="mx-auto max-w-6xl px-6 py-16 text-center">
+          <h2 className="mx-auto max-w-[22ch] text-3xl font-bold tracking-[-0.02em] [text-wrap:balance] md:text-4xl">
             Put your revenue in orbit.
           </h2>
           <p className="mx-auto mt-3 max-w-[52ch] leading-relaxed text-[hsl(var(--muted-foreground))]">
@@ -432,13 +444,13 @@ export default function LandingPage() {
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
               href="/signup"
-              className="rounded-[var(--radius-sm)] bg-[hsl(var(--primary))] px-6 py-3 text-sm font-semibold text-[hsl(var(--primary-foreground))] shadow-[0_8px_20px_-8px_rgba(15,23,42,0.5)] transition hover:translate-y-[-1px]"
+              className="rounded-full bg-[hsl(var(--primary))] px-7 py-3.5 text-sm font-semibold text-[hsl(var(--primary-foreground))] shadow-[0_12px_28px_-10px_hsl(var(--primary)/0.7)] transition hover:translate-y-[-1px]"
             >
               Start free
             </Link>
             <Link
               href="/login"
-              className="rounded-[var(--radius-sm)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-6 py-3 text-sm font-semibold hover:bg-[hsl(var(--muted))]"
+              className="rounded-full bg-[hsl(var(--card))] px-7 py-3.5 text-sm font-semibold ring-1 ring-[hsl(var(--border))] transition hover:bg-[hsl(var(--muted))]"
             >
               Sign in
             </Link>
@@ -447,12 +459,35 @@ export default function LandingPage() {
       </section>
 
       {/* ── footer ── */}
-      <footer className="border-t border-[hsl(var(--border))]">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-5 py-8 text-sm text-[hsl(var(--muted-foreground))] md:flex-row md:items-center">
-          <div className="flex items-center gap-2">
-            <LogoMark size={24} />
-            <span><strong className="font-semibold text-[hsl(var(--foreground))]">Orbit</strong> — subscription management for Brightloop Software</span>
+      <footer className="border-t border-[hsl(var(--border))] bg-[hsl(var(--card))]">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-6 py-8 text-sm text-[hsl(var(--muted-foreground))] md:flex-row">
+          <div className="flex items-center gap-3">
+            <LogoMark size={34} />
+            <div>
+              <p className="font-semibold text-[hsl(var(--foreground))]">Orbit</p>
+              <p className="text-xs">subscription management for Brightloop Software</p>
+            </div>
           </div>
+
+          <div className="flex items-center gap-4 text-[hsl(var(--muted-foreground))]">
+            <span title="A fidget spinner, because billing should spin this smoothly" aria-label="Easter egg: a spinning fidget">
+              <FidgetSpinner />
+            </span>
+            <span title="The billing-day stick man. Hover him, he waves." aria-label="Easter egg: a stick man who waves on hover">
+              <StickMan />
+            </span>
+            <a
+              href="https://github.com/gabsgj/Orbit"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full px-3.5 py-2 font-medium ring-1 ring-[hsl(var(--border))] transition hover:bg-[hsl(var(--muted))]"
+              aria-label="Orbit source on GitHub"
+            >
+              <GitHubIcon size={16} />
+              <span className="text-xs font-semibold">Source</span>
+            </a>
+          </div>
+
           <p className="font-mono text-xs">
             offline-first · local PostgreSQL · zero dependencies
           </p>

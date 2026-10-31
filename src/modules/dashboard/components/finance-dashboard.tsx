@@ -9,7 +9,6 @@ import { AgingBucketsCard } from "./aging-buckets-card";
 import { RevenueByPlanCard } from "./revenue-by-plan-card";
 import { RenewalsCard } from "./renewals-card";
 import { ExportButtons } from "./ExportButtons";
-import { Button } from "@/shared/ui/button";
 
 export function FinanceDashboard() {
   const [periodDays, setPeriodDays] = React.useState<"7" | "30" | "90" | "365" | "all">("30");
@@ -102,28 +101,28 @@ export function FinanceDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* ── Dashboard Header & Filter Controls ──────────────────────────── */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2 border-b border-[hsl(var(--border))]">
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[hsl(var(--foreground))]">
+          <h1 className="text-2xl font-bold tracking-tight text-[hsl(var(--foreground))] [text-wrap:balance]">
             Finance & Recurring Revenue
           </h1>
-          <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">
+          <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
             Brightloop Software · Executive SaaS recurring revenue, cashflow & receivables
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Period selector */}
-          <div className="flex items-center rounded-[var(--radius-xs)] border border-[hsl(var(--border))] p-0.5 bg-[hsl(var(--card))]">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Period selector — rounded-full pills with orbit-blue active */}
+          <div className="flex items-center rounded-full border border-[hsl(var(--border))] p-1 bg-[hsl(var(--card))]">
             {(["7", "30", "90", "365", "all"] as const).map((p) => (
               <button
                 key={p}
                 type="button"
                 onClick={() => setPeriodDays(p)}
-                className={`px-2.5 py-1 text-xs font-medium rounded-[calc(var(--radius-xs)-1px)] transition-colors ${
+                className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
                   periodDays === p
-                    ? "bg-[hsl(var(--background))] text-[hsl(var(--foreground))] shadow-xs font-semibold"
+                    ? "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
                     : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
                 }`}
               >
@@ -132,8 +131,8 @@ export function FinanceDashboard() {
             ))}
           </div>
 
-          {/* Live Polling Status */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-[11px] text-[hsl(var(--muted-foreground))]">
+          {/* Live indicator */}
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-xs text-[hsl(var(--muted-foreground))]">
             <span
               className={`inline-block h-2 w-2 rounded-full ${
                 isKpisFetching ? "bg-amber-500 animate-pulse" : "bg-[hsl(var(--status-active-ink))]"
@@ -141,55 +140,57 @@ export function FinanceDashboard() {
               aria-hidden="true"
             />
             <span className="hidden sm:inline">
-              {isKpisFetching ? "Syncing..." : "Live (10s)"}
+              {isKpisFetching ? "Syncing..." : "Live"}
             </span>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
+          <button
+            type="button"
             onClick={handleRefreshAll}
-            className="h-7 text-xs px-2.5"
+            className="inline-flex items-center justify-center rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-1 text-xs font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] transition-colors cursor-pointer"
           >
             Refresh
-          </Button>
+          </button>
 
           <ExportButtons />
         </div>
       </div>
 
-      {/* ── Error Banner if any query failed ────────────────────────────── */}
+      {/* ── Error banner ────────────────────────────────────────────────── */}
       {hasAnyError && (
-        <div className="rounded-[var(--radius-xs)] border border-[hsl(var(--status-overdue-ink))]/30 bg-[hsl(var(--status-overdue-ink))]/10 p-3 flex items-center justify-between text-xs text-[hsl(var(--foreground))]">
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--status-overdue-ink))]/30 bg-[hsl(var(--status-overdue-bg))] p-4 flex items-center justify-between text-sm text-[hsl(var(--foreground))]">
           <span>Some metrics could not be refreshed. Check your database connection.</span>
-          <Button
-            variant="outline"
-            size="sm"
+          <button
+            type="button"
             onClick={handleRefreshAll}
-            className="h-6 text-[11px] px-2"
+            className="inline-flex items-center rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-1 text-xs font-medium hover:bg-[hsl(var(--accent))] transition-colors cursor-pointer"
           >
             Retry
-          </Button>
+          </button>
         </div>
       )}
 
-      {/* ── 1. Top KPI Summary Strip (FR-DASH-01, FR-DASH-02, FR-DASH-03) ── */}
+      {/* ── 1. KPI strip ────────────────────────────────────────────────── */}
       <KPICards
         kpis={kpis}
         isLoading={isKpisLoading}
         periodLabel={periodLabels[periodDays]}
       />
 
-      {/* ── 2. MRR Movement Velocity Strip (FR-DASH-03) ──────────────────── */}
+      {/* ── 2. MRR Movement strip ───────────────────────────────────────── */}
       <MRRMovementCard movement={mrrMovement} isLoading={isMovementLoading} />
 
-      {/* ── 3. Middle Row: MRR Trend Chart & Revenue By Plan ─────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <MRRTrendCard trend={mrrTrend} isLoading={isTrendLoading} />
-        <RevenueByPlanCard plans={revenueByPlan} isLoading={isRevenueLoading} />
+      {/* ── 3. Main grid: MRR trend (2fr) + Revenue by plan (1fr) ───────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <MRRTrendCard trend={mrrTrend} isLoading={isTrendLoading} />
+        </div>
+        <div className="lg:col-span-1">
+          <RevenueByPlanCard plans={revenueByPlan} isLoading={isRevenueLoading} />
+        </div>
       </div>
 
-      {/* ── 4. Bottom Row: Receivables Aging & Upcoming Renewals ─────────── */}
+      {/* ── 4. Bottom row: Aging + Renewals ─────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AgingBucketsCard buckets={aging} isLoading={isAgingLoading} />
         <RenewalsCard

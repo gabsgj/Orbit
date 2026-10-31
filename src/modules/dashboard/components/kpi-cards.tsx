@@ -1,16 +1,60 @@
 "use client";
 
 import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Badge } from "@/shared/ui/badge";
-import { KPISkeleton } from "@/shared/ui/skeleton";
 import { formatINR } from "@/shared/lib/money";
+import {
+  SubscriptionIcon,
+  PaymentIcon,
+  CreditCardIcon,
+  DashboardIcon,
+} from "@/shared/ui/icons";
 import type { DashboardKPIs } from "../queries";
 
 export interface KPICardsProps {
   kpis?: DashboardKPIs;
   isLoading?: boolean;
   periodLabel?: string;
+}
+
+/* ── Icon dot: pastel tint bg + -ink foreground ─────────────────────────── */
+function IconDot({
+  tint,
+  ink,
+  children,
+}: {
+  tint: string;
+  ink: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+      style={{ backgroundColor: `hsl(var(${tint}))`, color: `hsl(var(${ink}))` }}
+    >
+      {children}
+    </span>
+  );
+}
+
+/* ── Delta chip: rounded-full pill, status pastel ───────────────────────── */
+function DeltaChip({
+  positive,
+  label,
+}: {
+  positive: boolean;
+  label: string;
+}) {
+  return (
+    <span
+      className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${
+        positive
+          ? "bg-[hsl(var(--status-active-bg))] text-[hsl(var(--status-active-ink))]"
+          : "bg-[hsl(var(--status-overdue-bg))] text-[hsl(var(--status-overdue-ink))]"
+      }`}
+    >
+      {positive ? "↑" : "↓"} {label}
+    </span>
+  );
 }
 
 export function KPICards({
@@ -21,10 +65,19 @@ export function KPICards({
   if (isLoading || !kpis) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPISkeleton />
-        <KPISkeleton />
-        <KPISkeleton />
-        <KPISkeleton />
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-[var(--shadow-soft)] animate-pulse space-y-4"
+          >
+            <div className="flex items-center justify-between">
+              <div className="h-4 w-24 rounded bg-[hsl(var(--muted))]" />
+              <div className="h-9 w-9 rounded-full bg-[hsl(var(--muted))]" />
+            </div>
+            <div className="h-9 w-32 rounded bg-[hsl(var(--muted))]" />
+            <div className="h-3 w-40 rounded bg-[hsl(var(--muted))]" />
+          </div>
+        ))}
       </div>
     );
   }
@@ -39,144 +92,98 @@ export function KPICards({
     arr,
   } = kpis;
 
+  // Delta computation: MRR-derived growth proxy.
+  // We can compute a real ratio: ARR vs revenue received (annualised run-rate vs actual).
+  // But per instructions: only compute deltas from real data; omit if no real source.
+  // The MRR movement card already shows real deltas — KPI cards keep clean.
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {/* 1. MRR & ARR */}
-      <Card className="relative overflow-hidden border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-[hsl(var(--kpi-primary))]" />
-        <CardHeader className="pb-1 pt-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
-              Monthly Recurring (MRR)
-            </CardTitle>
-            <span className="text-[10px] text-[hsl(var(--kpi-primary))] font-medium">
-              Normalized
-            </span>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="text-2xl font-bold tracking-tight tabular-nums text-[hsl(var(--foreground))]">
-            {formatINR(mrr)}
-          </div>
-          <div className="flex items-center justify-between border-t border-[hsl(var(--border))] pt-2 text-xs text-[hsl(var(--muted-foreground))]">
-            <span>Annual Run-Rate (ARR)</span>
-            <span className="font-semibold tabular-nums text-[hsl(var(--foreground))]">
-              {formatINR(arr)}
-            </span>
-          </div>
-          <div className="text-[10px] text-[hsl(var(--muted-foreground))] pt-1 border-t border-dashed border-[hsl(var(--border))] flex items-center justify-between">
-            <span>SRS §1.3 Multiplier</span>
-            <span className="font-mono text-[9px] text-[hsl(var(--foreground))]">
-              D×30 · W×52/12 · M×1 · Y/12
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      {/* ── 1. MRR ────────────────────────────────────────────────────────── */}
+      <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-[var(--shadow-soft)]">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-[hsl(var(--muted-foreground))]">
+            Monthly Recurring
+          </span>
+          <IconDot tint="--tint-blue" ink="--tint-blue-ink">
+            <DashboardIcon size={16} />
+          </IconDot>
+        </div>
+        <div className="mt-2 text-3xl font-bold tabular-nums text-[hsl(var(--foreground))]">
+          {formatINR(mrr)}
+        </div>
+        <div className="mt-3 flex items-center justify-between text-xs text-[hsl(var(--muted-foreground))]">
+          <span>ARR</span>
+          <span className="font-semibold tabular-nums text-[hsl(var(--foreground))]">
+            {formatINR(arr)}
+          </span>
+        </div>
+      </div>
 
-      {/* 2. Active Subscriptions */}
-      <Card className="border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-        <CardHeader className="pb-1 pt-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
-              Active Subscriptions
-            </CardTitle>
-            <Badge variant="active" className="text-[10px] py-0 px-1.5 font-normal">
-              Active
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="text-2xl font-bold tracking-tight tabular-nums text-[hsl(var(--foreground))]">
-            {activeSubscriptionsCount.toLocaleString("en-IN")}
-          </div>
-          <div className="flex items-center justify-between border-t border-[hsl(var(--border))] pt-2 text-xs text-[hsl(var(--muted-foreground))]">
-            <span>Billed Customers</span>
-            <span className="text-[11px] text-[hsl(var(--foreground))] font-medium">
-              Brightloop Cloud
-            </span>
-          </div>
-          <div className="text-[10px] text-[hsl(var(--muted-foreground))] pt-1 border-t border-dashed border-[hsl(var(--border))] flex items-center justify-between">
-            <span>Contributes to MRR</span>
-            <span className="font-mono text-[9px] text-[hsl(var(--status-active-ink))]">
-              ACTIVE state only
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      {/* ── 2. Active Subscriptions ───────────────────────────────────────── */}
+      <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-[var(--shadow-soft)]">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-[hsl(var(--muted-foreground))]">
+            Active Subscriptions
+          </span>
+          <IconDot tint="--tint-green" ink="--tint-green-ink">
+            <SubscriptionIcon size={16} />
+          </IconDot>
+        </div>
+        <div className="mt-2 text-3xl font-bold tabular-nums text-[hsl(var(--foreground))]">
+          {activeSubscriptionsCount.toLocaleString("en-IN")}
+        </div>
+        <div className="mt-3 flex items-center gap-1.5">
+          <span className="inline-flex items-center rounded-full bg-[hsl(var(--status-active-bg))] px-2 py-0.5 text-xs font-medium text-[hsl(var(--status-active-ink))]">
+            Active
+          </span>
+        </div>
+      </div>
 
-      {/* 3. Revenue Received */}
-      <Card className="border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-        <CardHeader className="pb-1 pt-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
-              Revenue Collected
-            </CardTitle>
-            <span className="text-[10px] text-[hsl(var(--muted-foreground))]">
-              {periodLabel}
-            </span>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="text-2xl font-bold tracking-tight tabular-nums text-[hsl(var(--foreground))]">
-            {formatINR(totalRevenueReceived)}
-          </div>
-          <div className="flex items-center justify-between border-t border-[hsl(var(--border))] pt-2 text-xs text-[hsl(var(--muted-foreground))]">
-            <span>Settled Payments</span>
-            <span className="text-[11px] text-[hsl(var(--status-active-ink))] font-medium">
-              Cashflow In
-            </span>
-          </div>
-          <div className="text-[10px] text-[hsl(var(--muted-foreground))] pt-1 border-t border-dashed border-[hsl(var(--border))] flex items-center justify-between">
-            <span>Payment Methods</span>
-            <span className="font-mono text-[9px] text-[hsl(var(--foreground))]">
-              UPI · CARD · WIRE
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      {/* ── 3. Revenue Collected ──────────────────────────────────────────── */}
+      <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-[var(--shadow-soft)]">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-[hsl(var(--muted-foreground))]">
+            Revenue Collected
+          </span>
+          <IconDot tint="--tint-teal" ink="--tint-teal-ink">
+            <PaymentIcon size={16} />
+          </IconDot>
+        </div>
+        <div className="mt-2 text-3xl font-bold tabular-nums text-[hsl(var(--foreground))]">
+          {formatINR(totalRevenueReceived)}
+        </div>
+        <div className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">
+          {periodLabel}
+        </div>
+      </div>
 
-      {/* 4. Amount Owed & Overdue */}
-      <Card className="border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-        <CardHeader className="pb-1 pt-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
-              Outstanding Receivables
-            </CardTitle>
-            {overdueInvoicesCount > 0 ? (
-              <Badge variant="overdue" className="text-[10px] py-0 px-1.5 font-medium">
-                {overdueInvoicesCount} Overdue
-              </Badge>
-            ) : (
-              <Badge variant="paid" className="text-[10px] py-0 px-1.5 font-normal">
-                All Current
-              </Badge>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="text-2xl font-bold tracking-tight tabular-nums text-[hsl(var(--foreground))]">
-            {formatINR(amountOwed)}
-          </div>
-          <div className="flex items-center justify-between border-t border-[hsl(var(--border))] pt-2 text-xs text-[hsl(var(--muted-foreground))]">
-            <span>Past Due Amount</span>
-            <span
-              className={`font-semibold tabular-nums ${
-                overdueAmount > 0
-                  ? "text-[hsl(var(--status-overdue-ink))]"
-                  : "text-[hsl(var(--foreground))]"
-              }`}
-            >
-              {formatINR(overdueAmount)}
+      {/* ── 4. Outstanding Receivables ────────────────────────────────────── */}
+      <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-[var(--shadow-soft)]">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-[hsl(var(--muted-foreground))]">
+            Outstanding
+          </span>
+          <IconDot tint="--tint-rose" ink="--tint-rose-ink">
+            <CreditCardIcon size={16} />
+          </IconDot>
+        </div>
+        <div className="mt-2 text-3xl font-bold tabular-nums text-[hsl(var(--foreground))]">
+          {formatINR(amountOwed)}
+        </div>
+        <div className="mt-3 flex items-center gap-1.5">
+          {overdueInvoicesCount > 0 ? (
+            <DeltaChip
+              positive={false}
+              label={`${overdueInvoicesCount} overdue · ${formatINR(overdueAmount)}`}
+            />
+          ) : (
+            <span className="inline-flex items-center rounded-full bg-[hsl(var(--status-active-bg))] px-2 py-0.5 text-xs font-medium text-[hsl(var(--status-active-ink))]">
+              All current
             </span>
-          </div>
-          <div className="text-[10px] text-[hsl(var(--muted-foreground))] pt-1 border-t border-dashed border-[hsl(var(--border))] flex items-center justify-between">
-            <span>Aging Breakdown</span>
-            <span className="font-mono text-[9px] text-[hsl(var(--status-overdue-ink))]">
-              0-30 · 31-60 · 61-90 · 90+
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
