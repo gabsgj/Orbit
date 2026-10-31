@@ -107,22 +107,22 @@ export function SubscriptionCreateForm({ onSuccess, onCancel }: SubscriptionCrea
   const isPending = createMutation.isPending || createFromTemplateMutation.isPending;
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+    <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-[var(--shadow-soft)]">
+      <div className="flex items-center justify-between pb-4 border-b border-[hsl(var(--border))]">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">New Subscription</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="text-lg font-semibold text-[hsl(var(--foreground))]">New Subscription</h2>
+          <p className="text-xs text-[hsl(var(--muted-foreground))]">
             Create a custom subscription or instantiate an existing quotation template.
           </p>
         </div>
-        <div className="flex rounded-md border border-slate-200 p-0.5 bg-slate-50">
+        <div className="flex rounded-full border border-[hsl(var(--border))] p-0.5 bg-[hsl(var(--muted))]">
           <button
             type="button"
             onClick={() => setMode("standard")}
-            className={`rounded px-3 py-1 text-xs font-medium ${
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               mode === "standard"
-                ? "bg-white text-slate-900 shadow-sm"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-[hsl(var(--card))] text-[hsl(var(--foreground))] shadow-[var(--shadow-soft)]"
+                : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
             }`}
           >
             Custom Subscription
@@ -130,10 +130,10 @@ export function SubscriptionCreateForm({ onSuccess, onCancel }: SubscriptionCrea
           <button
             type="button"
             onClick={() => setMode("template")}
-            className={`rounded px-3 py-1 text-xs font-medium ${
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               mode === "template"
-                ? "bg-white text-slate-900 shadow-sm"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-[hsl(var(--card))] text-[hsl(var(--foreground))] shadow-[var(--shadow-soft)]"
+                : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
             }`}
           >
             From Template (FR-QT-02)
@@ -142,7 +142,7 @@ export function SubscriptionCreateForm({ onSuccess, onCancel }: SubscriptionCrea
       </div>
 
       {errorMessage && (
-        <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+        <div className="mt-4 rounded-[var(--radius-lg)] border border-[hsl(var(--status-overdue-ink))]/30 bg-[hsl(var(--status-overdue-bg))] p-3 text-xs text-[hsl(var(--status-overdue-ink))]">
           <strong>Validation Error:</strong> {errorMessage}
         </div>
       )}
@@ -150,65 +150,65 @@ export function SubscriptionCreateForm({ onSuccess, onCancel }: SubscriptionCrea
       <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-xs">
         {/* Customer ID */}
         <div>
-          <label className="block font-medium text-slate-700">Customer UUID</label>
+          <label className="block font-medium text-[hsl(var(--foreground))]">Customer UUID</label>
           <input
             type="text"
             required
             value={customerId}
             onChange={(e) => setCustomerId(e.target.value)}
             placeholder="e.g. 12345678-1234-1234-1234-123456789abc"
-            className="mt-1 w-full rounded-md border border-slate-300 p-2 font-mono text-xs focus:border-slate-500 focus:outline-none"
+            className="mt-1 w-full rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-2 font-mono text-xs focus:border-[hsl(var(--ring))] focus:outline-none"
           />
         </div>
 
         {mode === "template" ? (
           <div>
-            <label className="block font-medium text-slate-700">Quotation Template UUID</label>
+            <label className="block font-medium text-[hsl(var(--foreground))]">Quotation Template UUID</label>
             <input
               type="text"
               required
               value={templateId}
               onChange={(e) => setTemplateId(e.target.value)}
               placeholder="e.g. template UUID from templates table"
-              className="mt-1 w-full rounded-md border border-slate-300 p-2 font-mono text-xs focus:border-slate-500 focus:outline-none"
+              className="mt-1 w-full rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-2 font-mono text-xs focus:border-[hsl(var(--ring))] focus:outline-none"
             />
-            <p className="mt-1 text-[11px] text-slate-500">
+            <p className="mt-1 text-[11px] text-[hsl(var(--muted-foreground))]">
               Lines and plan are auto-populated from the quotation template.
             </p>
           </div>
         ) : (
           <>
             <div>
-              <label className="block font-medium text-slate-700">Plan UUID</label>
+              <label className="block font-medium text-[hsl(var(--foreground))]">Plan UUID</label>
               <input
                 type="text"
                 required
                 value={planId}
                 onChange={(e) => setPlanId(e.target.value)}
                 placeholder="e.g. plan UUID from plans table"
-                className="mt-1 w-full rounded-md border border-slate-300 p-2 font-mono text-xs focus:border-slate-500 focus:outline-none"
+                className="mt-1 w-full rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-2 font-mono text-xs focus:border-[hsl(var(--ring))] focus:outline-none"
               />
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="block font-medium text-slate-700">Expiry Date</label>
+                <label className="block font-medium text-[hsl(var(--foreground))]">Expiry Date</label>
                 <input
                   type="date"
                   required
                   value={expiryDate}
                   onChange={(e) => setExpiryDate(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-slate-300 p-2 text-xs focus:border-slate-500 focus:outline-none"
+                  className="mt-1 w-full rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-2 text-xs focus:border-[hsl(var(--ring))] focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block font-medium text-slate-700">Payment Terms (Days)</label>
+                <label className="block font-medium text-[hsl(var(--foreground))]">Payment Terms (Days)</label>
                 <input
                   type="number"
                   min="0"
                   value={paymentTermsDays}
                   onChange={(e) => setPaymentTermsDays(parseInt(e.target.value, 10) || 0)}
-                  className="mt-1 w-full rounded-md border border-slate-300 p-2 text-xs focus:border-slate-500 focus:outline-none"
+                  className="mt-1 w-full rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-2 text-xs focus:border-[hsl(var(--ring))] focus:outline-none"
                 />
               </div>
             </div>
@@ -216,11 +216,11 @@ export function SubscriptionCreateForm({ onSuccess, onCancel }: SubscriptionCrea
             {/* Line Items */}
             <div className="pt-2">
               <div className="flex items-center justify-between mb-2">
-                <label className="font-semibold text-slate-900">Line Items</label>
+                <label className="font-semibold text-[hsl(var(--foreground))]">Line Items</label>
                 <button
                   type="button"
                   onClick={handleAddLine}
-                  className="text-xs font-medium text-blue-600 hover:text-blue-800"
+                  className="text-xs font-medium text-[hsl(var(--primary))] hover:opacity-80"
                 >
                   + Add Line
                 </button>
@@ -238,7 +238,7 @@ export function SubscriptionCreateForm({ onSuccess, onCancel }: SubscriptionCrea
                         next[idx].variantId = e.target.value;
                         setLines(next);
                       }}
-                      className="flex-1 rounded-md border border-slate-300 p-2 font-mono text-xs"
+                      className="flex-1 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-2 font-mono text-xs"
                       required
                     />
                     <input
@@ -251,7 +251,7 @@ export function SubscriptionCreateForm({ onSuccess, onCancel }: SubscriptionCrea
                         next[idx].quantity = parseInt(e.target.value, 10) || 1;
                         setLines(next);
                       }}
-                      className="w-16 rounded-md border border-slate-300 p-2 text-xs"
+                      className="w-16 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-2 text-xs"
                       required
                     />
                     <input
@@ -265,14 +265,14 @@ export function SubscriptionCreateForm({ onSuccess, onCancel }: SubscriptionCrea
                         next[idx].unitPrice = parseFloat(e.target.value) || 0;
                         setLines(next);
                       }}
-                      className="w-24 rounded-md border border-slate-300 p-2 text-xs"
+                      className="w-24 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-2 text-xs"
                       required
                     />
                     {lines.length > 1 && (
                       <button
                         type="button"
                         onClick={() => handleRemoveLine(idx)}
-                        className="text-red-500 hover:text-red-700 p-1"
+                        className="text-[hsl(var(--status-overdue-ink))] hover:opacity-80 p-1"
                       >
                         ✕
                       </button>
@@ -287,36 +287,36 @@ export function SubscriptionCreateForm({ onSuccess, onCancel }: SubscriptionCrea
         {/* Start Date */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="block font-medium text-slate-700">Start Date</label>
+            <label className="block font-medium text-[hsl(var(--foreground))]">Start Date</label>
             <input
               type="date"
               required
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="mt-1 w-full rounded-md border border-slate-300 p-2 text-xs focus:border-slate-500 focus:outline-none"
+              className="mt-1 w-full rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-2 text-xs focus:border-[hsl(var(--ring))] focus:outline-none"
             />
           </div>
           {mode === "template" && (
             <div>
-              <label className="block font-medium text-slate-700">Payment Terms (Days)</label>
+              <label className="block font-medium text-[hsl(var(--foreground))]">Payment Terms (Days)</label>
               <input
                 type="number"
                 min="0"
                 value={paymentTermsDays}
                 onChange={(e) => setPaymentTermsDays(parseInt(e.target.value, 10) || 0)}
-                className="mt-1 w-full rounded-md border border-slate-300 p-2 text-xs focus:border-slate-500 focus:outline-none"
+                className="mt-1 w-full rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-2 text-xs focus:border-[hsl(var(--ring))] focus:outline-none"
               />
             </div>
           )}
         </div>
 
         {/* Footer Actions */}
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-200">
+        <div className="flex justify-end gap-2 pt-4 border-t border-[hsl(var(--border))]">
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
-              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-full ring-1 ring-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-2 text-xs font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] transition-colors"
             >
               Cancel
             </button>
@@ -324,7 +324,7 @@ export function SubscriptionCreateForm({ onSuccess, onCancel }: SubscriptionCrea
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-md bg-slate-900 px-4 py-2 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-xs font-medium text-[hsl(var(--primary-foreground))] shadow-[var(--shadow-soft)] hover:bg-[hsl(var(--primary))]/90 disabled:opacity-50 transition-colors"
           >
             {isPending ? "Creating..." : mode === "template" ? "Instantiate Template" : "Create Subscription"}
           </button>
@@ -333,4 +333,3 @@ export function SubscriptionCreateForm({ onSuccess, onCancel }: SubscriptionCrea
     </div>
   );
 }
-

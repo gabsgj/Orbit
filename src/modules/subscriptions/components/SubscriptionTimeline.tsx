@@ -20,15 +20,15 @@ export function SubscriptionTimeline({ subscriptionId }: SubscriptionTimelinePro
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex gap-3">
-              <div className="h-2.5 w-2.5 rounded-full bg-slate-200 mt-1.5" />
+              <div className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--muted))] mt-1.5" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 w-48 rounded bg-slate-200" />
-                <div className="h-3 w-32 rounded bg-slate-100" />
+                <div className="h-4 w-48 rounded bg-[hsl(var(--muted))]" />
+                <div className="h-3 w-32 rounded bg-[hsl(var(--muted))]/60" />
               </div>
             </div>
           ))}
         </div>
-        <div className="h-32 rounded-lg bg-slate-100" />
+        <div className="h-32 rounded-[var(--radius-lg)] bg-[hsl(var(--muted))]" />
       </div>
     );
   }
@@ -51,28 +51,28 @@ export function SubscriptionTimeline({ subscriptionId }: SubscriptionTimelinePro
       {/* Status Transitions */}
       {statusHistory.length > 0 && (
         <div>
-          <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
             Status History
           </h4>
-          <div className="relative border-l border-slate-200 pl-5 space-y-5">
+          <div className="relative border-l border-[hsl(var(--border))] pl-5 space-y-5">
             {statusHistory.map((h) => (
               <div key={h.id} className="relative">
-                <span className="absolute -left-[26px] top-1.5 h-2.5 w-2.5 rounded-full bg-slate-900 ring-4 ring-white" />
+                <span className="absolute -left-[26px] top-1.5 h-2.5 w-2.5 rounded-full bg-[hsl(var(--primary))] ring-4 ring-[hsl(var(--card))]" />
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge tone={statusTone[h.fromStatus] ?? "neutral"}>
                       {h.fromStatus}
                     </Badge>
-                    <span className="text-xs text-slate-400">→</span>
+                    <span className="text-xs text-[hsl(var(--muted-foreground))]">→</span>
                     <Badge tone={statusTone[h.toStatus] ?? "neutral"}>
                       {h.toStatus}
                     </Badge>
                   </div>
-                  <p className="mt-1.5 text-xs text-slate-500">
+                  <p className="mt-1.5 text-xs text-[hsl(var(--muted-foreground))]">
                     {formatDate(h.changedAt)} · by {h.changedByEmail}
                   </p>
                   {h.note && (
-                    <p className="mt-1 text-xs text-slate-600 italic">
+                    <p className="mt-1 text-xs text-[hsl(var(--foreground))] italic">
                       &ldquo;{h.note}&rdquo;
                     </p>
                   )}
@@ -86,12 +86,12 @@ export function SubscriptionTimeline({ subscriptionId }: SubscriptionTimelinePro
       {/* Billing History */}
       {invoices.length > 0 && (
         <div>
-          <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
             Billing History
           </h4>
-          <div className="overflow-hidden rounded-lg border border-slate-200">
-            <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
-              <thead className="bg-slate-50 text-slate-600">
+          <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--border))]">
+            <table className="min-w-full divide-y divide-[hsl(var(--border))] text-left text-xs">
+              <thead className="bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]">
                 <tr>
                   <th scope="col" className="px-4 py-2.5 font-semibold">Invoice #</th>
                   <th scope="col" className="px-4 py-2.5 font-semibold">Issue Date</th>
@@ -99,17 +99,17 @@ export function SubscriptionTimeline({ subscriptionId }: SubscriptionTimelinePro
                   <th scope="col" className="px-4 py-2.5 text-right font-semibold">Amount</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-[hsl(var(--border))]/50 text-[hsl(var(--foreground))]">
                 {invoices.map((inv) => (
                   <tr key={inv.id}>
-                    <td className="px-4 py-2.5 font-medium text-slate-900">{inv.number}</td>
+                    <td className="px-4 py-2.5 font-medium text-[hsl(var(--foreground))]">{inv.number}</td>
                     <td className="px-4 py-2.5">{formatDate(inv.issueDate)}</td>
                     <td className="px-4 py-2.5">
                       <Badge tone={statusTone[inv.status] ?? "neutral"}>
                         {inv.status}
                       </Badge>
                     </td>
-                    <td className="px-4 py-2.5 text-right font-semibold text-slate-900">
+                    <td className="px-4 py-2.5 text-right font-semibold text-[hsl(var(--foreground))] tabular-nums">
                       {formatINR(inv.grandTotal)}
                     </td>
                   </tr>

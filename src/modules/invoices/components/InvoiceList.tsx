@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { trpc } from "@/shared/trpc/react";
 import { InvoiceStatusBadge } from "./InvoiceStatusBadge";
+import { EmptyState } from "@/shared/ui";
 import { formatINR, formatDate } from "@/shared/lib/money";
 import { isPastDue } from "@/shared/lib/dates";
 import type { InvoiceStatus } from "@prisma/client";
@@ -27,11 +28,11 @@ export function InvoiceList({ onSelectInvoice }: InvoiceListProps) {
   const totals = data?.totals;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">Invoices</h2>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-bold tracking-tight text-[hsl(var(--foreground))]">Invoices</h1>
+          <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
             Generated billing invoices, collections, and settlement tracking (FR-INV-01…05).
           </p>
         </div>
@@ -39,17 +40,17 @@ export function InvoiceList({ onSelectInvoice }: InvoiceListProps) {
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           <button
             type="button"
             onClick={() => {
               setOverdueOnly(false);
               setSelectedStatus(undefined);
             }}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium ${
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               !overdueOnly && selectedStatus === undefined
-                ? "bg-slate-900 text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
+                : "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))]"
             }`}
           >
             All Invoices
@@ -60,10 +61,10 @@ export function InvoiceList({ onSelectInvoice }: InvoiceListProps) {
               setOverdueOnly(false);
               setSelectedStatus("DRAFT");
             }}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium ${
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               !overdueOnly && selectedStatus === "DRAFT"
-                ? "bg-slate-900 text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
+                : "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))]"
             }`}
           >
             Draft
@@ -74,10 +75,10 @@ export function InvoiceList({ onSelectInvoice }: InvoiceListProps) {
               setOverdueOnly(false);
               setSelectedStatus("CONFIRMED");
             }}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium ${
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               !overdueOnly && selectedStatus === "CONFIRMED"
-                ? "bg-slate-900 text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
+                : "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))]"
             }`}
           >
             Confirmed
@@ -88,10 +89,10 @@ export function InvoiceList({ onSelectInvoice }: InvoiceListProps) {
               setOverdueOnly(false);
               setSelectedStatus("PAID");
             }}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium ${
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               !overdueOnly && selectedStatus === "PAID"
-                ? "bg-slate-900 text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
+                : "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))]"
             }`}
           >
             Paid
@@ -102,10 +103,10 @@ export function InvoiceList({ onSelectInvoice }: InvoiceListProps) {
               setOverdueOnly(true);
               setSelectedStatus(undefined);
             }}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium border ${
+            className={`rounded-full px-3 py-1.5 text-xs font-medium border transition-colors ${
               overdueOnly
-                ? "bg-red-600 text-white border-red-700"
-                : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+                ? "bg-[hsl(var(--status-overdue-ink))] text-white border-transparent"
+                : "bg-[hsl(var(--status-overdue-bg))] text-[hsl(var(--status-overdue-ink))] border-[hsl(var(--status-overdue-ink))]/20 hover:opacity-80"
             }`}
           >
             ⚠ Overdue Only
@@ -118,20 +119,20 @@ export function InvoiceList({ onSelectInvoice }: InvoiceListProps) {
             placeholder="Search invoice # or customer..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-xs focus:border-slate-500 focus:outline-none"
+            className="w-full rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-1.5 text-xs placeholder:text-[hsl(var(--placeholder-foreground))] focus:border-[hsl(var(--ring))] focus:outline-none"
           />
         </div>
       </div>
 
       {isLoading && (
-        <div className="rounded-lg border border-slate-200 bg-white p-6 animate-pulse space-y-4">
-          <div className="h-6 w-48 bg-slate-200 rounded" />
-          <div className="h-20 bg-slate-100 rounded" />
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-[var(--shadow-soft)] animate-pulse space-y-4">
+          <div className="h-6 w-48 bg-[hsl(var(--muted))] rounded" />
+          <div className="h-20 bg-[hsl(var(--muted))]/60 rounded" />
         </div>
       )}
 
       {isError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-xs text-red-800">
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--status-overdue-ink))]/30 bg-[hsl(var(--status-overdue-bg))] p-4 text-xs text-[hsl(var(--status-overdue-ink))]">
           Error loading invoices: {error.message}{" "}
           <button type="button" onClick={() => refetch()} className="underline font-semibold ml-2">
             Retry
@@ -140,15 +141,16 @@ export function InvoiceList({ onSelectInvoice }: InvoiceListProps) {
       )}
 
       {!isLoading && !isError && invoices && (
-        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-[var(--shadow-soft)]">
           {invoices.length === 0 ? (
-            <div className="p-8 text-center text-xs text-slate-500">
-              No invoices found matching criteria.
-            </div>
+            <EmptyState
+              title="No invoices found"
+              description="No invoices match the current filter criteria."
+            />
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
-                <thead className="bg-slate-50 text-slate-600">
+              <table className="min-w-full divide-y divide-[hsl(var(--border))] text-left text-xs">
+                <thead className="bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]">
                   <tr>
                     <th className="px-4 py-3 font-semibold">Invoice #</th>
                     <th className="px-4 py-3 font-semibold">Customer</th>
@@ -162,7 +164,7 @@ export function InvoiceList({ onSelectInvoice }: InvoiceListProps) {
                     <th className="px-4 py-3 text-right font-semibold">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
+                <tbody className="divide-y divide-[hsl(var(--border))]/50 text-[hsl(var(--foreground))]">
                   {invoices.map((inv) => {
                     const grandTotal = Number(inv.grandTotal);
                     const paid = Number(inv.amountPaid);
@@ -172,26 +174,26 @@ export function InvoiceList({ onSelectInvoice }: InvoiceListProps) {
                     return (
                       <tr
                         key={inv.id}
-                        className="cursor-pointer hover:bg-slate-50 transition-colors"
+                        className="cursor-pointer hover:bg-[hsl(var(--muted))]/50 transition-colors"
                         onClick={() => onSelectInvoice?.(inv.id)}
                       >
-                        <td className="px-4 py-3 font-medium text-slate-900">{inv.number}</td>
+                        <td className="px-4 py-3 font-medium text-[hsl(var(--foreground))]">{inv.number}</td>
                         <td className="px-4 py-3">{inv.customer.companyName}</td>
-                        <td className="px-4 py-3 font-mono text-[11px] text-slate-500">
+                        <td className="px-4 py-3 font-mono text-[11px] text-[hsl(var(--muted-foreground))]">
                           {inv.subscription?.number ?? "—"}
                         </td>
-                        <td className="px-4 py-3 text-slate-600">{formatDate(inv.issueDate)}</td>
-                        <td className="px-4 py-3 text-slate-600">{formatDate(inv.dueDate)}</td>
+                        <td className="px-4 py-3 text-[hsl(var(--muted-foreground))]">{formatDate(inv.issueDate)}</td>
+                        <td className="px-4 py-3 text-[hsl(var(--muted-foreground))]">{formatDate(inv.dueDate)}</td>
                         <td className="px-4 py-3">
                           <InvoiceStatusBadge status={inv.status} isOverdue={overdue} />
                         </td>
-                        <td className="px-4 py-3 text-right font-medium text-slate-900">
+                        <td className="px-4 py-3 text-right font-medium text-[hsl(var(--foreground))] tabular-nums">
                           {formatINR(grandTotal)}
                         </td>
-                        <td className="px-4 py-3 text-right text-emerald-700">
+                        <td className="px-4 py-3 text-right text-[hsl(var(--status-active-ink))] tabular-nums">
                           {formatINR(paid)}
                         </td>
-                        <td className="px-4 py-3 text-right font-semibold text-slate-900">
+                        <td className="px-4 py-3 text-right font-semibold text-[hsl(var(--foreground))] tabular-nums">
                           {formatINR(outstanding)}
                         </td>
                         <td className="px-4 py-3 text-right">
@@ -201,7 +203,7 @@ export function InvoiceList({ onSelectInvoice }: InvoiceListProps) {
                               e.stopPropagation();
                               onSelectInvoice?.(inv.id);
                             }}
-                            className="rounded px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                            className="rounded-full px-3 py-1 text-xs font-semibold text-[hsl(var(--primary))] hover:bg-[hsl(var(--tint-blue))] transition-colors"
                           >
                             View →
                           </button>
@@ -213,18 +215,18 @@ export function InvoiceList({ onSelectInvoice }: InvoiceListProps) {
 
                 {/* Totals Summary Footer (FR-INV-05) */}
                 {totals && (
-                  <tfoot className="bg-slate-100 font-semibold text-slate-900 border-t-2 border-slate-300">
+                  <tfoot className="bg-[hsl(var(--muted))] font-semibold text-[hsl(var(--foreground))] border-t-2 border-[hsl(var(--border))]">
                     <tr>
                       <td colSpan={6} className="px-4 py-3 text-right font-bold uppercase text-[11px]">
                         Totals Summary:
                       </td>
-                      <td className="px-4 py-3 text-right font-bold text-slate-900">
+                      <td className="px-4 py-3 text-right font-bold text-[hsl(var(--foreground))] tabular-nums">
                         {formatINR(totals.grandTotal)}
                       </td>
-                      <td className="px-4 py-3 text-right font-bold text-emerald-800">
+                      <td className="px-4 py-3 text-right font-bold text-[hsl(var(--status-active-ink))] tabular-nums">
                         {formatINR(totals.amountPaid)}
                       </td>
-                      <td className="px-4 py-3 text-right font-bold text-red-800">
+                      <td className="px-4 py-3 text-right font-bold text-[hsl(var(--status-overdue-ink))] tabular-nums">
                         {formatINR(totals.outstanding)}
                       </td>
                       <td className="px-4 py-3" />
@@ -239,4 +241,3 @@ export function InvoiceList({ onSelectInvoice }: InvoiceListProps) {
     </div>
   );
 }
-

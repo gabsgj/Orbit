@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { trpc } from "@/shared/trpc/react";
 import { SubscriptionStatusBadge } from "./SubscriptionStatusBadge";
 import { SubscriptionTimeline } from "./SubscriptionTimeline";
+import { Badge, statusTone, EmptyState } from "@/shared/ui";
 import { formatINR, formatDate } from "@/shared/lib/money";
 import type { SubscriptionStatus } from "@prisma/client";
 
@@ -55,11 +56,11 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
   if (isLoading) {
     return (
       <div className="space-y-6 animate-pulse">
-        <div className="h-8 w-48 rounded bg-slate-200" />
+        <div className="h-8 w-48 rounded bg-[hsl(var(--muted))]" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="h-32 rounded-lg bg-slate-100" />
-          <div className="h-32 rounded-lg bg-slate-100" />
-          <div className="h-32 rounded-lg bg-slate-100" />
+          <div className="h-32 rounded-[var(--radius-lg)] bg-[hsl(var(--muted))]" />
+          <div className="h-32 rounded-[var(--radius-lg)] bg-[hsl(var(--muted))]" />
+          <div className="h-32 rounded-[var(--radius-lg)] bg-[hsl(var(--muted))]" />
         </div>
       </div>
     );
@@ -67,15 +68,15 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
 
   if (isError || !sub) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-        <p className="text-sm font-medium text-red-800">
+      <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--status-overdue-ink))]/30 bg-[hsl(var(--status-overdue-bg))] p-6 text-center">
+        <p className="text-sm font-medium text-[hsl(var(--status-overdue-ink))]">
           Error loading subscription: {error?.message ?? "Not found"}
         </p>
         {onBack && (
           <button
             type="button"
             onClick={onBack}
-            className="mt-4 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm border border-slate-200"
+            className="mt-4 rounded-full bg-[hsl(var(--card))] px-3 py-1.5 text-xs font-semibold text-[hsl(var(--foreground))] shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--border))] hover:bg-[hsl(var(--accent))] transition-colors"
           >
             ← Back to Subscriptions
           </button>
@@ -113,17 +114,17 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
             <button
               type="button"
               onClick={onBack}
-              className="rounded-md border border-slate-200 bg-white p-1.5 text-slate-600 hover:bg-slate-50 text-xs font-medium"
+              className="rounded-full ring-1 ring-[hsl(var(--border))] bg-[hsl(var(--card))] p-1.5 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))] text-xs font-medium transition-colors"
             >
               ← Back
             </button>
           )}
           <div>
             <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">{sub.number}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-[hsl(var(--foreground))]">{sub.number}</h1>
               <SubscriptionStatusBadge status={sub.status} />
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
               {sub.customer.companyName} · Created {formatDate(sub.createdAt)}
             </p>
           </div>
@@ -136,14 +137,14 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
               <button
                 type="button"
                 onClick={() => setPendingStatus("QUOTATION")}
-                className="rounded-lg bg-blue-600 px-3.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
+                className="rounded-full bg-[hsl(var(--primary))] px-4 py-1.5 text-xs font-medium text-[hsl(var(--primary-foreground))] shadow-[var(--shadow-soft)] hover:bg-[hsl(var(--primary))]/90 transition-colors"
               >
                 Send Quotation →
               </button>
               <button
                 type="button"
                 onClick={() => setPendingStatus("CLOSED")}
-                className="rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                className="rounded-full ring-1 ring-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-1.5 text-xs font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] transition-colors"
               >
                 Abandon
               </button>
@@ -155,14 +156,14 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
               <button
                 type="button"
                 onClick={() => setPendingStatus("CONFIRMED")}
-                className="rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-emerald-700"
+                className="rounded-full bg-[hsl(var(--status-active-ink))] px-4 py-1.5 text-xs font-medium text-white shadow-[var(--shadow-soft)] hover:opacity-90 transition-colors"
               >
                 Confirm Order ✓
               </button>
               <button
                 type="button"
                 onClick={() => setPendingStatus("CLOSED")}
-                className="rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                className="rounded-full ring-1 ring-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-1.5 text-xs font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] transition-colors"
               >
                 Reject
               </button>
@@ -174,7 +175,7 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
               <button
                 type="button"
                 onClick={() => setPendingStatus("ACTIVE")}
-                className="rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-emerald-700"
+                className="rounded-full bg-[hsl(var(--status-active-ink))] px-4 py-1.5 text-xs font-medium text-white shadow-[var(--shadow-soft)] hover:opacity-90 transition-colors"
               >
                 Activate Subscription ▶
               </button>
@@ -183,7 +184,7 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
                   type="button"
                   onClick={handleRenew}
                   disabled={renewMutation.isPending}
-                  className="rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                  className="rounded-full ring-1 ring-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-1.5 text-xs font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] transition-colors"
                 >
                   Renew Period ⟳
                 </button>
@@ -191,7 +192,7 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
               <button
                 type="button"
                 onClick={() => setPendingStatus("CLOSED")}
-                className="rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                className="rounded-full ring-1 ring-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-1.5 text-xs font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] transition-colors"
               >
                 Cancel
               </button>
@@ -204,7 +205,7 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
                 <button
                   type="button"
                   onClick={() => setPendingStatus("PAUSED")}
-                  className="rounded-lg bg-amber-600 px-3.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-amber-700"
+                  className="rounded-full bg-[hsl(var(--status-warning-ink))] px-4 py-1.5 text-xs font-medium text-white shadow-[var(--shadow-soft)] hover:opacity-90 transition-colors"
                 >
                   Pause ⏸
                 </button>
@@ -214,7 +215,7 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
                   type="button"
                   onClick={handleRenew}
                   disabled={renewMutation.isPending}
-                  className="rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                  className="rounded-full ring-1 ring-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 py-1.5 text-xs font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] transition-colors"
                 >
                   Renew Period ⟳
                 </button>
@@ -223,7 +224,7 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
                 <button
                   type="button"
                   onClick={() => setPendingStatus("CLOSED")}
-                  className="rounded-lg border border-red-300 bg-white px-3.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50"
+                  className="rounded-full ring-1 ring-[hsl(var(--status-overdue-ink))]/30 bg-[hsl(var(--card))] px-4 py-1.5 text-xs font-medium text-[hsl(var(--status-overdue-ink))] hover:bg-[hsl(var(--status-overdue-bg))] transition-colors"
                 >
                   Close Early ✕
                 </button>
@@ -236,7 +237,7 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
               <button
                 type="button"
                 onClick={() => setPendingStatus("ACTIVE")}
-                className="rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-emerald-700"
+                className="rounded-full bg-[hsl(var(--status-active-ink))] px-4 py-1.5 text-xs font-medium text-white shadow-[var(--shadow-soft)] hover:opacity-90 transition-colors"
               >
                 Resume ▶
               </button>
@@ -244,7 +245,7 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
                 <button
                   type="button"
                   onClick={() => setPendingStatus("CLOSED")}
-                  className="rounded-lg border border-red-300 bg-white px-3.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50"
+                  className="rounded-full ring-1 ring-[hsl(var(--status-overdue-ink))]/30 bg-[hsl(var(--card))] px-4 py-1.5 text-xs font-medium text-[hsl(var(--status-overdue-ink))] hover:bg-[hsl(var(--status-overdue-bg))] transition-colors"
                 >
                   Close Early ✕
                 </button>
@@ -256,16 +257,16 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
 
       {/* Action Error Message */}
       {actionError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--status-overdue-ink))]/30 bg-[hsl(var(--status-overdue-bg))] p-3 text-xs text-[hsl(var(--status-overdue-ink))]">
           <strong>Action Failed:</strong> {actionError}
         </div>
       )}
 
       {/* Transition Confirmation Box */}
       {pendingStatus && (
-        <div className="rounded-lg border border-slate-300 bg-slate-50 p-4 space-y-3">
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-900">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--foreground))]">
               Confirm Status Change: {sub.status} → {pendingStatus}
             </h4>
             <button
@@ -274,13 +275,13 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
                 setPendingStatus(null);
                 setTransitionNote("");
               }}
-              className="text-slate-400 hover:text-slate-600 text-xs"
+              className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] text-xs"
             >
               Cancel ✕
             </button>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">
+            <label className="block text-xs font-medium text-[hsl(var(--foreground))] mb-1">
               Audit Note (optional)
             </label>
             <input
@@ -288,7 +289,7 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
               value={transitionNote}
               onChange={(e) => setTransitionNote(e.target.value)}
               placeholder="Reason for status change..."
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs focus:border-slate-500 focus:outline-none"
+              className="w-full rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-1.5 text-xs focus:border-[hsl(var(--ring))] focus:outline-none"
             />
           </div>
           <div className="flex justify-end gap-2">
@@ -298,7 +299,7 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
                 setPendingStatus(null);
                 setTransitionNote("");
               }}
-              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-full ring-1 ring-[hsl(var(--border))] bg-[hsl(var(--card))] px-3 py-1.5 text-xs font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] transition-colors"
             >
               Cancel
             </button>
@@ -306,7 +307,7 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
               type="button"
               onClick={handleConfirmTransition}
               disabled={transitionMutation.isPending}
-              className="rounded-md bg-slate-900 px-4 py-1.5 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+              className="rounded-full bg-[hsl(var(--primary))] px-4 py-1.5 text-xs font-medium text-[hsl(var(--primary-foreground))] shadow-[var(--shadow-soft)] hover:bg-[hsl(var(--primary))]/90 disabled:opacity-50 transition-colors"
             >
               {transitionMutation.isPending ? "Applying..." : "Confirm Transition"}
             </button>
@@ -317,80 +318,80 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
       {/* Info Cards Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {/* Customer Info */}
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 shadow-[var(--shadow-soft)]">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
             Customer
           </h3>
-          <p className="mt-2 text-sm font-semibold text-slate-900">
+          <p className="mt-2 text-sm font-semibold text-[hsl(var(--foreground))]">
             {sub.customer.companyName}
           </p>
-          <p className="text-xs text-slate-500">{sub.customer.user.email}</p>
+          <p className="text-xs text-[hsl(var(--muted-foreground))]">{sub.customer.user.email}</p>
           {sub.customer.billingAddress && (
-            <p className="mt-2 text-xs text-slate-600 line-clamp-2">
+            <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))] line-clamp-2">
               {sub.customer.billingAddress}
             </p>
           )}
           {sub.customer.taxId && (
-            <p className="mt-1 text-xs text-slate-500">Tax ID: {sub.customer.taxId}</p>
+            <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Tax ID: {sub.customer.taxId}</p>
           )}
         </div>
 
         {/* Plan Info */}
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 shadow-[var(--shadow-soft)]">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
             Plan Details
           </h3>
-          <p className="mt-2 text-sm font-semibold text-slate-900">
+          <p className="mt-2 text-sm font-semibold text-[hsl(var(--foreground))]">
             {sub.plan.product.name}
           </p>
-          <p className="text-xs text-slate-500 capitalize">
+          <p className="text-xs text-[hsl(var(--muted-foreground))] capitalize">
             {sub.plan.period.toLowerCase()} · {formatINR(sub.plan.price)}
           </p>
           <div className="mt-2 flex flex-wrap gap-1 text-[10px]">
             {sub.plan.pausable && (
-              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">Pausable</span>
+              <span className="rounded-full bg-[hsl(var(--tint-blue))] px-2 py-0.5 text-[hsl(var(--tint-blue-ink))]">Pausable</span>
             )}
             {sub.plan.renewable && (
-              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">Renewable</span>
+              <span className="rounded-full bg-[hsl(var(--tint-green))] px-2 py-0.5 text-[hsl(var(--tint-green-ink))]">Renewable</span>
             )}
             {sub.plan.closableEarly && (
-              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">Closable Early</span>
+              <span className="rounded-full bg-[hsl(var(--tint-amber))] px-2 py-0.5 text-[hsl(var(--tint-amber-ink))]">Closable Early</span>
             )}
             {sub.plan.autoClose && (
-              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">Auto Close</span>
+              <span className="rounded-full bg-[hsl(var(--tint-lavender))] px-2 py-0.5 text-[hsl(var(--tint-lavender-ink))]">Auto Close</span>
             )}
           </div>
         </div>
 
         {/* Schedule & Billing */}
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 shadow-[var(--shadow-soft)]">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">
             Schedule & Terms
           </h3>
           <dl className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 text-xs">
-            <dt className="text-slate-500">Start Date:</dt>
-            <dd className="font-medium text-slate-900">{formatDate(sub.startDate)}</dd>
-            <dt className="text-slate-500">Expiry Date:</dt>
-            <dd className="font-medium text-slate-900">{formatDate(sub.expiryDate)}</dd>
-            <dt className="text-slate-500">Next Billing:</dt>
-            <dd className="font-medium text-slate-900">{formatDate(sub.nextBillingDate)}</dd>
-            <dt className="text-slate-500">Payment Terms:</dt>
-            <dd className="font-medium text-slate-900">Net {sub.paymentTermsDays} days</dd>
+            <dt className="text-[hsl(var(--muted-foreground))]">Start Date:</dt>
+            <dd className="font-medium text-[hsl(var(--foreground))]">{formatDate(sub.startDate)}</dd>
+            <dt className="text-[hsl(var(--muted-foreground))]">Expiry Date:</dt>
+            <dd className="font-medium text-[hsl(var(--foreground))]">{formatDate(sub.expiryDate)}</dd>
+            <dt className="text-[hsl(var(--muted-foreground))]">Next Billing:</dt>
+            <dd className="font-medium text-[hsl(var(--foreground))]">{formatDate(sub.nextBillingDate)}</dd>
+            <dt className="text-[hsl(var(--muted-foreground))]">Payment Terms:</dt>
+            <dd className="font-medium text-[hsl(var(--foreground))]">Net {sub.paymentTermsDays} days</dd>
           </dl>
         </div>
       </div>
 
       {/* Tabs */}
       <div>
-        <div className="border-b border-slate-200">
+        <div className="border-b border-[hsl(var(--border))]">
           <nav className="-mb-px flex space-x-6">
             <button
               type="button"
               onClick={() => setActiveTab("lines")}
               className={`pb-2.5 text-xs font-medium border-b-2 transition-colors ${
                 activeTab === "lines"
-                  ? "border-slate-900 text-slate-900 font-semibold"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
+                  ? "border-[hsl(var(--primary))] text-[hsl(var(--primary))] font-semibold"
+                  : "border-transparent text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
               }`}
             >
               Contract Lines ({sub.lines.length})
@@ -400,8 +401,8 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
               onClick={() => setActiveTab("timeline")}
               className={`pb-2.5 text-xs font-medium border-b-2 transition-colors ${
                 activeTab === "timeline"
-                  ? "border-slate-900 text-slate-900 font-semibold"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
+                  ? "border-[hsl(var(--primary))] text-[hsl(var(--primary))] font-semibold"
+                  : "border-transparent text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
               }`}
             >
               Activity Timeline
@@ -411,8 +412,8 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
               onClick={() => setActiveTab("invoices")}
               className={`pb-2.5 text-xs font-medium border-b-2 transition-colors ${
                 activeTab === "invoices"
-                  ? "border-slate-900 text-slate-900 font-semibold"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
+                  ? "border-[hsl(var(--primary))] text-[hsl(var(--primary))] font-semibold"
+                  : "border-transparent text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
               }`}
             >
               Invoices ({sub.invoices.length})
@@ -422,9 +423,9 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
 
         {/* Tab 1: Lines */}
         {activeTab === "lines" && (
-          <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
-              <thead className="bg-slate-50 text-slate-600">
+          <div className="mt-4 overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-[var(--shadow-soft)]">
+            <table className="min-w-full divide-y divide-[hsl(var(--border))] text-left text-xs">
+              <thead className="bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]">
                 <tr>
                   <th scope="col" className="px-4 py-3 font-semibold">Product Variant</th>
                   <th scope="col" className="px-4 py-3 font-semibold">Quantity</th>
@@ -432,22 +433,22 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
                   <th scope="col" className="px-4 py-3 text-right font-semibold">Line Total</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-[hsl(var(--border))]/50 text-[hsl(var(--foreground))]">
                 {sub.lines.map((line) => {
                   const qty = line.quantity;
                   const price = Number(line.unitPrice);
                   const total = qty * price;
                   return (
                     <tr key={line.id}>
-                      <td className="px-4 py-3 font-medium text-slate-900">
+                      <td className="px-4 py-3 font-medium text-[hsl(var(--foreground))]">
                         {line.variant.product.name}{" "}
-                        <span className="text-slate-500">
+                        <span className="text-[hsl(var(--muted-foreground))]">
                           ({line.variant.attributeValue.value})
                         </span>
                       </td>
                       <td className="px-4 py-3">{qty}</td>
-                      <td className="px-4 py-3">{formatINR(price)}</td>
-                      <td className="px-4 py-3 text-right font-semibold text-slate-900">
+                      <td className="px-4 py-3 tabular-nums">{formatINR(price)}</td>
+                      <td className="px-4 py-3 text-right font-semibold text-[hsl(var(--foreground))] tabular-nums">
                         {formatINR(total)}
                       </td>
                     </tr>
@@ -460,21 +461,22 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
 
         {/* Tab 2: Activity Timeline */}
         {activeTab === "timeline" && (
-          <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mt-4 rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 shadow-[var(--shadow-soft)]">
             <SubscriptionTimeline subscriptionId={subscriptionId} />
           </div>
         )}
 
         {/* Tab 3: Invoices */}
         {activeTab === "invoices" && (
-          <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="mt-4 overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-[var(--shadow-soft)]">
             {sub.invoices.length === 0 ? (
-              <p className="text-xs text-slate-500 py-6 text-center">
-                No invoices generated for this subscription yet.
-              </p>
+              <EmptyState
+                title="No invoices yet"
+                description="No invoices generated for this subscription yet."
+              />
             ) : (
-              <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
-                <thead className="bg-slate-50 text-slate-600">
+              <table className="min-w-full divide-y divide-[hsl(var(--border))] text-left text-xs">
+                <thead className="bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]">
                   <tr>
                     <th scope="col" className="px-4 py-3 font-semibold">Invoice #</th>
                     <th scope="col" className="px-4 py-3 font-semibold">Issue Date</th>
@@ -483,18 +485,18 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
                     <th scope="col" className="px-4 py-3 text-right font-semibold">Amount</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
+                <tbody className="divide-y divide-[hsl(var(--border))]/50 text-[hsl(var(--foreground))]">
                   {sub.invoices.map((inv) => (
                     <tr key={inv.id}>
-                      <td className="px-4 py-3 font-medium text-slate-900">{inv.number}</td>
+                      <td className="px-4 py-3 font-medium text-[hsl(var(--foreground))]">{inv.number}</td>
                       <td className="px-4 py-3">{formatDate(inv.issueDate)}</td>
                       <td className="px-4 py-3">{formatDate(inv.dueDate)}</td>
                       <td className="px-4 py-3">
-                        <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+                        <Badge tone={statusTone[inv.status] ?? "neutral"} dot>
                           {inv.status}
-                        </span>
+                        </Badge>
                       </td>
-                      <td className="px-4 py-3 text-right font-semibold text-slate-900">
+                      <td className="px-4 py-3 text-right font-semibold text-[hsl(var(--foreground))] tabular-nums">
                         {formatINR(inv.grandTotal)}
                       </td>
                     </tr>
@@ -508,4 +510,3 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
     </div>
   );
 }
-

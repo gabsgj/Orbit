@@ -2,6 +2,7 @@
 
 import React from "react";
 import { trpc } from "@/shared/trpc/react";
+import { Badge, EmptyState } from "@/shared/ui";
 import { formatINR, formatDate } from "@/shared/lib/money";
 
 interface DiscountRuleDetailProps {
@@ -13,12 +14,12 @@ export function DiscountRuleDetail({ ruleId, onBack }: DiscountRuleDetailProps) 
   const { data: rule, isLoading, isError, error } = trpc.discounts.get.useQuery({ id: ruleId });
 
   if (isLoading) {
-    return <div className="h-64 rounded-lg bg-slate-100 animate-pulse" />;
+    return <div className="h-64 rounded-[var(--radius-lg)] bg-[hsl(var(--muted))] animate-pulse" />;
   }
 
   if (isError || !rule) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-xs text-red-800">
+      <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--status-overdue-ink))]/30 bg-[hsl(var(--status-overdue-bg))] p-6 text-xs text-[hsl(var(--status-overdue-ink))]">
         Error loading rule: {error?.message ?? "Not found"}{" "}
         {onBack && (
           <button type="button" onClick={onBack} className="underline font-semibold ml-2">
@@ -42,29 +43,23 @@ export function DiscountRuleDetail({ ruleId, onBack }: DiscountRuleDetailProps) 
             <button
               type="button"
               onClick={onBack}
-              className="rounded-md border border-slate-200 bg-white p-1.5 text-xs text-slate-600 hover:bg-slate-50"
+              className="rounded-full ring-1 ring-[hsl(var(--border))] bg-[hsl(var(--card))] p-1.5 text-xs text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--accent))] transition-colors"
             >
               ← Back
             </button>
           )}
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">{rule.name}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-[hsl(var(--foreground))]">{rule.name}</h1>
               {isExhausted ? (
-                <span className="rounded bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800">
-                  Exhausted
-                </span>
+                <Badge tone="danger">Exhausted</Badge>
               ) : rule.isActive ? (
-                <span className="rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
-                  Active
-                </span>
+                <Badge tone="success">Active</Badge>
               ) : (
-                <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
-                  Inactive
-                </span>
+                <Badge tone="neutral">Inactive</Badge>
               )}
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
               Scope: {rule.scope} · Created {formatDate(rule.createdAt)}
             </p>
           </div>
@@ -73,24 +68,24 @@ export function DiscountRuleDetail({ ruleId, onBack }: DiscountRuleDetailProps) 
 
       {/* Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <h3 className="text-xs font-semibold uppercase text-slate-400">Discount Value</h3>
-          <p className="mt-2 text-2xl font-bold text-slate-900">{valueDisplay}</p>
-          <p className="text-xs text-slate-500 mt-1">Kind: {rule.kind}</p>
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 shadow-[var(--shadow-soft)]">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Discount Value</h3>
+          <p className="mt-2 text-2xl font-bold text-[hsl(var(--foreground))] tabular-nums">{valueDisplay}</p>
+          <p className="text-xs text-[hsl(var(--muted-foreground))] mt-1">Kind: {rule.kind}</p>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <h3 className="text-xs font-semibold uppercase text-slate-400">Usage Ledger (FR-DISC-06)</h3>
-          <p className="mt-2 text-2xl font-bold text-slate-900">
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 shadow-[var(--shadow-soft)]">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Usage Ledger (FR-DISC-06)</h3>
+          <p className="mt-2 text-2xl font-bold text-[hsl(var(--foreground))] tabular-nums">
             {usageCount}
-            <span className="text-sm font-normal text-slate-500">
+            <span className="text-sm font-normal text-[hsl(var(--muted-foreground))]">
               {rule.usageLimit !== null ? ` / ${rule.usageLimit} max` : " (unlimited)"}
             </span>
           </p>
           {rule.usageLimit !== null && (
-            <div className="mt-2 w-full bg-slate-100 rounded-full h-1.5">
+            <div className="mt-2 w-full bg-[hsl(var(--muted))] rounded-full h-1.5">
               <div
-                className={`h-1.5 rounded-full ${isExhausted ? "bg-red-500" : "bg-emerald-500"}`}
+                className={`h-1.5 rounded-full ${isExhausted ? "bg-[hsl(var(--status-overdue-ink))]" : "bg-[hsl(var(--status-active-ink))]"}`}
                 style={{
                   width: `${Math.min(100, (usageCount / rule.usageLimit) * 100)}%`,
                 }}
@@ -99,12 +94,12 @@ export function DiscountRuleDetail({ ruleId, onBack }: DiscountRuleDetailProps) 
           )}
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <h3 className="text-xs font-semibold uppercase text-slate-400">Validity Window</h3>
-          <p className="mt-2 text-xs font-medium text-slate-800">
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 shadow-[var(--shadow-soft)]">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Validity Window</h3>
+          <p className="mt-2 text-xs font-medium text-[hsl(var(--foreground))]">
             {formatDate(rule.startDate)} – {formatDate(rule.endDate)}
           </p>
-          <div className="mt-2 text-[11px] text-slate-500 space-y-0.5">
+          <div className="mt-2 text-[11px] text-[hsl(var(--muted-foreground))] space-y-0.5">
             {rule.minPurchase && <p>Min Purchase: {formatINR(rule.minPurchase)}</p>}
             {rule.minQuantity && <p>Min Quantity: {rule.minQuantity}</p>}
           </div>
@@ -113,15 +108,15 @@ export function DiscountRuleDetail({ ruleId, onBack }: DiscountRuleDetailProps) 
 
       {/* Product Scoped items */}
       {rule.scope === "PRODUCT" && rule.products.length > 0 && (
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <h3 className="text-xs font-semibold uppercase text-slate-600 mb-2">
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4 shadow-[var(--shadow-soft)]">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--muted-foreground))] mb-2">
             Applicable Products ({rule.products.length})
           </h3>
           <div className="flex flex-wrap gap-2">
             {rule.products.map((p) => (
               <span
                 key={p.productId}
-                className="rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700"
+                className="rounded-full bg-[hsl(var(--tint-blue))] px-3 py-1 text-xs font-medium text-[hsl(var(--tint-blue-ink))]"
               >
                 {p.product.name}
               </span>
@@ -131,19 +126,20 @@ export function DiscountRuleDetail({ ruleId, onBack }: DiscountRuleDetailProps) 
       )}
 
       {/* Usage History Table */}
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-200">
-          <h3 className="text-sm font-semibold text-slate-900">Usage Audit Trail</h3>
-          <p className="text-xs text-slate-500">Every transactional discount applied to an invoice.</p>
+      <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-[var(--shadow-soft)] overflow-hidden">
+        <div className="p-4 border-b border-[hsl(var(--border))]">
+          <h3 className="text-sm font-semibold text-[hsl(var(--foreground))]">Usage Audit Trail</h3>
+          <p className="text-xs text-[hsl(var(--muted-foreground))]">Every transactional discount applied to an invoice.</p>
         </div>
 
         {rule.usages.length === 0 ? (
-          <div className="p-6 text-center text-xs text-slate-500">
-            No invoices have used this discount rule yet.
-          </div>
+          <EmptyState
+            title="No usage yet"
+            description="No invoices have used this discount rule yet."
+          />
         ) : (
-          <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600">
+          <table className="min-w-full divide-y divide-[hsl(var(--border))] text-left text-xs">
+            <thead className="bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]">
               <tr>
                 <th className="px-4 py-2.5 font-semibold">Applied At</th>
                 <th className="px-4 py-2.5 font-semibold">Invoice #</th>
@@ -151,13 +147,13 @@ export function DiscountRuleDetail({ ruleId, onBack }: DiscountRuleDetailProps) 
                 <th className="px-4 py-2.5 text-right font-semibold">Discount Applied</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-[hsl(var(--border))]/50 text-[hsl(var(--foreground))]">
               {rule.usages.map((u) => (
                 <tr key={u.id}>
-                  <td className="px-4 py-2.5 text-slate-500">{formatDate(u.appliedAt)}</td>
-                  <td className="px-4 py-2.5 font-medium text-slate-900">{u.invoice.number}</td>
-                  <td className="px-4 py-2.5">{formatINR(u.invoice.grandTotal)}</td>
-                  <td className="px-4 py-2.5 text-right font-semibold text-emerald-600">
+                  <td className="px-4 py-2.5 text-[hsl(var(--muted-foreground))]">{formatDate(u.appliedAt)}</td>
+                  <td className="px-4 py-2.5 font-medium text-[hsl(var(--foreground))]">{u.invoice.number}</td>
+                  <td className="px-4 py-2.5 tabular-nums">{formatINR(u.invoice.grandTotal)}</td>
+                  <td className="px-4 py-2.5 text-right font-semibold text-[hsl(var(--status-active-ink))] tabular-nums">
                     -{formatINR(u.appliedAmount)}
                   </td>
                 </tr>
@@ -169,4 +165,3 @@ export function DiscountRuleDetail({ ruleId, onBack }: DiscountRuleDetailProps) 
     </div>
   );
 }
-

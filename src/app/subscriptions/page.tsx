@@ -12,7 +12,7 @@ export default function SubscriptionsPage() {
   const [isCreating, setIsCreating] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 md:p-10">
+    <div className="min-h-screen p-6 md:p-10">
       <div className="mx-auto max-w-5xl">
         {selectedId ? (
           <SubscriptionDetail
