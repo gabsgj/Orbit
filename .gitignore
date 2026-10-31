@@ -1,0 +1,116 @@
+# ============================================================================
+# Make-a-Ton 9.0 — Odoo x Make-a-Ton Kochi Hackathon
+# Generic .gitignore — prune sections that don't apply once the stack is fixed.
+# NOTE: .aimem/ is intentionally NOT ignored — it is shared team/agent memory
+# and must be committed so all 4 members and every agent stay in sync.
+# ============================================================================
+
+# ---------- Secrets & environment (NEVER commit these) ----------
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p12
+secrets/
+.secrets/
+credentials*.json
+service-account*.json
+
+# ---------- OS junk ----------
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ---------- Editors / IDEs ----------
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# ---------- Logs ----------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------- Node / JavaScript / TypeScript ----------
+node_modules/
+dist/
+build/
+out/
+.next/
+.nuxt/
+.svelte-kit/
+.vite/
+.turbo/
+.parcel-cache/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+pip-wheel-metadata/
+
+# ---------- Java / Kotlin (if used) ----------
+target/
+*.class
+*.jar
+*.war
+.gradle/
+
+# ---------- Databases ----------
+# Local database data dirs & dumps — never commit live data
+pgdata/
+postgres-data/
+data/db/
+*.dump
+*.backup
+*.sqlite
+*.sqlite3
+*.db
+!**/seed*.sql        # keep seed/schema scripts — they ARE source code
+!**/schema*.sql
+!**/migrations/**
+
+# ---------- Caches & temp ----------
+.cache/
+tmp/
+temp/
+*.tmp
+*.bak
+
+# ---------- Build / tooling misc ----------
+.vercel/
+.netlify/
+.docusaurus/
+storybook-static/
