@@ -23,10 +23,6 @@ function StatusChip({ tone, children }: { tone: "active" | "overdue" | "warning"
   );
 }
 
-function Rule() {
-  return <div className="border-t border-[hsl(var(--border))]" />;
-}
-
 function Mono({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <code className={`font-mono text-[0.92em] text-[hsl(var(--chart-1))] ${className}`}>{children}</code>
