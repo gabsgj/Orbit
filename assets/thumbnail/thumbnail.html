@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #0f172a;
+    color: #f8fafc;
+    position: relative;
+  }
+
+  /* ---------- backdrop ---------- */
+  .glow {
+    position: absolute; border-radius: 50%; filter: blur(110px); opacity: .35;
+  }
+  .glow.a { width: 560px; height: 560px; background: #1d5fbf; top: -180px; left: -140px; }
+  .glow.b { width: 480px; height: 480px; background: #2f6bf0; bottom: -220px; right: 60px; opacity: .22; }
+
+  .orbit-ring {
+    position: absolute; border: 3px solid rgba(47,107,240,.28); border-radius: 50%;
+    transform: rotate(-24deg);
+  }
+  .orbit-ring.r1 { width: 900px; height: 340px; top: 190px; left: -200px; }
+  .orbit-ring.r2 { width: 1120px; height: 430px; top: 150px; left: -260px; border-color: rgba(47,107,240,.14); }
+
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(248,250,252,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(248,250,252,.035) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at 35% 45%, black 30%, transparent 75%);
+  }
+
+  /* ---------- layout ---------- */
+  .stage { position: absolute; inset: 0; display: flex; align-items: center; padding: 56px 64px; gap: 56px; }
+
+  /* ---------- dashboard mock ---------- */
+  .dash {
+    width: 700px; height: 560px; flex: none;
+    background: #16203a;
+    border: 1px solid rgba(148,163,184,.22);
+    border-radius: 18px;
+    box-shadow: 0 40px 90px rgba(2,6,23,.75), 0 0 0 1px rgba(47,107,240,.12);
+    display: flex; overflow: hidden;
+    transform: perspective(1400px) rotateY(7deg) rotateX(2deg);
+  }
+  .side {
+    width: 132px; background: #111a30; border-right: 1px solid rgba(148,163,184,.14);
+    padding: 18px 14px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .side .brand { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .side .brand .dot { width: 22px; height: 22px; border-radius: 7px; background: #0f172a; border: 2px solid #2f6bf0; position: relative; }
+  .side .brand .dot::after { content: ""; position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #f8fafc; top: 5.5px; left: 5.5px; }
+  .side .brand span { font-size: 13px; font-weight: 700; letter-spacing: .04em; }
+  .navitem { height: 26px; border-radius: 7px; background: rgba(148,163,184,.10); display: flex; align-items: center; padding: 0 9px; }
+  .navitem i { width: 52px; height: 7px; border-radius: 4px; background: rgba(148,163,184,.4); }
+  .navitem.active { background: rgba(47,107,240,.22); border: 1px solid rgba(47,107,240,.45); }
+  .navitem.active i { background: #2f6bf0; }
+
+  .main { flex: 1; padding: 20px 22px; display: flex; flex-direction: column; gap: 16px; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; }
+  .topbar .title { width: 150px; height: 14px; border-radius: 7px; background: rgba(248,250,252,.55); }
+  .topbar .avatar { width: 26px; height: 26px; border-radius: 50%; background: #2f6bf0; }
+
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .kpi {
+    background: #1a2745; border: 1px solid rgba(148,163,184,.16); border-radius: 12px; padding: 12px 14px;
+  }
+  .kpi .label { width: 62px; height: 8px; border-radius: 4px; background: rgba(148,163,184,.4); margin-bottom: 10px; }
+  .kpi .value { width: 84px; height: 16px; border-radius: 6px; background: rgba(248,250,252,.8); }
+  .kpi.hot .value { background: #2f6bf0; }
+  .kpi .delta { margin-top: 8px; width: 46px; height: 8px; border-radius: 4px; background: #22c55e; opacity: .8; }
+
+  .chart {
+    flex: 1; background: #1a2745; border: 1px solid rgba(148,163,184,.16); border-radius: 12px;
+    padding: 14px 16px; position: relative; overflow: hidden;
+  }
+  .chart .label { width: 90px; height: 9px; border-radius: 5px; background: rgba(148,163,184,.4); margin-bottom: 8px; }
+  .chart svg { position: absolute; left: 12px; right: 12px; bottom: 10px; width: calc(100% - 24px); height: 70%; }
+
+  .table { background: #1a2745; border: 1px solid rgba(148,163,184,.16); border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: column; gap: 9px; }
+  .trow { display: flex; align-items: center; gap: 12px; }
+  .trow .c1 { width: 90px; height: 9px; border-radius: 5px; background: rgba(248,250,252,.5); }
+  .trow .c2 { flex: 1; height: 9px; border-radius: 5px; background: rgba(148,163,184,.3); }
+  .pill { font-size: 10px; font-weight: 800; letter-spacing: .08em; padding: 3px 10px; border-radius: 999px; }
+  .pill.paid { background: rgba(34,197,94,.18); color: #4ade80; border: 1px solid rgba(34,197,94,.45); }
+  .pill.due  { background: rgba(245,158,11,.15); color: #fbbf24; border: 1px solid rgba(245,158,11,.4); }
+
+  /* ---------- right panel ---------- */
+  .panel { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 26px; }
+
+  .logo-mark { width: 96px; height: 96px; }
+
+  .word {
+    font-size: 108px; font-weight: 800; letter-spacing: .02em; line-height: .95;
+    background: linear-gradient(180deg, #f8fafc 30%, #94a3b8 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .tag { font-size: 21px; color: #94a3b8; letter-spacing: .02em; font-weight: 500; }
+
+  .cta {
+    display: inline-flex; align-items: center; gap: 14px;
+    background: linear-gradient(90deg, #1d5fbf, #2f6bf0);
+    padding: 18px 34px; border-radius: 999px;
+    font-size: 30px; font-weight: 800; letter-spacing: .06em;
+    box-shadow: 0 14px 40px rgba(47,107,240,.45);
+  }
+  .cta .play { width: 0; height: 0; border-left: 22px solid #f8fafc; border-top: 14px solid transparent; border-bottom: 14px solid transparent; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    border: 1px solid rgba(148,163,184,.35); border-radius: 999px; padding: 9px 18px;
+    font-size: 15px; font-weight: 600; color: #cbd5e1; letter-spacing: .05em;
+    background: rgba(22,32,58,.6);
+  }
+  .badge .dot { width: 9px; height: 9px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 10px #22c55e; }
+</style>
+</head>
+<body>
+  <div class="glow a"></div>
+  <div class="glow b"></div>
+  <div class="orbit-ring r2"></div>
+  <div class="orbit-ring r1"></div>
+  <div class="grid"></div>
+
+  <div class="stage">
+    <!-- dashboard mock -->
+    <div class="dash">
+      <div class="side">
+        <div class="brand"><div class="dot"></div><span>Orbit</span></div>
+        <div class="navitem active"><i></i></div>
+        <div class="navitem"><i></i></div>
+        <div class="navitem"><i></i></div>
+        <div class="navitem"><i></i></div>
+        <div class="navitem"><i></i></div>
+        <div class="navitem"><i></i></div>
+      </div>
+      <div class="main">
+        <div class="topbar"><div class="title"></div><div class="avatar"></div></div>
+        <div class="kpis">
+          <div class="kpi hot"><div class="label"></div><div class="value"></div><div class="delta"></div></div>
+          <div class="kpi"><div class="label"></div><div class="value"></div><div class="delta"></div></div>
+          <div class="kpi"><div class="label"></div><div class="value"></div><div class="delta"></div></div>
+        </div>
+        <div class="chart">
+          <div class="label"></div>
+          <svg viewBox="0 0 520 160" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#2f6bf0" stop-opacity=".45"/>
+                <stop offset="1" stop-color="#2f6bf0" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,130 C60,125 90,100 140,96 C190,92 220,110 270,84 C320,58 350,66 400,40 C440,20 480,18 508,12 L520,12 L520,160 L0,160 Z" fill="url(#area)"/>
+            <path d="M0,130 C60,125 90,100 140,96 C190,92 220,110 270,84 C320,58 350,66 400,40 C440,20 480,18 508,12" fill="none" stroke="#2f6bf0" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="508" cy="12" r="7" fill="#2f6bf0" stroke="#f8fafc" stroke-width="3"/>
+          </svg>
+        </div>
+        <div class="table">
+          <div class="trow"><div class="c1"></div><div class="c2"></div><span class="pill paid">PAID</span></div>
+          <div class="trow"><div class="c1"></div><div class="c2"></div><span class="pill paid">PAID</span></div>
+          <div class="trow"><div class="c1"></div><div class="c2"></div><span class="pill due">DUE</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- right panel -->
+    <div class="panel">
+      <svg class="logo-mark" viewBox="0 0 64 64">
+        <rect width="64" height="64" rx="14" fill="#0f172a" stroke="rgba(148,163,184,.4)"/>
+        <ellipse cx="32" cy="32" rx="20" ry="9.5" fill="none" stroke="#2f6bf0" stroke-width="3" transform="rotate(-24 32 32)"/>
+        <circle cx="32" cy="32" r="6.5" fill="#f8fafc"/>
+        <circle cx="46.6" cy="20.2" r="3.6" fill="#2f6bf0"/>
+      </svg>
+      <div>
+        <div class="word">ORBIT</div>
+        <div class="tag">Recurring billing that cannot bill you twice.</div>
+      </div>
+      <div class="cta"><span class="play"></span>UI WALKTHROUGH</div>
+      <div class="badge"><span class="dot"></span>ODOO × MAKE-A-TON 9.0 · KOCHI</div>
+    </div>
+  </div>
+</body>
+</html>
