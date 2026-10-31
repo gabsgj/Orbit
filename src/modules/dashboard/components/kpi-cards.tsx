@@ -47,7 +47,7 @@ export function KPICards({
         <CardHeader className="pb-1 pt-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
-              Monthly Recurring
+              Monthly Recurring (MRR)
             </CardTitle>
             <span className="text-[10px] text-[hsl(var(--kpi-primary))] font-medium">
               Normalized
@@ -62,6 +62,12 @@ export function KPICards({
             <span>Annual Run-Rate (ARR)</span>
             <span className="font-semibold tabular-nums text-[hsl(var(--foreground))]">
               {formatINR(arr)}
+            </span>
+          </div>
+          <div className="text-[10px] text-[hsl(var(--muted-foreground))] pt-1 border-t border-dashed border-[hsl(var(--border))] flex items-center justify-between">
+            <span>SRS §1.3 Multiplier</span>
+            <span className="font-mono text-[9px] text-[hsl(var(--foreground))]">
+              D×30 · W×52/12 · M×1 · Y/12
             </span>
           </div>
         </CardContent>
@@ -89,6 +95,12 @@ export function KPICards({
               Brightloop Cloud
             </span>
           </div>
+          <div className="text-[10px] text-[hsl(var(--muted-foreground))] pt-1 border-t border-dashed border-[hsl(var(--border))] flex items-center justify-between">
+            <span>Contributes to MRR</span>
+            <span className="font-mono text-[9px] text-[hsl(var(--status-active-ink))]">
+              ACTIVE state only
+            </span>
+          </div>
         </CardContent>
       </Card>
 
@@ -112,6 +124,12 @@ export function KPICards({
             <span>Settled Payments</span>
             <span className="text-[11px] text-[hsl(var(--status-active-ink))] font-medium">
               Cashflow In
+            </span>
+          </div>
+          <div className="text-[10px] text-[hsl(var(--muted-foreground))] pt-1 border-t border-dashed border-[hsl(var(--border))] flex items-center justify-between">
+            <span>Payment Methods</span>
+            <span className="font-mono text-[9px] text-[hsl(var(--foreground))]">
+              UPI · CARD · WIRE
             </span>
           </div>
         </CardContent>
@@ -149,6 +167,12 @@ export function KPICards({
               }`}
             >
               {formatINR(overdueAmount)}
+            </span>
+          </div>
+          <div className="text-[10px] text-[hsl(var(--muted-foreground))] pt-1 border-t border-dashed border-[hsl(var(--border))] flex items-center justify-between">
+            <span>Aging Breakdown</span>
+            <span className="font-mono text-[9px] text-[hsl(var(--status-overdue-ink))]">
+              0-30 · 31-60 · 61-90 · 90+
             </span>
           </div>
         </CardContent>

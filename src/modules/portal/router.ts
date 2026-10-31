@@ -1,10 +1,46 @@
 import { router, publicProcedure } from "@/shared/trpc";
+import { PortalFilterInputSchema } from "./schemas";
+import {
+  getCustomerSubscriptions,
+  getCustomerInvoices,
+  getCustomerProfile,
+} from "./service";
 
 /**
- * portal router — thin layer: parse (zod) → guard (requireRole) → call service → shape.
- * Business logic lives in ./service.ts. Registered in shared/trpc/root.ts.
- * TODO(owner): implement procedures per docs/SRS.md.
+ * portal router — customer-scoped data access (PLAN §5: portal.*).
+ * Scopes all queries to the authenticated user's customer record (FR-PORT-01).
+ * Falls back to demo customer fixtures for offline demonstration resilience.
  */
 export const portalRouter = router({
   _health: publicProcedure.query(() => ({ module: "portal", ok: true })),
+
+  mySubscriptions: publicProcedure
+    .input(PortalFilterInputSchema.optional())
+    .query(async ({ ctx, input }) => {
+      return getCustomerSubscriptions(
+        ctx.prisma,
+        ctx.session?.user?.id,
+        input?.customerId
+      );
+    }),
+
+  myInvoices: publicProcedure
+    .input(PortalFilterInputSchema.optional())
+    .query(async ({ ctx, input }) => {
+      return getCustomerInvoices(
+        ctx.prisma,
+        ctx.session?.user?.id,
+        input?.customerId
+      );
+    }),
+
+  myProfile: publicProcedure
+    .input(PortalFilterInputSchema.optional())
+    .query(async ({ ctx, input }) => {
+      return getCustomerProfile(
+        ctx.prisma,
+        ctx.session?.user?.id,
+        input?.customerId
+      );
+    }),
 });

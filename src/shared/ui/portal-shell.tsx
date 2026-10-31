@@ -29,7 +29,7 @@ export function PortalShell({
     },
     {
       label: "Invoices & Billing",
-      href: "/portal/invoices",
+      href: "/portal#invoices",
       icon: InvoiceIcon,
     },
   ];
@@ -37,7 +37,7 @@ export function PortalShell({
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))] flex flex-col">
       {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-30 border-b border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 lg:px-8">
+      <header className="no-print sticky top-0 z-30 border-b border-[hsl(var(--border))] bg-[hsl(var(--card))] px-4 lg:px-8">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between">
           {/* Brand */}
           <div className="flex items-center gap-6">
@@ -56,11 +56,11 @@ export function PortalShell({
             {/* Navigation tabs */}
             <nav className="hidden sm:flex items-center space-x-1">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href;
+                const isActive = pathname === link.href || (link.href === "/portal" && pathname === "/portal");
                 const Icon = link.icon;
                 return (
                   <Link
-                    key={link.href}
+                    key={link.label}
                     href={link.href}
                     className={cn(
                       "flex items-center gap-2 rounded-[var(--radius-xs)] px-3 py-1.5 text-xs font-medium transition-colors",
@@ -79,6 +79,14 @@ export function PortalShell({
 
           {/* User Profile & Sign Out */}
           <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard"
+              className="hidden md:inline-flex items-center gap-1 text-[11px] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] mr-2"
+              title="Return to Staff App"
+            >
+              <span>← Staff App</span>
+            </Link>
+
             <div className="text-right hidden sm:block">
               <p className="text-xs font-medium leading-none text-[hsl(var(--foreground))]">
                 {user.companyName || user.email}
@@ -105,10 +113,9 @@ export function PortalShell({
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[hsl(var(--border))] py-6 text-center text-xs text-[hsl(var(--muted-foreground))]">
+      <footer className="no-print border-t border-[hsl(var(--border))] py-6 text-center text-xs text-[hsl(var(--muted-foreground))]">
         <p>Orbit Subscription Management · Brightloop Software · All rights reserved.</p>
       </footer>
     </div>
   );
 }
-

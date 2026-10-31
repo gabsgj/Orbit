@@ -20,6 +20,7 @@ import {
   AuditIcon,
   LogOutIcon,
   PlayIcon,
+  TemplateIcon,
 } from "./icons";
 
 export interface NavItem {
@@ -56,7 +57,7 @@ const NAV_SECTIONS: NavSection[] = [
       {
         label: "Quotation Templates",
         href: "/templates",
-        icon: SubscriptionIcon,
+        icon: TemplateIcon,
       },
       {
         label: "Invoices",
@@ -70,7 +71,7 @@ const NAV_SECTIONS: NavSection[] = [
       },
       {
         label: "Billing Runs",
-        href: "/billing/runs",
+        href: "/billing",
         icon: BillingRunIcon,
       },
     ],
@@ -161,7 +162,7 @@ export function AppShell({
       {/* Sidebar Navigation (240px) */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-60 flex-col border-r border-[hsl(var(--border))] bg-[hsl(var(--card))] transition-transform duration-200 ease-in-out lg:static lg:translate-x-0",
+          "no-print fixed inset-y-0 left-0 z-50 flex w-60 flex-col border-r border-[hsl(var(--border))] bg-[hsl(var(--card))] transition-transform duration-200 ease-in-out lg:static lg:translate-x-0",
           mobileOpen ? "translate-x-0" : "-translate-x-0 -translate-x-full lg:translate-x-0"
         )}
       >
@@ -253,7 +254,7 @@ export function AppShell({
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col min-w-0">
         {/* Topbar (48px) */}
-        <header className="sticky top-0 z-30 flex h-12 items-center justify-between border-b border-[hsl(var(--border))] bg-[hsl(var(--card))]/90 backdrop-blur-sm px-4 lg:px-6">
+        <header className="no-print sticky top-0 z-30 flex h-12 items-center justify-between border-b border-[hsl(var(--border))] bg-[hsl(var(--card))]/90 backdrop-blur-sm px-4 lg:px-6">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -277,6 +278,16 @@ export function AppShell({
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              href="/portal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-[var(--radius-xs)] border border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))] transition-colors"
+              title="Open Customer Portal view in new tab"
+            >
+              <span>Customer Portal ↗</span>
+            </Link>
+
             {onRunBilling && (
               <Button
                 size="sm"
@@ -300,4 +311,3 @@ export function AppShell({
     </div>
   );
 }
-

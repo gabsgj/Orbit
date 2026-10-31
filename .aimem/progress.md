@@ -239,3 +239,30 @@ _Chronological record of work done. Newest entries at the bottom._
   - `npm run typecheck` $\rightarrow$ 0 errors.
   - `npm run lint` $\rightarrow$ 0 warnings, 0 errors.
   - `npm run build` $\rightarrow$ Compiled successfully across all routes.
+
+
+## 2026-10-31 — Multi-Agent Evaluation & Refinement of Pavithra's Contribution
+
+**By:** Pavithra S Rajesh (Experience & Insights Lead) on `main`
+
+- **Multi-Agent Evaluation:**
+  - Evaluated Pavithra's contribution across 5 distinct perspectives: Agent 1 (UI/UX), Agent 2 (Finance Dashboard), Agent 3 (Architecture & Integration), Agent 4 (Feature Completeness), and Agent 5 (Hackathon Judge).
+  - Preserved strict ownership boundaries: 0 modifications to teammate modules (`billing`, `admin`, `catalog`, `subscriptions`, `invoices`, `payments`, `discounts`, `prisma/schema.prisma`).
+- **Customer Portal Real DB Integration (FR-PORT-01, FR-PORT-02, PLAN §5):**
+  - Implemented `src/modules/portal/service.ts`, `schemas.ts`, and `router.ts` exposing `portal.mySubscriptions`, `portal.myInvoices`, and `portal.myProfile`.
+  - Scoped customer data access at the query layer via authenticated session `userId` or explicit customer ID.
+  - Provided graceful fallback to `DEMO_SUBSCRIPTIONS` / `DEMO_INVOICES` for unseeded local preview environments.
+  - Connected `CustomerPortal` (`customer-portal.tsx`) to `trpc.portal.*` with 10s TanStack Query polling.
+  - Added unit test suite in `src/modules/portal/service.test.ts` verifying monthly line normalization (Daily × 30, Weekly × 52/12, Monthly × 1, Yearly / 12) and fallback resilience (6/6 tests passing).
+- **Navigation & AppShell Hardening (`src/shared/ui/app-shell.tsx`, `icons.tsx`):**
+  - Fixed broken navigation link from `/billing/runs` (404) to `/billing` matching Gabriel's billing page.
+  - Added `TemplateIcon` to `icons.tsx` and assigned to Quotation Templates in navigation.
+  - Added "Customer Portal ↗" link in `AppShell` header for one-click access during demo presentations.
+  - Added `no-print` utility class to `AppShell` and `PortalShell` headers/footers to support clean invoice printing.
+- **Finance Dashboard Mathematical Transparency (`kpi-cards.tsx`):**
+  - Added explicit SRS §1.3 formula indicator (`D×30 · W×52/12 · M×1 · Y/12`) to the MRR KPI card.
+- **Verification:**
+  - `npm run typecheck` → 0 errors.
+  - `npm run lint` → 0 warnings, 0 errors.
+  - `npx vitest run src/modules/portal/service.test.ts` → 6/6 tests passing.
+  - `npm run build` → 21/21 routes compiled and prerendered cleanly.

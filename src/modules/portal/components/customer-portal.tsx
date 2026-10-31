@@ -8,6 +8,7 @@ import { Button } from "@/shared/ui/button";
 import { Dialog } from "@/shared/ui/dialog";
 import { DataTable } from "@/shared/ui/data-table";
 import { formatINR, formatDate } from "@/shared/lib/money";
+import { trpc } from "@/shared/trpc/react";
 import {
   SubscriptionIcon,
   InvoiceIcon,
@@ -17,124 +18,57 @@ import {
   AlertTriangleIcon,
   PrinterIcon,
 } from "@/shared/ui/icons";
-
-export interface PortalSubscription {
-  id: string;
-  number: string;
-  productName: string;
-  planName: string;
-  period: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
-  status: "ACTIVE" | "PAUSED" | "CLOSED";
-  startDate: string;
-  nextBillingDate: string;
-  paymentTermsDays: number;
-  monthlyLineValue: number;
-  quantity: number;
-  unitPrice: number;
-}
-
-export interface PortalInvoice {
-  id: string;
-  number: string;
-  issueDate: string;
-  dueDate: string;
-  subtotal: number;
-  taxTotal: number;
-  grandTotal: number;
-  amountPaid: number;
-  status: "CONFIRMED" | "PAID" | "CANCELLED";
-  periodStart: string;
-  periodEnd: string;
-}
+import {
+  PortalSubscription,
+  PortalInvoice,
+  PortalCustomerProfile,
+} from "../schemas";
+import {
+  DEMO_SUBSCRIPTIONS,
+  DEMO_INVOICES,
+  DEMO_PROFILE,
+} from "../service";
 
 export interface CustomerPortalProps {
-  customer?: {
-    name: string;
-    email: string;
-    companyName: string;
-    taxId?: string;
-    billingAddress?: string;
-  };
+  customer?: Partial<PortalCustomerProfile>;
   subscriptions?: PortalSubscription[];
   invoices?: PortalInvoice[];
   isLoading?: boolean;
 }
 
-// Sample fallback for rich demonstration when live DB has initial fixtures
-const DEMO_SUBSCRIPTIONS: PortalSubscription[] = [
-  {
-    id: "sub-1",
-    number: "SUB-2026-00001",
-    productName: "Brightloop CRM Cloud",
-    planName: "Enterprise Tier (Monthly)",
-    period: "MONTHLY",
-    status: "ACTIVE",
-    startDate: "2026-01-15",
-    nextBillingDate: "2026-11-15",
-    paymentTermsDays: 15,
-    monthlyLineValue: 5560,
-    quantity: 5,
-    unitPrice: 1112,
-  },
-  {
-    id: "sub-2",
-    number: "SUB-2026-00004",
-    productName: "Orbit Analytics Add-on",
-    planName: "Pro Analytics (Monthly)",
-    period: "MONTHLY",
-    status: "ACTIVE",
-    startDate: "2026-03-01",
-    nextBillingDate: "2026-11-01",
-    paymentTermsDays: 15,
-    monthlyLineValue: 2400,
-    quantity: 1,
-    unitPrice: 2400,
-  },
-];
-
-const DEMO_INVOICES: PortalInvoice[] = [
-  {
-    id: "inv-1",
-    number: "INV-2026-00001",
-    issueDate: "2026-10-01",
-    dueDate: "2026-10-16",
-    subtotal: 7960,
-    taxTotal: 1432.8,
-    grandTotal: 9392.8,
-    amountPaid: 9392.8,
-    status: "PAID",
-    periodStart: "2026-10-01",
-    periodEnd: "2026-11-01",
-  },
-  {
-    id: "inv-2",
-    number: "INV-2026-00002",
-    issueDate: "2026-09-01",
-    dueDate: "2026-09-16",
-    subtotal: 7960,
-    taxTotal: 1432.8,
-    grandTotal: 9392.8,
-    amountPaid: 9392.8,
-    status: "PAID",
-    periodStart: "2026-09-01",
-    periodEnd: "2026-10-01",
-  },
-];
-
 export function CustomerPortal({
-  customer = {
-    name: "Alex Rivera",
-    email: "customer@brightloop.local",
-    companyName: "Acme Stores Pvt Ltd",
-    taxId: "GSTIN29ABCDE1234F1Z5",
-    billingAddress: "42 MG Road, Brigade Towers, Bengaluru, KA 560001",
-  },
-  subscriptions = DEMO_SUBSCRIPTIONS,
-  invoices = DEMO_INVOICES,
-  isLoading = false,
+  customer: propCustomer,
+  subscriptions: propSubscriptions,
+  invoices: propInvoices,
+  isLoading: propLoading = false,
 }: CustomerPortalProps) {
   const [activeTab, setActiveTab] = React.useState<"subscriptions" | "invoices" | "billing">("subscriptions");
   const [selectedInvoice, setSelectedInvoice] = React.useState<PortalInvoice | null>(null);
+
+  // Live queries via tRPC portalRouter (FR-PORT-01, FR-PORT-02)
+  const { data: remoteProfile } = trpc.portal.myProfile.useQuery(undefined, {
+    enabled: !propCustomer,
+  });
+
+  const { data: remoteSubs, isLoading: isSubsLoading } = trpc.portal.mySubscriptions.useQuery(undefined, {
+    enabled: !propSubscriptions,
+    refetchInterval: 10000,
+  });
+
+  const { data: remoteInvoices, isLoading: isInvoicesLoading } = trpc.portal.myInvoices.useQuery(undefined, {
+    enabled: !propInvoices,
+    refetchInterval: 10000,
+  });
+
+  const customer: PortalCustomerProfile = {
+    ...DEMO_PROFILE,
+    ...(remoteProfile || {}),
+    ...(propCustomer || {}),
+  };
+
+  const subscriptions: PortalSubscription[] = propSubscriptions || remoteSubs || DEMO_SUBSCRIPTIONS;
+  const invoices: PortalInvoice[] = propInvoices || remoteInvoices || DEMO_INVOICES;
+  const isLoading = propLoading || (isSubsLoading && !propSubscriptions) || (isInvoicesLoading && !propInvoices);
 
   const totalMonthlySpend = subscriptions
     .filter((s) => s.status === "ACTIVE")
@@ -263,15 +197,13 @@ export function CustomerPortal({
                 {formatINR(totalMonthlySpend)}
               </span>
             </div>
-            <div>
+            <div className="border-l border-[hsl(var(--border))] pl-4">
               <span className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase tracking-wider block">
-                Outstanding Balance
+                Outstanding
               </span>
               <span
                 className={`text-sm font-bold tabular-nums ${
-                  totalOutstanding > 0
-                    ? "text-[hsl(var(--status-overdue-ink))]"
-                    : "text-[hsl(var(--status-active-ink))]"
+                  totalOutstanding > 0 ? "text-[hsl(var(--status-overdue-ink))]" : "text-[hsl(var(--foreground))]"
                 }`}
               >
                 {formatINR(totalOutstanding)}
@@ -339,44 +271,49 @@ export function CustomerPortal({
           }`}
         >
           <CreditCardIcon size={14} />
-          <span>Payment & Billing Details</span>
+          <span>Payment & Tax Profile</span>
         </button>
       </div>
 
-      {/* ── TAB 1: Subscriptions Overview ──────────────────────────────── */}
+      {/* ── TAB 1: Subscriptions View ───────────────────────────────────── */}
       {activeTab === "subscriptions" && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {subscriptions.map((sub) => (
               <Card key={sub.id} className="border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="text-sm font-semibold text-[hsl(var(--foreground))]">
+                      <span className="font-mono text-[11px] text-[hsl(var(--muted-foreground))]">
+                        {sub.number}
+                      </span>
+                      <CardTitle className="text-base font-semibold text-[hsl(var(--foreground))] mt-0.5">
                         {sub.productName}
                       </CardTitle>
-                      <CardDescription className="text-xs">
-                        {sub.planName} · {sub.number}
-                      </CardDescription>
                     </div>
-                    <Badge
-                      variant={sub.status === "ACTIVE" ? "active" : "neutral"}
-                      className="text-[10px] py-0 px-2"
-                    >
+                    <Badge variant={sub.status === "ACTIVE" ? "active" : "neutral"} className="text-[10px]">
                       {sub.status}
                     </Badge>
                   </div>
+                  <CardDescription className="text-xs">
+                    {sub.planName} · Billing cadence: {sub.period.toLowerCase()}
+                  </CardDescription>
                 </CardHeader>
-
                 <CardContent className="space-y-3">
-                  <div className="rounded-[var(--radius-xs)] border border-[hsl(var(--border))] bg-[hsl(var(--background))] p-2.5 space-y-1.5 text-xs">
-                    <div className="flex items-center justify-between text-[hsl(var(--muted-foreground))]">
-                      <span>Licenses / Seats:</span>
+                  <div className="rounded-[var(--radius-xs)] border border-[hsl(var(--border))] bg-[hsl(var(--background))] p-3 space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[hsl(var(--muted-foreground))]">Quantity / Seats:</span>
                       <span className="font-medium text-[hsl(var(--foreground))] tabular-nums">
-                        {sub.quantity} {sub.quantity === 1 ? "seat" : "seats"} @ {formatINR(sub.unitPrice)}
+                        {sub.quantity} {sub.quantity === 1 ? "seat" : "seats"}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-[hsl(var(--muted-foreground))]">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[hsl(var(--muted-foreground))]">Rate per seat:</span>
+                      <span className="font-medium text-[hsl(var(--foreground))] tabular-nums">
+                        {formatINR(sub.unitPrice)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-[hsl(var(--border))] pt-2">
                       <span>Monthly Recurring Value:</span>
                       <span className="font-semibold text-[hsl(var(--foreground))] tabular-nums">
                         {formatINR(sub.monthlyLineValue)}
@@ -440,13 +377,13 @@ export function CustomerPortal({
         </Card>
       )}
 
-      {/* ── TAB 3: Payment & Billing Profile ────────────────────────────── */}
+      {/* ── TAB 3: Payment Details & GST Compliance Profile ────────────── */}
       {activeTab === "billing" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="border-[hsl(var(--border))] bg-[hsl(var(--card))]">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold text-[hsl(var(--foreground))]">
-                Payment Channel & Wire Details
+                Wire & Direct Transfer Account
               </CardTitle>
               <CardDescription className="text-xs">
                 Brightloop Software settlement account for NEFT, RTGS & UPI
@@ -488,10 +425,10 @@ export function CustomerPortal({
                 Registered Billing Information
               </CardTitle>
               <CardDescription className="text-xs">
-                Official entity details printed on GST-compliant tax invoices
+                Statutory tax registration & invoicing address
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3 text-xs">
+            <CardContent className="space-y-4 text-xs">
               <div className="rounded-[var(--radius-xs)] border border-[hsl(var(--border))] bg-[hsl(var(--background))] p-3 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-[hsl(var(--muted-foreground))]">Legal Entity:</span>

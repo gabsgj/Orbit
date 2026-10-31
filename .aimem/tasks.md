@@ -69,7 +69,7 @@ _Legend: ☐ todo · ☐↑ high priority · ✅ done (YYYY-MM-DD)_
 ### Phase 3 — Differentiators & proof
 - ✅ Volume seed (10,007 subs / 15,147 invoices) + `EXPLAIN ANALYZE` verification — **worst query 10.55ms, ~190× headroom**; docs/PERF.md filled (FR-ADM-04, NFR-PERF-01) — DONE (a2+a7).
 - ☐ Invoice print stylesheet (FR-INV-02) — Catherine. Timeline UI (FR-SUB-08) — Catherine.
-- ✅ Customer portal (FR-PORT-01…03) — Pavithra UI complete with mock/sample data and statement print preview dialog.
+- ✅ Customer portal (FR-PORT-01…03) — Pavithra UI + tRPC backend procedures (`portal.mySubscriptions`, `portal.myInvoices`, `portal.myProfile`) complete with live DB queries, 10s polling, fallback resilience, unit tests, and statement print preview dialog.
 - ✅ Polling live-ish dashboard (FR-DASH-07) — Pavithra DONE (10s TanStack Query polling + refresh button + error banner).
 
 ### Phase 4 — Harden & rehearse (FEATURE FREEZE at start)
