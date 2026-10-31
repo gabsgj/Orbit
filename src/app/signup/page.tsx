@@ -9,7 +9,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/shared/trpc/react";
-import { signupSchema } from "@/modules/auth";
+import { signupSchema } from "@/modules/auth/client";
 
 const POLICY_RULES = [
   { id: "length", label: "More than 8 characters" },

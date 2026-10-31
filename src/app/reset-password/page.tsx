@@ -9,7 +9,7 @@ import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/shared/trpc/react";
-import { resetPasswordSchema } from "@/modules/auth";
+import { resetPasswordSchema } from "@/modules/auth/client";
 
 const POLICY_RULES = [
   { id: "length", label: "More than 8 characters" },

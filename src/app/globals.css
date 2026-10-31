@@ -24,7 +24,8 @@
   --secondary-foreground: 222 47% 11%;
 
   --muted: 210 20% 96%;                /* #f1f5f9 */
-  --muted-foreground: 215 16% 47%;     /* #64748b - Secondary text */
+  --muted-foreground: 215 19% 40%;     /* #55657a - Secondary text (WCAG AA ≥4.5:1 on #f9fafb) */
+  --placeholder-foreground: 215 20% 34%; /* #46586d - Placeholder text (AA on card backgrounds) */
 
   --accent: 210 20% 92%;               /* #e2e8f0 */
   --accent-foreground: 222 47% 11%;
@@ -105,6 +106,13 @@ body {
   color: hsl(var(--foreground));
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   letter-spacing: -0.01em;
+}
+
+/* Placeholder text must meet WCAG AA (≥4.5:1) — browsers otherwise default to
+   ~40-50% opacity (caught by the Gate-3 detector on the auth pages). */
+::placeholder {
+  color: hsl(var(--placeholder-foreground));
+  opacity: 1; /* Firefox lowers placeholder opacity by default */
 }
 
 /* Ensure tabular figures for financial data alignment across all tables & KPIs */

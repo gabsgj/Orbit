@@ -8,7 +8,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { api } from "@/shared/trpc/react";
-import { forgotPasswordSchema } from "@/modules/auth";
+import { forgotPasswordSchema } from "@/modules/auth/client";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
