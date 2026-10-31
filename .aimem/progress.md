@@ -112,6 +112,16 @@ _Chronological record of work done. Newest entries at the bottom._
 - Smoke checklist run from here (docs/DEPLOY.md §5): landing 200 (0.84s), `/billing` 307→signin (role guard), cron 401 without secret, next-auth csrf/providers healthy. Recorded in DEPLOY.md status table.
 - Reminder still open: rotate the Neon password (was shared in chat) and update the Vercel `DATABASE_URL` env var.
 
+## 2026-10-31 — Phase-4 wrap-up: clean-checkout verification + offline audit + act-4 rehearsal
+
+**By:** OpenCode agent (Gabriel's lane, items #2/#3 — the last unblocked work)
+
+- **#2 Clean-checkout README verification PASSED:** fresh clone to /tmp → `npm install` → `.env` → new DB `orbit_clean` → `prisma migrate dev` (both migrations, 26 tables) → `db:seed` (7 subs) → `npm run dev` (landing 200, /billing 307, csrf 200) → `npm run build` ✓. README is fresh-machine accurate. Clone deleted after.
+- **#3 Offline-readiness audit PASSED:** zero external URLs in `src/`, zero font/CDN imports, zero runtime `fetch()` outside `/api/*`; DB local; scheduler local; mail staged in `email_outbox`. Evidence table added to `docs/DEMO.md`.
+- **Act-4 rehearsal:** on the demo dataset, RUN 1 → **4 invoices created** (sub 00001 + sub 00002's 3-period catch-up), RUN 2 → **0 created** — mic-drop confirmed end-to-end. DB reseeded to pristine demo state (2 invoices).
+- **🐛 Found + fixed a broken main:** Pavithra's Gate-0 commit added `@tanstack/react-table` + `recharts` to package.json *without running npm install* → stale lockfile, runtime crash (`Cannot find module '@tanstack/react-table'`), and `npm ci` would fail for any fresh clone. Fixed by running `npm install` (lockfile already in sync — deps were added to package.json's lock entry). **Lesson recorded: agents must run npm install after adding deps, and CI-style `npm ci` check would catch this.**
+- Gabriel's lane is now **code-complete**; only integration-steward + Phase-4 dry-run duties remain (waiting on teammates' PRs).
+
 ## 2026-10-31 — Admin UI pages (parallel agent a5-adminui)
 
 **By:** Pavithra S Rajesh (Experience & Insights Lead) on `main`

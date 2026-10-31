@@ -200,6 +200,23 @@ period_start)` highlighted), and the WiFi-OFF icon as the final image.
 **Fallback:** None needed — static docs never fail. If time is cut, the close is two
 sentences: the constraint cheat-sheet + the WiFi gesture.
 
+### Offline-proof audit (verified 2026-10-31, pre-demo)
+
+Static audit of the shipped bundle — this is *why* the WiFi-off claim is safe:
+
+| Check | Result |
+|---|---|
+| External URLs in `src/` (fonts, CDNs, APIs) | **none** — `grep -rn "https\?://" src/` clean |
+| `next/font` / Google Fonts / unpkg / jsdelivr | **none** — system font stack only |
+| Runtime `fetch()` to anything but `/api/*` | **none** |
+| Database | local PostgreSQL 18 (`localhost:5432`) |
+| Scheduler | local node-cron worker (`npm run worker`) |
+| Mail | staged in `email_outbox` table, viewed in-app (no SMTP) |
+
+Act 4 rehearsal (2026-10-31): RUN 1 → **4 invoices created** (sub 00001 + sub 00002's
+3-period catch-up), RUN 2 → **0 created** — the idempotency mic-drop works end-to-end
+on the real dataset.
+
 ---
 
 ## Pre-demo checklist (10 items — run 15 min before judges arrive)
