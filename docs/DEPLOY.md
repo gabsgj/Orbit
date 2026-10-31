@@ -57,9 +57,11 @@ cat vercel.json
 | 1 · Neon project + pooled URL (us-east-1, PG 18.6) | ✅ Provided |
 | 2 · `prisma migrate deploy` → Neon | ✅ Applied — both migrations, **17 CHECK constraints** live |
 | 2 · `npm run db:seed` → Neon | ✅ Demo dataset live (7 subs, 2 invoices, 4 users, sequences) |
-| 3 · Vercel import + env vars | ⏳ **Blocked: needs Gabriel's Vercel login** (`vercel login` or dashboard import of `gabsgj/Orbit`) |
-| 4 · Cron registration | ⏳ Auto on Vercel import (vercel.json committed) |
-| 5 · Smoke checklist | ⏳ After deploy |
+| 3 · Vercel import + env vars | ✅ **LIVE: https://orbit-amber-two.vercel.app** (Gabriel, 2026-10-31) |
+| 4 · Cron registration | ✅ vercel.json — `5 0 * * *` (fires daily 00:05 UTC) |
+| 5 · Smoke checklist | ✅ Passed (see below) |
+
+**Smoke results (2026-10-31):** landing `200` (0.84s) · `/billing` → `307` to signin (guard works) · `/api/cron/billing` without secret → `401` (guard works) · `/api/auth/csrf` + `/api/auth/providers` healthy (credentials provider live). Demo logins: `admin@orbit.local` / `Admin@Orbit1`.
 
 > **🔐 Security:** the Neon password was shared in chat — **rotate it now**: Neon
 > console → project → Roles → `neondb_owner` → Reset password → update it in

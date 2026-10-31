@@ -106,6 +106,12 @@ _Chronological record of work done. Newest entries at the bottom._
 - `docs/DEPLOY.md` Status table added: steps 1–2 ✅; step 3 (Vercel import) **blocked on Gabriel's Vercel login**; env-var table + smoke checklist ready.
 - **Security flag raised (twice):** the Neon password was shared in chat → rotate in Neon console → update Vercel env vars. Never committed to git; no `.env.production` written.
 
+## 2026-10-31 — Hosted mirror LIVE
+
+- **Gabriel completed the Vercel import:** **https://orbit-amber-two.vercel.app** — the bonus hosted link is live (Neon DB + Vercel Cron `5 0 * * *`).
+- Smoke checklist run from here (docs/DEPLOY.md §5): landing 200 (0.84s), `/billing` 307→signin (role guard), cron 401 without secret, next-auth csrf/providers healthy. Recorded in DEPLOY.md status table.
+- Reminder still open: rotate the Neon password (was shared in chat) and update the Vercel `DATABASE_URL` env var.
+
 ## 2026-10-31 — Admin UI pages (parallel agent a5-adminui)
 
 **By:** Pavithra S Rajesh (Experience & Insights Lead) on `main`
