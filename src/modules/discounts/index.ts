@@ -12,4 +12,10 @@ export type {
   DiscountEvaluation,
   DiscountLineOut,
   UsageOut,
+  DiscountRule,
 } from "./service";
+
+// UI Components
+export { DiscountRuleList } from "./components/DiscountRuleList";
+export { DiscountRuleForm } from "./components/DiscountRuleForm";
+export { DiscountRuleDetail } from "./components/DiscountRuleDetail";

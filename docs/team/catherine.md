@@ -84,20 +84,20 @@ non-obvious decision — I must be able to explain every line to the judges.
 - [x] "From template" flow (uses Abhiram's `templates.getWithLines`)
 
 ### Phase 2 — Money core
-- [ ] Invoice service + list/detail UI, confirm/cancel actions, filters + pagination + totals footer
-- [ ] PaymentService + record-payment form; paid/outstanding/overdue views
-- [ ] DiscountEngine + admin discount CRUD UI + usage ledger display
-- [ ] Wire `evaluate()` into Gabriel's billing hook; joint idempotency/usage-limit race test
-- [ ] Send-invoice action → email_outbox staging (Abhiram's viewer displays it)
+- [x] Invoice service + list/detail UI, confirm/cancel actions, filters + pagination + totals footer
+- [x] PaymentService + record-payment form; paid/outstanding/overdue views
+- [x] DiscountEngine + admin discount CRUD UI + usage ledger display
+- [x] Wire `evaluate()` into Gabriel's billing hook; joint idempotency/usage-limit race test
+- [x] Send-invoice action → email_outbox staging (Abhiram's viewer displays it)
 
 ### Phase 3 — Differentiators
-- [ ] Invoice print stylesheet (professional paper layout)
-- [ ] Subscription activity timeline (history + invoices + payments)
-- [ ] Customer portal: my subscriptions/invoices, print own invoice, pause/resume/renew requests
+- [x] Invoice print stylesheet (professional paper layout)
+- [x] Subscription activity timeline (history + invoices + payments)
+- [x] Customer portal: my subscriptions/invoices, print own invoice, pause/resume/renew requests
 
 ### Phase 4 — Harden & rehearse
-- [ ] Fix Gate 2/3 UI findings for my screens
-- [ ] Demo acts 3 (quotation→subscription), 5 (discount auto-applies), 6 (payment flips to PAID) rehearsed
+- [x] Fix Gate 2/3 UI findings for my screens
+- [x] Demo acts 3 (quotation→subscription), 5 (discount auto-applies), 6 (payment flips to PAID) rehearsed
 
 ## Coordination points
 - **Gabriel** — the DiscountEngine hook (above); joint unit tests for billing+discount in Phase 2. His `UNIQUE(subscription_id, period_start)` + my usage counting share one transaction.

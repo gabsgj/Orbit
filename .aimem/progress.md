@@ -315,3 +315,13 @@ _Chronological record of work done. Newest entries at the bottom._
   - `npm run lint` → 0 warnings, 0 errors.
   - `npx vitest run src/modules/portal/service.test.ts` → 10/10 tests passing.
   - `npm run build` → 21/21 routes compiled and prerendered cleanly.
+
+## 2026-10-31 � Money-Flow deliverables complete (Phases 2 & 3)
+
+**By:** mariacatheriine (Catherine Maria Benny)
+
+- **Discounts Module (FR-DISC-01..06)**: Full DiscountEngine with transactional `evaluate()`, precedence (product-line first, then subscription-level), caps at remaining subtotal, usage limit ledger, admin CRUD UI, and detail view with audit trail. Tested with 5 vitest unit tests.
+- **Invoices Module (FR-INV-01..05)**: Invoice query layer with totals aggregation, confirmation, cancellation, outbox staging, invoice status badge, list and detail views with print layout and payment history. Tested with 5 vitest unit tests.
+- **Payments Module (FR-PAY-01..04)**: PaymentService with transactional settlement, strict overpayment guard, atomic amount_paid update, auto-flip to PAID upon full settlement, `RecordPaymentDialog` modal, and dedicated Payments & Collections page (`/payments`) with transaction ledger and overdue invoices view. Tested with 4 vitest unit tests.
+- **Invoice Print Stylesheet (FR-INV-02)**: Configured print media styles in `src/app/globals.css` hiding navigation, sidebars, and buttons for clean A4 printing.
+- **Verification**: 79/79 unit tests passing across all Catherine modules, 0 TypeScript errors (`npm run typecheck`), 0 ESLint warnings/errors (`npm run lint`).

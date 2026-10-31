@@ -3,3 +3,26 @@
  * (enforced by eslint no-restricted-imports; see docs/PLAN.md §1).
  */
 export { invoicesRouter } from "./router";
+export {
+  confirmInvoice,
+  cancelInvoice,
+  sendInvoice,
+  InvoiceError,
+  LEGAL_INVOICE_TRANSITIONS,
+} from "./service";
+export {
+  listInvoicesSchema,
+  confirmInvoiceSchema,
+  cancelInvoiceSchema,
+  sendInvoiceSchema,
+  invoiceStatusSchema,
+} from "./schemas";
+export type {
+  ListInvoicesInput,
+  InvoiceStatus,
+} from "./schemas";
+
+// UI Components
+export { InvoiceStatusBadge } from "./components/InvoiceStatusBadge";
+export { InvoiceList } from "./components/InvoiceList";
+export { InvoiceDetail } from "./components/InvoiceDetail";
