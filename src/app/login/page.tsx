@@ -47,7 +47,10 @@ export default function LoginPage() {
     if (result?.error) {
       setServerError("Invalid email or password. Check your credentials and try again.");
     } else {
-      router.push("/dashboard");
+      // Route by role: staff/admin → dashboard, customer → portal. Fetch the
+      // session (cookie is set by the time signIn resolves) and route by it.
+      const session = await fetch("/api/auth/session").then((r) => r.json());
+      router.push(session?.user?.role === "CUSTOMER" ? "/portal" : "/dashboard");
       router.refresh();
     }
   }
