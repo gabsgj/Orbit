@@ -43,13 +43,13 @@ export default async function OutboxDetailPage({
         >
           ← Back to outbox
         </Link>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight">{mail.subject}</h1>
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-[hsl(var(--foreground))]">{mail.subject}</h1>
         <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
           Staged {formatDate(mail.createdAt)} · to {mail.toEmail}
         </p>
       </div>
 
-      <Card>
+      <Card className="rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--border))] border-0">
         <CardHeader
           title="Message"
           description="Exactly as staged by the app — no SMTP involved."
@@ -92,7 +92,7 @@ export default async function OutboxDetailPage({
         {/* Admin-only preview of our own staged content (never user-supplied
             input), so dangerouslySetInnerHTML is acceptable here. */}
         <div
-          className="rounded-lg border border-[hsl(var(--border))] bg-white p-6"
+          className="rounded-[var(--radius-lg)] ring-1 ring-[hsl(var(--border))] bg-white p-6 shadow-[var(--shadow-soft)]"
           dangerouslySetInnerHTML={{ __html: mail.bodyHtml }}
         />
       </Card>

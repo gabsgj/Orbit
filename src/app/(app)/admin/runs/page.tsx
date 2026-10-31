@@ -14,14 +14,14 @@ export default function BillingRunsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Billing runs</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-[hsl(var(--foreground))]">Billing runs</h1>
         <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
           Every execution of the billing engine — manual or scheduled — is audited
           here with invoices created, skips and errors.
         </p>
       </div>
 
-      <Card>
+      <Card className="rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--border))] border-0">
         <CardHeader
           title="Run history"
           description="Newest first. A run that found nothing new to bill reports all due subscriptions as skipped."

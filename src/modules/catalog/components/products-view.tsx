@@ -85,10 +85,10 @@ export function ProductsView() {
       {/* Action Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[hsl(var(--foreground))]">
+          <h1 className="text-2xl font-bold tracking-tight text-[hsl(var(--foreground))]">
             Products & Variants
           </h1>
-          <p className="text-xs text-[hsl(var(--muted-foreground))]">
+          <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
             Manage your service and good catalog offerings with custom variant modifiers
           </p>
         </div>
@@ -100,9 +100,8 @@ export function ProductsView() {
             className="w-56 text-xs h-9"
           />
           <Button
-            size="sm"
             onClick={() => setCreateModalOpen(true)}
-            className="gap-1.5 text-xs h-9 font-medium"
+            className="gap-1.5 rounded-full bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] px-5 h-10 text-sm font-medium shadow-[var(--shadow-soft)] hover:bg-[hsl(var(--primary))]/90"
           >
             <PlusIcon size={14} />
             <span>Add Product</span>
@@ -114,7 +113,7 @@ export function ProductsView() {
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="p-4 space-y-3">
+            <Card key={i} className="p-4 space-y-3 rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--border))] border-0">
               <Skeleton className="h-5 w-3/4" />
               <Skeleton className="h-4 w-1/2" />
               <Skeleton className="h-8 w-full mt-4" />
@@ -132,7 +131,10 @@ export function ProductsView() {
           title="No products found"
           description={search ? "No products matching your search criteria." : "Start by adding your first product to the catalog."}
           action={
-            <Button size="sm" onClick={() => setCreateModalOpen(true)} className="gap-1.5">
+            <Button
+              onClick={() => setCreateModalOpen(true)}
+              className="gap-1.5 rounded-full bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] px-5 h-9 text-sm font-medium hover:bg-[hsl(var(--primary))]/90"
+            >
               <PlusIcon size={14} />
               <span>Add Product</span>
             </Button>
@@ -141,7 +143,7 @@ export function ProductsView() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {data.items.map((prod) => (
-            <Card key={prod.id} className="flex flex-col justify-between overflow-hidden border-[hsl(var(--border))]">
+            <Card key={prod.id} className="flex flex-col justify-between overflow-hidden rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--border))] border-0">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="space-y-1">
@@ -197,19 +199,30 @@ export function ProductsView() {
                     </span>
                     {!expandedIds.has(prod.id) && prod.variants.length > 0 && (
                       <span className="flex flex-wrap gap-1">
-                        {prod.variants.slice(0, 3).map((v) => (
-                          <span
-                            key={v.id}
-                            className="inline-flex items-center gap-0.5 rounded bg-[hsl(var(--background))] border border-[hsl(var(--border))] px-1.5 py-0 text-[10px] text-[hsl(var(--muted-foreground))]"
-                          >
-                            {v.attributeValue.value}
-                            {Number(v.priceExtra) > 0 && (
-                              <span className="text-[hsl(var(--status-active-ink))] font-medium tabular-nums">
-                                +₹{Number(v.priceExtra)}
-                              </span>
-                            )}
-                          </span>
-                        ))}
+                        {prod.variants.slice(0, 3).map((v, vi) => {
+                          const tintCycle = [
+                            "bg-[hsl(var(--tint-blue))] text-[hsl(var(--tint-blue-ink))]",
+                            "bg-[hsl(var(--tint-green))] text-[hsl(var(--tint-green-ink))]",
+                            "bg-[hsl(var(--tint-amber))] text-[hsl(var(--tint-amber-ink))]",
+                            "bg-[hsl(var(--tint-rose))] text-[hsl(var(--tint-rose-ink))]",
+                            "bg-[hsl(var(--tint-lavender))] text-[hsl(var(--tint-lavender-ink))]",
+                            "bg-[hsl(var(--tint-teal))] text-[hsl(var(--tint-teal-ink))]",
+                            "bg-[hsl(var(--tint-peach))] text-[hsl(var(--tint-peach-ink))]",
+                          ];
+                          return (
+                            <span
+                              key={v.id}
+                              className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0 text-[10px] ${tintCycle[vi % tintCycle.length]}`}
+                            >
+                              {v.attributeValue.value}
+                              {Number(v.priceExtra) > 0 && (
+                                <span className="font-medium tabular-nums">
+                                  +₹{Number(v.priceExtra)}
+                                </span>
+                              )}
+                            </span>
+                          );
+                        })}
                         {prod.variants.length > 3 && (
                           <span className="text-[10px] text-[hsl(var(--muted-foreground))]">
                             +{prod.variants.length - 3} more
@@ -236,7 +249,7 @@ export function ProductsView() {
                       size="sm"
                       onClick={() => archiveMutation.mutate({ id: prod.id })}
                       disabled={archiveMutation.isPending}
-                      className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--destructive))] h-7 px-2"
+                      className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--destructive))] h-7 px-3 rounded-full"
                     >
                       <TrashIcon size={12} className="mr-1" />
                       Archive
@@ -330,10 +343,10 @@ export function ProductsView() {
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" size="sm" onClick={() => setCreateModalOpen(false)}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setCreateModalOpen(false)} className="rounded-full">
                 Cancel
               </Button>
-              <Button type="submit" size="sm" isLoading={createProductMutation.isPending}>
+              <Button type="submit" size="sm" isLoading={createProductMutation.isPending} className="rounded-full">
                 Save Product
               </Button>
             </DialogFooter>

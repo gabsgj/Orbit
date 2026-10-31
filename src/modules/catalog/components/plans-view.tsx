@@ -103,22 +103,21 @@ export function PlansView() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[hsl(var(--foreground))]">
+          <h1 className="text-2xl font-bold tracking-tight text-[hsl(var(--foreground))]">
             Subscription Plans
           </h1>
-          <p className="text-xs text-[hsl(var(--muted-foreground))]">
+          <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
             Configure recurring billing periods and lifecycle behavior flags (FR-CAT-03, FR-CAT-04)
           </p>
         </div>
         <Button
-          size="sm"
           onClick={() => {
             if (productsQuery.data?.items[0]?.id && !productId) {
               setProductId(productsQuery.data.items[0].id);
             }
             setCreateModalOpen(true);
           }}
-          className="gap-1.5 text-xs h-9 font-medium"
+          className="gap-1.5 rounded-full bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] px-5 h-10 text-sm font-medium shadow-[var(--shadow-soft)] hover:bg-[hsl(var(--primary))]/90"
         >
           <PlusIcon size={14} />
           <span>New Plan</span>
@@ -129,7 +128,7 @@ export function PlansView() {
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="p-4 space-y-3">
+            <Card key={i} className="p-4 space-y-3 rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--border))] border-0">
               <Skeleton className="h-5 w-3/4" />
               <Skeleton className="h-4 w-1/2" />
               <Skeleton className="h-8 w-full mt-4" />
@@ -147,7 +146,10 @@ export function PlansView() {
           title="No subscription plans found"
           description="Create your first recurring billing plan to attach to customer subscriptions."
           action={
-            <Button size="sm" onClick={() => setCreateModalOpen(true)} className="gap-1.5">
+            <Button
+              onClick={() => setCreateModalOpen(true)}
+              className="gap-1.5 rounded-full bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] px-5 h-9 text-sm font-medium hover:bg-[hsl(var(--primary))]/90"
+            >
               <PlusIcon size={14} />
               <span>New Plan</span>
             </Button>
@@ -156,7 +158,7 @@ export function PlansView() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {data.items.map((plan) => (
-            <Card key={plan.id} className="flex flex-col justify-between overflow-hidden border-[hsl(var(--border))]">
+            <Card key={plan.id} className="flex flex-col justify-between overflow-hidden rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--border))] border-0">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="space-y-1">
@@ -229,7 +231,7 @@ export function PlansView() {
                       size="sm"
                       onClick={() => archiveMutation.mutate({ id: plan.id })}
                       disabled={archiveMutation.isPending}
-                      className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--destructive))] h-7 px-2"
+                      className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--destructive))] h-7 px-3 rounded-full"
                     >
                       <TrashIcon size={12} className="mr-1" />
                       Archive
@@ -386,10 +388,10 @@ export function PlansView() {
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" size="sm" onClick={() => setCreateModalOpen(false)}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setCreateModalOpen(false)} className="rounded-full">
                 Cancel
               </Button>
-              <Button type="submit" size="sm" isLoading={createPlanMutation.isPending}>
+              <Button type="submit" size="sm" isLoading={createPlanMutation.isPending} className="rounded-full">
                 Create Plan
               </Button>
             </DialogFooter>

@@ -76,17 +76,16 @@ export function TaxesView() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[hsl(var(--foreground))]">
+          <h1 className="text-2xl font-bold tracking-tight text-[hsl(var(--foreground))]">
             Taxes & Duties
           </h1>
-          <p className="text-xs text-[hsl(var(--muted-foreground))]">
+          <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
             Configure rates (e.g. GST 18%) auto-calculated during billing generation (FR-CAT-05)
           </p>
         </div>
         <Button
-          size="sm"
           onClick={() => setCreateModalOpen(true)}
-          className="gap-1.5 text-xs h-9 font-medium"
+          className="gap-1.5 rounded-full bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] px-5 h-10 text-sm font-medium shadow-[var(--shadow-soft)] hover:bg-[hsl(var(--primary))]/90"
         >
           <PlusIcon size={14} />
           <span>New Tax</span>
@@ -116,7 +115,7 @@ export function TaxesView() {
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="p-4 space-y-3">
+            <Card key={i} className="p-4 space-y-3 rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--border))] border-0">
               <Skeleton className="h-5 w-1/2" />
               <Skeleton className="h-8 w-1/3" />
             </Card>
@@ -133,7 +132,10 @@ export function TaxesView() {
           title="No taxes defined"
           description="Create your first tax rate to apply onto invoice and subscription lines."
           action={
-            <Button size="sm" onClick={() => setCreateModalOpen(true)} className="gap-1.5">
+            <Button
+              onClick={() => setCreateModalOpen(true)}
+              className="gap-1.5 rounded-full bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] px-5 h-9 text-sm font-medium hover:bg-[hsl(var(--primary))]/90"
+            >
               <PlusIcon size={14} />
               <span>New Tax</span>
             </Button>
@@ -142,7 +144,7 @@ export function TaxesView() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {taxes.map((tax) => (
-            <Card key={tax.id} className="border-[hsl(var(--border))]">
+            <Card key={tax.id} className="rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--border))] border-0">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base font-semibold">{tax.name}</CardTitle>
@@ -166,7 +168,7 @@ export function TaxesView() {
                       size="sm"
                       onClick={() => archiveMutation.mutate({ id: tax.id })}
                       disabled={archiveMutation.isPending}
-                      className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--destructive))] h-7 px-2"
+                      className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--destructive))] h-7 px-3 rounded-full"
                     >
                       <TrashIcon size={12} className="mr-1" />
                       Archive
@@ -237,10 +239,10 @@ export function TaxesView() {
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" size="sm" onClick={() => setCreateModalOpen(false)}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setCreateModalOpen(false)} className="rounded-full">
                 Cancel
               </Button>
-              <Button type="submit" size="sm" isLoading={createTaxMutation.isPending}>
+              <Button type="submit" size="sm" isLoading={createTaxMutation.isPending} className="rounded-full">
                 Save Tax
               </Button>
             </DialogFooter>

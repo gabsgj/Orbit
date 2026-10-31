@@ -9,7 +9,7 @@ export default function BillingPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Billing day</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-[hsl(var(--foreground))]">Billing day</h1>
         <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
           Generate invoices for every subscription whose billing date has arrived.
           The engine is idempotent and concurrency-safe — re-running never bills
@@ -17,7 +17,7 @@ export default function BillingPage() {
         </p>
       </div>
 
-      <Card>
+      <Card className="rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--border))] border-0">
         <CardHeader
           title="Run billing"
           description="Trigger a billing run for all due subscriptions right now."
@@ -25,7 +25,7 @@ export default function BillingPage() {
         />
       </Card>
 
-      <Card>
+      <Card className="rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--border))] border-0">
         <CardHeader
           title="Runs history"
           description="Every billing run — manual or scheduled — is audited here."

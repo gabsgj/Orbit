@@ -8,7 +8,7 @@ export default function AuditPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Audit log</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-[hsl(var(--foreground))]">Audit log</h1>
         <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
           Every sensitive action recorded with who, what and when. Expand a
           row&rsquo;s meta for the full payload.

@@ -65,17 +65,16 @@ export function StaffView() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[hsl(var(--foreground))]">
+          <h1 className="text-2xl font-bold tracking-tight text-[hsl(var(--foreground))]">
             Internal Staff Management (FR-ADM-01)
           </h1>
-          <p className="text-xs text-[hsl(var(--muted-foreground))]">
+          <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
             Admin-only staff provisioning: no public staff registration exists (FR-AUTH-06)
           </p>
         </div>
         <Button
-          size="sm"
           onClick={() => setCreateModalOpen(true)}
-          className="gap-1.5 text-xs h-9 font-medium"
+          className="gap-1.5 rounded-full bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] px-5 h-10 text-sm font-medium shadow-[var(--shadow-soft)] hover:bg-[hsl(var(--primary))]/90"
         >
           <PlusIcon size={14} />
           <span>Provision Staff</span>
@@ -105,14 +104,17 @@ export function StaffView() {
           title="No staff members found"
           description="Provision internal operations personnel to manage day-to-day subscriptions and billing."
           action={
-            <Button size="sm" onClick={() => setCreateModalOpen(true)} className="gap-1.5">
+            <Button
+              onClick={() => setCreateModalOpen(true)}
+              className="gap-1.5 rounded-full bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] px-5 h-9 text-sm font-medium hover:bg-[hsl(var(--primary))]/90"
+            >
               <PlusIcon size={14} />
               <span>Provision Staff</span>
             </Button>
           }
         />
       ) : (
-        <div className="rounded-[var(--radius)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] overflow-hidden">
+        <div className="rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--border))] bg-[hsl(var(--card))] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-[hsl(var(--border))] bg-[hsl(var(--muted))]/50 text-[hsl(var(--muted-foreground))] font-semibold">
@@ -156,7 +158,7 @@ export function StaffView() {
                             size="sm"
                             onClick={() => deactivateMutation.mutate({ userId: member.id })}
                             disabled={deactivateMutation.isPending}
-                            className="text-[11px] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--destructive))] h-7 px-2"
+                            className="text-[11px] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--destructive))] h-7 px-3 rounded-full"
                           >
                             <TrashIcon size={12} className="mr-1" />
                             Deactivate
@@ -230,10 +232,10 @@ export function StaffView() {
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" size="sm" onClick={() => setCreateModalOpen(false)}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setCreateModalOpen(false)} className="rounded-full">
                 Cancel
               </Button>
-              <Button type="submit" size="sm" isLoading={createStaffMutation.isPending}>
+              <Button type="submit" size="sm" isLoading={createStaffMutation.isPending} className="rounded-full">
                 Create Staff Account
               </Button>
             </DialogFooter>

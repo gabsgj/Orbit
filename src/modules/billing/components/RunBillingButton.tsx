@@ -36,7 +36,11 @@ export function RunBillingButton() {
     <>
       <div className="flex items-center gap-3">
         {alreadyRunning && <Badge tone="warning">A run is already in progress</Badge>}
-        <Button onClick={handleClick} disabled={run.isPending}>
+        <Button
+          onClick={handleClick}
+          disabled={run.isPending}
+          className="rounded-full bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] px-6 h-11 text-base font-semibold shadow-[0_4px_14px_0_hsl(var(--primary)/0.35)] hover:bg-[hsl(var(--primary))]/90"
+        >
           {run.isPending ? "Running…" : "Run billing day"}
         </Button>
       </div>
