@@ -9,6 +9,7 @@ import Link from "next/link";
 import { api } from "@/shared/trpc/react";
 import { forgotPasswordSchema } from "@/modules/auth/client";
 import { AuthLayout, authFieldClass, authLabelClass, authButtonClass } from "@/shared/ui/auth-layout";
+import { DemoCredentials } from "@/shared/ui/demo-credentials";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -101,6 +102,9 @@ export default function ForgotPasswordPage() {
           </Link>
         </p>
       </form>
+          <div className="mt-6">
+        <DemoCredentials />
+      </div>
     </AuthLayout>
   );
 }

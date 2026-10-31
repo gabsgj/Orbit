@@ -63,8 +63,40 @@ export function AuthLayout({
       </aside>
 
       {/* form panel */}
-      <main className="flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
+      <main className="relative flex items-center justify-center overflow-hidden p-6">
+        {/* orbital backdrop art (crisp geometry, decorative only) */}
+        <svg
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          viewBox="0 0 800 800"
+          fill="none"
+        >
+          <ellipse
+            cx="680"
+            cy="120"
+            rx="260"
+            ry="110"
+            transform="rotate(-22 680 120)"
+            stroke="hsl(var(--tint-blue))"
+            strokeWidth="1.5"
+            opacity="0.9"
+          />
+          <circle cx="560" cy="60" r="5" fill="hsl(var(--chart-1))" opacity="0.55" />
+          <circle cx="790" cy="150" r="4" fill="hsl(var(--chart-1))" opacity="0.4" />
+          <ellipse
+            cx="60"
+            cy="720"
+            rx="300"
+            ry="130"
+            transform="rotate(18 60 720)"
+            stroke="hsl(var(--tint-lavender))"
+            strokeWidth="1.5"
+            opacity="0.8"
+          />
+          <circle cx="180" cy="680" r="5" fill="hsl(var(--tint-lavender-ink))" opacity="0.4" />
+        </svg>
+
+        <div className="relative w-full max-w-md">
           <div className="mb-6 flex justify-center lg:hidden">
             <Link
               href="/"
@@ -82,6 +114,15 @@ export function AuthLayout({
           </div>
         </div>
       </main>
+
+      {/* DEMO ONLY indicator — all auth surfaces */}
+      <span className="fixed bottom-4 right-4 z-50 inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--status-warning-bg))] px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-[hsl(var(--status-warning-ink))] shadow-[var(--shadow-soft)]">
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[hsl(var(--status-warning-ink))] opacity-50" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[hsl(var(--status-warning-ink))]" />
+        </span>
+        Demo only
+      </span>
     </div>
   );
 }

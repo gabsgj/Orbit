@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { loginSchema } from "@/modules/auth/client";
 import { AuthLayout, authFieldClass, authLabelClass, authButtonClass } from "@/shared/ui/auth-layout";
+import { DemoCredentials } from "@/shared/ui/demo-credentials";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -107,6 +108,9 @@ export default function LoginPage() {
           Create a customer&nbsp;account
         </Link>
       </p>
+          <div className="mt-6">
+        <DemoCredentials />
+      </div>
     </AuthLayout>
   );
 }

@@ -10,6 +10,7 @@ import Link from "next/link";
 import { api } from "@/shared/trpc/react";
 import { resetPasswordSchema } from "@/modules/auth/client";
 import { AuthLayout, authFieldClass, authLabelClass, authButtonClass } from "@/shared/ui/auth-layout";
+import { DemoCredentials } from "@/shared/ui/demo-credentials";
 
 const POLICY_RULES = [
   { id: "length", label: "More than 8 characters" },
@@ -163,6 +164,9 @@ export default function ResetPasswordPage() {
       <Suspense fallback={<div className="p-4 text-center text-xs text-[hsl(var(--muted-foreground))]">Loading…</div>}>
         <ResetPasswordForm />
       </Suspense>
+          <div className="mt-6">
+        <DemoCredentials />
+      </div>
     </AuthLayout>
   );
 }

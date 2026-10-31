@@ -11,6 +11,7 @@ import Link from "next/link";
 import { api } from "@/shared/trpc/react";
 import { signupSchema } from "@/modules/auth/client";
 import { AuthLayout, authFieldClass, authLabelClass, authButtonClass } from "@/shared/ui/auth-layout";
+import { DemoCredentials } from "@/shared/ui/demo-credentials";
 
 const POLICY_RULES = [
   { id: "length", label: "More than 8 characters" },
@@ -153,6 +154,9 @@ export default function SignupPage() {
           Sign in
         </Link>
       </p>
+          <div className="mt-6">
+        <DemoCredentials />
+      </div>
     </AuthLayout>
   );
 }
