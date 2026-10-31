@@ -178,3 +178,33 @@ export interface StageEmailInput {
 export async function stageEmail(db: Db, input: StageEmailInput) {
   return (db as PrismaClient).emailOutbox.create({ data: input });
 }
+
+/**
+ * Returns the most recently staged email for a given recipient, optionally
+ * filtered by kind. The demo's reset-link click reads the newest RESET email
+ * so the admin can click the link straight from the outbox viewer.
+ */
+export async function getLatestEmail(
+  db: Db,
+  toEmail: string,
+  kind?: StageEmailInput["kind"],
+) {
+  return (db as PrismaClient).emailOutbox.findFirst({
+    where: { toEmail, ...(kind ? { kind } : {}) },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+/**
+ * Lists emails that are still queued (sentAt IS NULL), newest first.
+ * Optionally filtered by kind. This powers the outbox viewer's "pending" tab.
+ */
+export async function listPendingEmails(
+  db: Db,
+  kind?: StageEmailInput["kind"],
+) {
+  return (db as PrismaClient).emailOutbox.findMany({
+    where: { sentAt: null, ...(kind ? { kind } : {}) },
+    orderBy: { createdAt: "desc" },
+  });
+}

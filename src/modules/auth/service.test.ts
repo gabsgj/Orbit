@@ -12,6 +12,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { passwordSchema } from "./schemas";
 import { signup, forgotPassword, resetPassword, createStaff, deactivateStaff } from "./service";
+import { getLatestEmail, listPendingEmails } from "./queries";
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
 
@@ -45,6 +46,12 @@ async function cleanTestUsers() {
     where: { user: { email: { contains: "@orbit.test" } } },
   });
   await testDb.emailOutbox.deleteMany({ where: { toEmail: { contains: "@orbit.test" } } });
+  await testDb.auditLog.deleteMany({
+    where: { user: { email: { contains: "@orbit.test" } } },
+  });
+  await testDb.auditLog.deleteMany({
+    where: { user: { email: { contains: "deactivated::" } } },
+  });
   await testDb.user.deleteMany({
     where: {
       OR: [
@@ -248,8 +255,18 @@ describe("createStaff + deactivateStaff — FR-ADM-01", () => {
   beforeEach(cleanTestUsers);
 
   it("creates a STAFF user with no customer row", async () => {
+    let adminUser = await testDb.user.findFirst({ where: { role: "ADMIN" } });
+    if (!adminUser) {
+      adminUser = await testDb.user.create({
+        data: {
+          email: uniqueEmail("admin"),
+          passwordHash: "hash",
+          role: "ADMIN",
+        },
+      });
+    }
     const email = uniqueEmail("staff");
-    const result = await createStaff(testDb, { email, password: "StaffPass#1" });
+    const result = await createStaff(testDb, { email, password: "StaffPass#1", adminUserId: adminUser.id });
     expect(result.ok).toBe(true);
 
     const user = await testDb.user.findUnique({ where: { id: result.userId } });
@@ -271,7 +288,7 @@ describe("createStaff + deactivateStaff — FR-ADM-01", () => {
       });
     }
     const email = uniqueEmail("todeactivate");
-    const { userId } = await createStaff(testDb, { email, password: "StaffPass#1" });
+    const { userId } = await createStaff(testDb, { email, password: "StaffPass#1", adminUserId: adminUser.id });
 
     const result = await deactivateStaff(testDb, {
       targetUserId: userId,
@@ -317,5 +334,80 @@ describe("createStaff + deactivateStaff — FR-ADM-01", () => {
     await expect(
       deactivateStaff(testDb, { targetUserId: customer.userId, requestingUserId: adminUser.id }),
     ).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("outbox read helpers — FR-MAIL-01 (demo reset-link click)", () => {
+  beforeEach(cleanTestUsers);
+
+  it("getLatestEmail returns the newest of 3 staged mails", async () => {
+    const email = uniqueEmail("outbox");
+
+    // Stage three emails with staggered createdAt so ordering is deterministic.
+    const base = Date.now();
+    await testDb.emailOutbox.create({
+      data: {
+        toEmail: email,
+        subject: "First",
+        bodyHtml: "<p>first</p>",
+        kind: "RESET",
+        createdAt: new Date(base - 2000),
+      },
+    });
+    await testDb.emailOutbox.create({
+      data: {
+        toEmail: email,
+        subject: "Second",
+        bodyHtml: "<p>second</p>",
+        kind: "RESET",
+        createdAt: new Date(base - 1000),
+      },
+    });
+    await testDb.emailOutbox.create({
+      data: {
+        toEmail: email,
+        subject: "Third",
+        bodyHtml: "<p>third</p>",
+        kind: "RESET",
+        createdAt: new Date(base),
+      },
+    });
+
+    const latest = await getLatestEmail(testDb, email);
+    expect(latest).toBeTruthy();
+    expect(latest?.subject).toBe("Third");
+  });
+
+  it("listPendingEmails excludes ones with sentAt set", async () => {
+    const email = uniqueEmail("pending");
+
+    // One pending email (sentAt = null)
+    await testDb.emailOutbox.create({
+      data: {
+        toEmail: email,
+        subject: "Pending one",
+        bodyHtml: "<p>pending</p>",
+        kind: "RESET",
+      },
+    });
+    // One already-sent email (sentAt set)
+    await testDb.emailOutbox.create({
+      data: {
+        toEmail: email,
+        subject: "Already sent",
+        bodyHtml: "<p>sent</p>",
+        kind: "RESET",
+        sentAt: new Date(),
+      },
+    });
+
+    const pending = await listPendingEmails(testDb);
+    const subjects = pending
+      .filter((row) => row.toEmail === email)
+      .map((row) => row.subject);
+    expect(subjects).toContain("Pending one");
+    expect(subjects).not.toContain("Already sent");
   });
 });

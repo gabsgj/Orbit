@@ -24,3 +24,4 @@ export type {
   CreateStaffInput,
   DeactivateStaffInput,
 } from "./schemas";
+export { getLatestEmail, listPendingEmails } from "./queries";

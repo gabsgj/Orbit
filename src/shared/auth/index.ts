@@ -39,6 +39,15 @@ export const authOptions: NextAuthOptions = {
         if (!user) return null;
         const ok = await bcrypt.compare(credentials.password, user.passwordHash);
         if (!ok) return null;
+        // FR-ADM-01 hardening: the User model has no isActive column, so
+        // instead of a schema change we check audit_log for a STAFF_DEACTIVATED
+        // event targeting this user. One extra indexed query per login keeps
+        // the schema untouched while closing the deactivated-staff login gap.
+        const deactivated = await prisma.auditLog.findFirst({
+          where: { entity: "user", entityId: user.id, action: "STAFF_DEACTIVATED" },
+          select: { id: true },
+        });
+        if (deactivated) return null;
         return { id: user.id, email: user.email, role: user.role };
       },
     }),
