@@ -81,8 +81,8 @@ export function AuthLayout({
             strokeWidth="1.5"
             opacity="0.9"
           />
-          <circle cx="560" cy="60" r="5" fill="hsl(var(--chart-1))" opacity="0.55" />
-          <circle cx="790" cy="150" r="4" fill="hsl(var(--chart-1))" opacity="0.4" />
+          {/* satellite dot placed ON the top-right ellipse path (cx+rx·cos(-22°), cy+ry·sin(-22°)) */}
+          <circle cx={680 + 260 * Math.cos((-22 * Math.PI) / 180)} cy={120 + 110 * Math.sin((-22 * Math.PI) / 180)} r="5" fill="hsl(var(--chart-1))" opacity="0.55" />
           <ellipse
             cx="60"
             cy="720"
@@ -93,7 +93,8 @@ export function AuthLayout({
             strokeWidth="1.5"
             opacity="0.8"
           />
-          <circle cx="180" cy="680" r="5" fill="hsl(var(--tint-lavender-ink))" opacity="0.4" />
+          {/* satellite dot placed ON the bottom-left ellipse path */}
+          <circle cx={60 + 300 * Math.cos((18 * Math.PI) / 180)} cy={720 + 130 * Math.sin((18 * Math.PI) / 180)} r="5" fill="hsl(var(--tint-lavender-ink))" opacity="0.4" />
         </svg>
 
         <div className="relative w-full max-w-md">
