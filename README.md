@@ -27,25 +27,36 @@
 
 ## Table of contents
 
-1. [What is Orbit](#what-is-orbit)
-2. [Quick start](#quick-start)
-3. [Demo logins](#demo-logins)
-4. [Problem statement → solved](#problem-statement--solved-traceability)
-5. [The billing engine](#the-billing-engine-the-crown-jewel)
-6. [Architecture](#architecture)
-7. [Database design](#database-design)
-8. [Data flow](#data-flow)
-9. [Roles & access](#roles--access)
-10. [Feature map](#feature-map)
-11. [Routes](#routes)
-12. [Scripts](#scripts)
-13. [Testing & verification](#testing--verification)
-14. [Performance proof](#performance-proof)
-15. [Offline operation](#offline-operation)
-16. [Deployment (hosted mirror)](#deployment-hosted-mirror)
-17. [Project structure](#project-structure)
-18. [Documentation index](#documentation-index)
-19. [Team](#team)
+1. [Watch the UI walkthrough](#watch-the-ui-walkthrough)
+2. [What is Orbit](#what-is-orbit)
+3. [Quick start](#quick-start)
+4. [Demo logins](#demo-logins)
+5. [Problem statement → solved](#problem-statement--solved-traceability)
+6. [The billing engine](#the-billing-engine-the-crown-jewel)
+7. [Architecture](#architecture)
+8. [Database design](#database-design)
+9. [Data flow](#data-flow)
+10. [Roles & access](#roles--access)
+11. [Feature map](#feature-map)
+12. [Routes](#routes)
+13. [Scripts](#scripts)
+14. [Testing & verification](#testing--verification)
+15. [Performance proof](#performance-proof)
+16. [Offline operation](#offline-operation)
+17. [Deployment (hosted mirror)](#deployment-hosted-mirror)
+18. [Project structure](#project-structure)
+19. [Documentation index](#documentation-index)
+20. [Team](#team)
+
+---
+
+## Watch the UI walkthrough
+
+[![Orbit — UI walkthrough video](assets/thumbnail/orbit-thumbnail.png)](https://youtu.be/c8NYDi70Dwk)
+
+*A guided tour of the product: the landing page, the finance dashboard, the
+billing-day engine (including the idempotent "already billed" replay), discounts
+applying themselves, payments settling invoices, and the customer portal.*
 
 ---
 
