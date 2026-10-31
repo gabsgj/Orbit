@@ -3,3 +3,10 @@
  * (enforced by eslint no-restricted-imports; see docs/PLAN.md §1).
  */
 export { dashboardRouter } from "./router";
+export { kpis, mrr, aging, renewals } from "./service";
+export type {
+  KpisResult,
+  MrrResult,
+  AgingBucketResult,
+  RenewalWeekResult,
+} from "./service";
