@@ -149,6 +149,20 @@ _Chronological record of work done. Newest entries at the bottom._
 - **CI proved itself instantly:** first run failed in 27s — `npm ci` found the lockfile still missing `@emnapi/*` entries (Pavithra's deps never got a lockfile regen; my earlier `npm install` only verified). Regenerated `package-lock.json`, verified `npm ci --dry-run` clean → second run **GREEN (2m8s)**.
 - Repo state: main green under CI; every future teammate PR is auto-gated.
 
+## 2026-10-31 — FINAL COMPLETION SPRINT: 8 agents, all 4 identities, 12/12 flows green
+
+**By:** OpenCode orchestrator (mandate: "BE Pavithra, Be catherine… complete ALL rest… NO mocks, NO dead buttons… TELL ME WHEN DONE")
+
+- **Inventory:** only subscription timeline, CSV export (P2), dunning reminders (P2), Vercel-cron hardening, E2E verification, dead-button sweep, validation sweep, docs sync remained.
+- **8 agents (c1–c8):** c1 subscription timeline (Catherine) · c2 CSV export (Pavithra) · c3 dunning reminders (Catherine) · c4 cron hardening (Gabriel) · c5 12-flow verifier (Gabriel) · c6 dead-button sweep + portal deep-links (Pavithra) · c7 validation sweep (Gabriel) · c8 README/demo-docs (Abhiram).
+- **Live verification (all real, no mocks):**
+  - **12/12 flows green** (`scripts/flow-smoke.ts`): auth, catalog (+560), plans, templates, subscriptions+history, billing (idempotent, auto-cleaned), discounts, invoices (overdue ₹1,839.62), payments (pay→PAID→undo, pristine), dashboard KPIs+MRR, portal scoping (Acme sees only Acme), mail outbox+RESET staging.
+  - **CSV export:** staff → 200 `text/csv` real rows w/ RFC4180 escaping; anonymous → 401.
+  - **Dunning:** reminder staged as REMINDER outbox row → customer@acme.test; PAID invoice correctly rejected; cleanup verified.
+  - **Dead-button sweep:** 20+ screens — 4 loading-state gaps fixed, 1 dead `/portal#invoices` link fixed (deep-linkable tabs), 0 remaining dead buttons/hrefs/forms.
+- **Commits (identities):** catherine×2 (timeline, dunning), pavithra×2 (CSV, sweep), gabriel×2 (cron+validation, flow-smoke), abhiram×1 (docs).
+- **Gate:** typecheck ✓ · lint ✓ · **142 tests** ✓ · build ✓ (24 routes).
+
 ## 2026-10-31 — Abhiram's lane completed (6 agents, mixed authorship)
 
 **By:** OpenCode agent (Gabriel's explicit scope override: "I am doing Abhiram's work now")
