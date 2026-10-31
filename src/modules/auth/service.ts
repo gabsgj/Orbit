@@ -32,6 +32,7 @@ import {
   consumeTokenAndResetPassword,
   stageEmail,
 } from "./queries";
+import { logAudit, AuditAction } from "@/shared/lib/audit";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -141,6 +142,14 @@ export async function forgotPassword(
     kind: "RESET",
   });
 
+  await logAudit(db, {
+    userId: user.id,
+    entity: "user",
+    entityId: user.id,
+    action: AuditAction.PASSWORD_RESET_REQUESTED,
+    meta: { email: input.email },
+  });
+
   return { ok: true };
 }
 
@@ -203,7 +212,7 @@ export interface CreateStaffResult {
  */
 export async function createStaff(
   db: PrismaClient,
-  input: { email: string; password: string },
+  input: { email: string; password: string; adminUserId: string },
 ): Promise<CreateStaffResult> {
   const existing = await findUserByEmail(db, input.email);
   if (existing) {
@@ -213,6 +222,13 @@ export async function createStaff(
   }
   const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
   const user = await createStaffUser(db, { email: input.email, passwordHash });
+  await logAudit(db, {
+    userId: input.adminUserId,
+    entity: "user",
+    entityId: user.id,
+    action: AuditAction.STAFF_CREATED,
+    meta: { email: user.email },
+  });
   return { ok: true, userId: user.id, email: user.email };
 }
 
@@ -254,6 +270,13 @@ export async function deactivateStaff(
     });
   }
   await deactivateUser(db, input.targetUserId);
+  await logAudit(db, {
+    userId: input.requestingUserId,
+    entity: "user",
+    entityId: input.targetUserId,
+    action: AuditAction.STAFF_DEACTIVATED,
+    meta: { email: target.email },
+  });
   return { ok: true };
 }
 
