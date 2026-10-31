@@ -7,83 +7,10 @@ import {
 } from "./schemas";
 
 /**
- * Fallback fixtures used when the database has not yet been seeded with customer records.
- * Ensures the application is 100% resilient and demo-ready under any circumstance.
+ * NO MOCK DATA. The portal renders only real, session-scoped rows (FR-PORT-01).
+ * A customer with no subscriptions sees a designed empty state in the UI —
+ * never invented data. Errors propagate to the caller's error state.
  */
-export const DEMO_SUBSCRIPTIONS: PortalSubscription[] = [
-  {
-    id: "sub-demo-1",
-    number: "SUB-2026-00001",
-    productName: "Brightloop CRM Cloud",
-    planName: "Brightloop CRM Cloud (MONTHLY)",
-    period: "MONTHLY",
-    status: "ACTIVE",
-    startDate: "2026-01-15",
-    nextBillingDate: "2026-11-15",
-    paymentTermsDays: 15,
-    monthlyLineValue: 5560,
-    quantity: 5,
-    unitPrice: 1112,
-    pausable: true,
-    renewable: true,
-    closableEarly: false,
-  },
-  {
-    id: "sub-demo-2",
-    number: "SUB-2026-00004",
-    productName: "Orbit Analytics Add-on",
-    planName: "Orbit Analytics Add-on (MONTHLY)",
-    period: "MONTHLY",
-    status: "ACTIVE",
-    startDate: "2026-03-01",
-    nextBillingDate: "2026-11-01",
-    paymentTermsDays: 15,
-    monthlyLineValue: 2400,
-    quantity: 1,
-    unitPrice: 2400,
-    pausable: false,
-    renewable: true,
-    closableEarly: true,
-  },
-];
-
-export const DEMO_INVOICES: PortalInvoice[] = [
-  {
-    id: "inv-demo-1",
-    number: "INV-2026-00001",
-    issueDate: "2026-10-01",
-    dueDate: "2026-10-16",
-    subtotal: 7960,
-    taxTotal: 1432.8,
-    grandTotal: 9392.8,
-    amountPaid: 9392.8,
-    status: "PAID",
-    periodStart: "2026-10-01",
-    periodEnd: "2026-11-01",
-  },
-  {
-    id: "inv-demo-2",
-    number: "INV-2026-00002",
-    issueDate: "2026-09-01",
-    dueDate: "2026-09-16",
-    subtotal: 7960,
-    taxTotal: 1432.8,
-    grandTotal: 9392.8,
-    amountPaid: 9392.8,
-    status: "PAID",
-    periodStart: "2026-09-01",
-    periodEnd: "2026-10-01",
-  },
-];
-
-export const DEMO_PROFILE: PortalCustomerProfile = {
-  id: "cust-demo-1",
-  name: "Alex Rivera",
-  email: "customer@brightloop.local",
-  companyName: "Acme Stores Pvt Ltd",
-  taxId: "GSTIN29ABCDE1234F1Z5",
-  billingAddress: "42 MG Road, Brigade Towers, Bengaluru, KA 560001",
-};
 
 /**
  * Normalizes subscription line recurring value to a monthly amount.
@@ -114,7 +41,10 @@ export function calculateMonthlyLineValue(
 }
 
 /**
- * Resolves customer entity from session or fallback.
+ * Resolves the customer for the signed-in user — and ONLY that customer
+ * (FR-PORT-01 / FR-AUTH-07). There is deliberately NO "first customer in the
+ * DB" fallback: a staff/admin or anonymous caller has no customer record, and
+ * the portal must show an empty state, never someone else's data.
  */
 async function resolveCustomer(
   prisma: PrismaClient,
@@ -122,111 +52,92 @@ async function resolveCustomer(
   explicitCustomerId?: string
 ) {
   if (explicitCustomerId) {
-    const customer = await prisma.customer.findUnique({
+    return prisma.customer.findUnique({
       where: { id: explicitCustomerId },
       include: { user: true },
     });
-    if (customer) return customer;
   }
-
-  if (userId) {
-    const customer = await prisma.customer.findUnique({
-      where: { userId },
-      include: { user: true },
-    });
-    if (customer) return customer;
-  }
-
-  // Fallback to first customer in DB for demo/unauthenticated preview
-  return prisma.customer.findFirst({
+  if (!userId) return null;
+  return prisma.customer.findUnique({
+    where: { userId },
     include: { user: true },
   });
 }
 
 /**
- * Retrieves customer profile for the portal view.
+ * Retrieves customer profile for the portal view. NULL when the signed-in
+ * user has no customer record (staff/admin) — the UI renders its empty state.
  */
 export async function getCustomerProfile(
   prisma: PrismaClient,
   userId?: string,
   explicitCustomerId?: string
-): Promise<PortalCustomerProfile> {
-  try {
-    const customer = await resolveCustomer(prisma, userId, explicitCustomerId);
-    if (!customer) return DEMO_PROFILE;
+): Promise<PortalCustomerProfile | null> {
+  const customer = await resolveCustomer(prisma, userId, explicitCustomerId);
+  if (!customer) return null;
 
-    return {
-      id: customer.id,
-      name: customer.companyName,
-      email: customer.user?.email || "customer@brightloop.local",
-      companyName: customer.companyName,
-      taxId: customer.taxId || undefined,
-      billingAddress: customer.billingAddress || undefined,
-    };
-  } catch {
-    return DEMO_PROFILE;
-  }
+  return {
+    id: customer.id,
+    name: customer.companyName,
+    email: customer.user?.email ?? "",
+    companyName: customer.companyName,
+    taxId: customer.taxId || undefined,
+    billingAddress: customer.billingAddress || undefined,
+  };
 }
 
 /**
  * Retrieves subscriptions strictly scoped to the active customer (FR-PORT-01).
+ * Empty array when none — the UI's empty state, never fabricated rows.
  */
 export async function getCustomerSubscriptions(
   prisma: PrismaClient,
   userId?: string,
   explicitCustomerId?: string
 ): Promise<PortalSubscription[]> {
-  try {
-    const customer = await resolveCustomer(prisma, userId, explicitCustomerId);
-    if (!customer) return DEMO_SUBSCRIPTIONS;
+  const customer = await resolveCustomer(prisma, userId, explicitCustomerId);
+  if (!customer) return [];
 
-    const subscriptions = await prisma.subscription.findMany({
-      where: { customerId: customer.id },
-      include: {
-        plan: {
-          include: { product: true },
-        },
-        lines: {
-          include: { variant: true },
-        },
+  const subscriptions = await prisma.subscription.findMany({
+    where: { customerId: customer.id },
+    include: {
+      plan: {
+        include: { product: true },
       },
-      orderBy: { createdAt: "desc" },
-    });
+      lines: {
+        include: { variant: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
-    if (subscriptions.length === 0) {
-      return DEMO_SUBSCRIPTIONS;
-    }
+  return subscriptions.map((s) => {
+    const primaryLine = s.lines[0];
+    const quantity = primaryLine?.quantity ?? 1;
+    const unitPrice = Number(primaryLine?.unitPrice ?? 0);
+    const period = s.plan.period as "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
+    const monthlyLineValue = calculateMonthlyLineValue(quantity, unitPrice, period);
 
-    return subscriptions.map((s) => {
-      const primaryLine = s.lines[0];
-      const quantity = primaryLine?.quantity ?? 1;
-      const unitPrice = Number(primaryLine?.unitPrice ?? 0);
-      const period = s.plan.period as "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
-      const monthlyLineValue = calculateMonthlyLineValue(quantity, unitPrice, period);
-
-      return {
-        id: s.id,
-        number: s.number,
-        productName: s.plan.product.name,
-        planName: `${s.plan.product.name} (${s.plan.period})`,
-        period,
-        status: s.status as "ACTIVE" | "PAUSED" | "CLOSED",
-        startDate: s.startDate.toISOString().split("T")[0]!,
-        nextBillingDate: s.nextBillingDate
-          ? s.nextBillingDate.toISOString().split("T")[0]!
-          : s.expiryDate.toISOString().split("T")[0]!,
-        paymentTermsDays: s.paymentTermsDays,
-        monthlyLineValue,
-        quantity,
-        unitPrice,
-        pausable: s.plan.pausable,
-        renewable: s.plan.renewable,
-        closableEarly: s.plan.closableEarly,
-      };
-    });
-  } catch {
-    return DEMO_SUBSCRIPTIONS;
-  }
+    return {
+      id: s.id,
+      number: s.number,
+      productName: s.plan.product.name,
+      planName: `${s.plan.product.name} (${s.plan.period})`,
+      period,
+      status: s.status as "ACTIVE" | "PAUSED" | "CLOSED",
+      startDate: s.startDate.toISOString().split("T")[0]!,
+      nextBillingDate: s.nextBillingDate
+        ? s.nextBillingDate.toISOString().split("T")[0]!
+        : s.expiryDate.toISOString().split("T")[0]!,
+      paymentTermsDays: s.paymentTermsDays,
+      monthlyLineValue,
+      quantity,
+      unitPrice,
+      pausable: s.plan.pausable,
+      renewable: s.plan.renewable,
+      closableEarly: s.plan.closableEarly,
+    };
+  });
 }
 
 /**
@@ -237,35 +148,27 @@ export async function getCustomerInvoices(
   userId?: string,
   explicitCustomerId?: string
 ): Promise<PortalInvoice[]> {
-  try {
-    const customer = await resolveCustomer(prisma, userId, explicitCustomerId);
-    if (!customer) return DEMO_INVOICES;
+  const customer = await resolveCustomer(prisma, userId, explicitCustomerId);
+  if (!customer) return [];
 
-    const invoices = await prisma.invoice.findMany({
-      where: { customerId: customer.id },
-      orderBy: { issueDate: "desc" },
-    });
+  const invoices = await prisma.invoice.findMany({
+    where: { customerId: customer.id },
+    orderBy: { issueDate: "desc" },
+  });
 
-    if (invoices.length === 0) {
-      return DEMO_INVOICES;
-    }
-
-    return invoices.map((inv) => ({
-      id: inv.id,
-      number: inv.number,
-      issueDate: inv.issueDate.toISOString().split("T")[0]!,
-      dueDate: inv.dueDate.toISOString().split("T")[0]!,
-      subtotal: Number(inv.subtotal),
-      taxTotal: Number(inv.taxTotal),
-      grandTotal: Number(inv.grandTotal),
-      amountPaid: Number(inv.amountPaid),
-      status: inv.status as "CONFIRMED" | "PAID" | "CANCELLED",
-      periodStart: inv.periodStart.toISOString().split("T")[0]!,
-      periodEnd: inv.periodEnd.toISOString().split("T")[0]!,
-    }));
-  } catch {
-    return DEMO_INVOICES;
-  }
+  return invoices.map((inv) => ({
+    id: inv.id,
+    number: inv.number,
+    issueDate: inv.issueDate.toISOString().split("T")[0]!,
+    dueDate: inv.dueDate.toISOString().split("T")[0]!,
+    subtotal: Number(inv.subtotal),
+    taxTotal: Number(inv.taxTotal),
+    grandTotal: Number(inv.grandTotal),
+    amountPaid: Number(inv.amountPaid),
+    status: inv.status as "CONFIRMED" | "PAID" | "CANCELLED",
+    periodStart: inv.periodStart.toISOString().split("T")[0]!,
+    periodEnd: inv.periodEnd.toISOString().split("T")[0]!,
+  }));
 }
 
 /**

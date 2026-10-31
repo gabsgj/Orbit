@@ -1,9 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   calculateMonthlyLineValue,
-  DEMO_SUBSCRIPTIONS,
-  DEMO_INVOICES,
-  DEMO_PROFILE,
   getCustomerSubscriptions,
   getCustomerInvoices,
   getCustomerProfile,
@@ -34,8 +31,8 @@ describe("portal service unit tests", () => {
     });
   });
 
-  describe("graceful fallback behavior (FR-PORT-01 resilience)", () => {
-    it("returns demo fixtures if database customer resolution produces no records", async () => {
+  describe("no-mock scoping behavior (FR-PORT-01 / FR-AUTH-07)", () => {
+    it("returns null/empty when the user has no customer record — never fake data", async () => {
       const mockPrisma = {
         customer: {
           findUnique: async () => null,
@@ -44,35 +41,42 @@ describe("portal service unit tests", () => {
       } as unknown as PrismaClient;
 
       const profile = await getCustomerProfile(mockPrisma, "non-existent-user");
-      expect(profile).toEqual(DEMO_PROFILE);
+      expect(profile).toBeNull();
 
       const subs = await getCustomerSubscriptions(mockPrisma, "non-existent-user");
-      expect(subs).toEqual(DEMO_SUBSCRIPTIONS);
+      expect(subs).toEqual([]);
 
       const invs = await getCustomerInvoices(mockPrisma, "non-existent-user");
-      expect(invs).toEqual(DEMO_INVOICES);
+      expect(invs).toEqual([]);
     });
 
-    it("handles database exceptions gracefully without crashing the UI", async () => {
+    it("never falls back to another customer's data for anonymous callers", async () => {
+      const findFirst = async () => {
+        throw new Error("findFirst must never be called — no cross-customer fallback");
+      };
+      const mockPrisma = {
+        customer: {
+          findUnique: async () => null,
+          findFirst,
+        },
+      } as unknown as PrismaClient;
+
+      const profile = await getCustomerProfile(mockPrisma);
+      expect(profile).toBeNull();
+    });
+
+    it("lets database errors propagate to the caller's error state (no swallowing)", async () => {
       const throwingPrisma = {
         customer: {
           findUnique: async () => {
             throw new Error("Connection lost");
           },
-          findFirst: async () => {
-            throw new Error("Connection lost");
-          },
         },
       } as unknown as PrismaClient;
 
-      const profile = await getCustomerProfile(throwingPrisma);
-      expect(profile).toEqual(DEMO_PROFILE);
-
-      const subs = await getCustomerSubscriptions(throwingPrisma);
-      expect(subs).toEqual(DEMO_SUBSCRIPTIONS);
-
-      const invs = await getCustomerInvoices(throwingPrisma);
-      expect(invs).toEqual(DEMO_INVOICES);
+      await expect(getCustomerProfile(throwingPrisma, "user-1")).rejects.toThrow(
+        "Connection lost",
+      );
     });
   });
 

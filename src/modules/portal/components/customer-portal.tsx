@@ -24,11 +24,6 @@ import {
   PortalInvoice,
   PortalCustomerProfile,
 } from "../schemas";
-import {
-  DEMO_SUBSCRIPTIONS,
-  DEMO_INVOICES,
-  DEMO_PROFILE,
-} from "../service";
 
 export interface CustomerPortalProps {
   customer?: Partial<PortalCustomerProfile>;
@@ -93,14 +88,21 @@ export function CustomerPortal({
     },
   });
 
+  // Real, session-scoped data only (FR-PORT-01): no fixtures, no fallbacks.
+  // A signed-in customer always has a profile (signup creates it); when the
+  // query hasn't resolved yet we hold an empty profile and let the loading
+  // skeletons cover it. Empty arrays render designed empty states below.
   const customer: PortalCustomerProfile = {
-    ...DEMO_PROFILE,
+    id: "",
+    name: "",
+    email: "",
+    companyName: "",
     ...(remoteProfile || {}),
     ...(propCustomer || {}),
   };
 
-  const subscriptions: PortalSubscription[] = propSubscriptions || remoteSubs || DEMO_SUBSCRIPTIONS;
-  const invoices: PortalInvoice[] = propInvoices || remoteInvoices || DEMO_INVOICES;
+  const subscriptions: PortalSubscription[] = propSubscriptions || remoteSubs || [];
+  const invoices: PortalInvoice[] = propInvoices || remoteInvoices || [];
   const isLoading = propLoading || (isSubsLoading && !propSubscriptions) || (isInvoicesLoading && !propInvoices);
 
   const totalMonthlySpend = subscriptions
