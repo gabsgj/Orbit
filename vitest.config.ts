@@ -8,5 +8,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["src/**/*.test.ts"],
+    // DB-backed suites (billing, numbering) share one test database — run serially.
+    fileParallelism: false,
   },
 });
