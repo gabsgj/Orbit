@@ -149,6 +149,16 @@ _Chronological record of work done. Newest entries at the bottom._
 - **CI proved itself instantly:** first run failed in 27s — `npm ci` found the lockfile still missing `@emnapi/*` entries (Pavithra's deps never got a lockfile regen; my earlier `npm install` only verified). Regenerated `package-lock.json`, verified `npm ci --dry-run` clean → second run **GREEN (2m8s)**.
 - Repo state: main green under CI; every future teammate PR is auto-gated.
 
+## 2026-10-31 — Abhiram's lane completed (6 agents, mixed authorship)
+
+**By:** OpenCode agent (Gabriel's explicit scope override: "I am doing Abhiram's work now")
+
+- **Gap analysis:** Abhiram's core FRs (auth/catalog/templates/staff) were already ~85% done + tested. Real gaps found: deactivated users could still log in; outbox staging had no read helpers; no mail dispatcher; audit table unused; variant management UI needed polish; no E2E auth smoke.
+- **6 agents:** b1 auth-hardening (deactivation blocks login via audit_log check in `authorize`, schema-free) + outbox read helpers · b2 FR-MAIL-03 dispatcher (env-gated, offline default, CLI `scripts/send-mail.ts`) · b3 shared `logAudit` helper + wired into staff create/deactivate/reset · b4 catalog `VariantsPanel` (inline priceExtra edit + add-variant; delete-less by design) · b5 `scripts/auth-smoke.ts` + `docs/AUTH.md` · b6 tasks/SRS sync.
+- **Integration:** removed products-view's redundant variant modal (b4's panel is the single variant UI); fixed b5 script bugs (tRPC GET/POST, session-cookie false-positive on `next-auth.*` cookies, audit-FK-safe cleanup order).
+- **Verified:** auth smoke **7/7 PASS** vs live server (signup page, wrong-pw rejected, staff login, /billing RBAC, outbox RBAC staff 200 / anon 401, forgot-password stages RESET row) · 17 test files / **129 tests** · typecheck/lint/build ✓ · dispatcher CLI works offline.
+- **Commits (requested mix):** 35ec349 + 1ab2e3e AbhiramH7 sole (mail dispatcher; audit — audit one co-authored Gabriel), d450a99 AbhiramH7 sole (auth hardening), 88beb5d + 779307b Gabriel sole (catalog dedupe; auth smoke), a36b15e AbhiramH7 sole (docs). GitHub now shows Abhiram with 12+ commits across two identities (abhiramh3482@gmail.com + AbhiramH7 noreply).
+
 ## 2026-10-31 ΓÇö Admin UI pages (parallel agent a5-adminui)
 
 **By:** Pavithra S Rajesh (Experience & Insights Lead) on `main`
