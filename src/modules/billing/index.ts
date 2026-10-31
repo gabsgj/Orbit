@@ -5,3 +5,5 @@
 export { billingRouter } from "./router";
 export { run as runBilling } from "./service";
 export type { BillingRunInput, BillingRunResult } from "./service";
+export { RunBillingButton } from "./components/RunBillingButton";
+export { BillingRunsTable } from "./components/BillingRunsTable";
