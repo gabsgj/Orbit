@@ -80,8 +80,11 @@ modules/<name>/
 
 ### Dependency rules (the modularity contract — binding)
 
-1. **Barrel-only imports.** Other modules may import ONLY from `modules/<name>/index.ts`.
-   Deep imports (`modules/discounts/service`) are forbidden — enforced by an eslint
+1. **Barrel-only imports.** Other modules may import ONLY from `modules/<name>/index.ts`
+   (or the client-safe `modules/<name>/client.ts` — a sanctioned *second* barrel for
+   browser-safe exports like zod schemas, which must never import server-only code such
+   as `@trpc/server` or Prisma; it exists so pages don't drag the router into the client
+   bundle). All other deep imports are forbidden — enforced by an eslint
    `no-restricted-imports` rule, not just convention.
 2. **One direction:** components → router → service → queries → prisma. No sideways
    imports within a layer across modules except through the module's public `index.ts`.
