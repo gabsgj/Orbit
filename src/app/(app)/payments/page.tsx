@@ -5,7 +5,8 @@ import { trpc } from "@/shared/trpc/react";
 import { formatINR, formatDate } from "@/shared/lib/money";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
-import { RecordPaymentDialog } from "@/modules/payments";
+import { EmptyState } from "@/shared/ui";
+import { RecordPaymentDialog } from "@/modules/payments/client";
 
 export default function PaymentsPage() {
   const [activeTab, setActiveTab] = useState<"transactions" | "overdue">("transactions");
@@ -24,33 +25,33 @@ export default function PaymentsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">Payments & Collections</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h1 className="text-2xl font-bold tracking-tight text-[hsl(var(--foreground))]">Payments & Collections</h1>
+          <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
             Audit recorded payments, monitor overdue receivables, and settle invoices
           </p>
         </div>
 
         {/* Quick KPI stats */}
         <div className="flex gap-4">
-          <div className="rounded-lg border bg-white px-3 py-2 shadow-sm">
-            <span className="text-[10px] uppercase font-semibold text-slate-500">Total Collected (Recent)</span>
-            <p className="text-base font-bold text-green-700 tabular-nums">{formatINR(totalCollected)}</p>
+          <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--tint-green))] px-4 py-3 shadow-[var(--shadow-soft)]">
+            <span className="text-[10px] uppercase font-semibold tracking-wider text-[hsl(var(--tint-green-ink))]">Total Collected (Recent)</span>
+            <p className="text-lg font-bold tabular-nums text-[hsl(var(--tint-green-ink))]">{formatINR(totalCollected)}</p>
           </div>
-          <div className="rounded-lg border bg-white px-3 py-2 shadow-sm">
-            <span className="text-[10px] uppercase font-semibold text-slate-500">Overdue Receivables</span>
-            <p className="text-base font-bold text-amber-700 tabular-nums">{formatINR(totalOverdue)}</p>
+          <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--tint-rose))] px-4 py-3 shadow-[var(--shadow-soft)]">
+            <span className="text-[10px] uppercase font-semibold tracking-wider text-[hsl(var(--tint-rose-ink))]">Overdue Receivables</span>
+            <p className="text-lg font-bold tabular-nums text-[hsl(var(--tint-rose-ink))]">{formatINR(totalOverdue)}</p>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200">
+      <div className="flex border-b border-[hsl(var(--border))]">
         <button
           onClick={() => setActiveTab("transactions")}
           className={`py-2 px-4 text-xs font-semibold border-b-2 transition-colors ${
             activeTab === "transactions"
-              ? "border-blue-600 text-blue-600"
-              : "border-transparent text-slate-500 hover:text-slate-700"
+              ? "border-[hsl(var(--primary))] text-[hsl(var(--primary))]"
+              : "border-transparent text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
           }`}
         >
           Transactions Ledger ({payments?.length ?? 0})
@@ -59,13 +60,13 @@ export default function PaymentsPage() {
           onClick={() => setActiveTab("overdue")}
           className={`py-2 px-4 text-xs font-semibold border-b-2 transition-colors flex items-center gap-2 ${
             activeTab === "overdue"
-              ? "border-blue-600 text-blue-600"
-              : "border-transparent text-slate-500 hover:text-slate-700"
+              ? "border-[hsl(var(--primary))] text-[hsl(var(--primary))]"
+              : "border-transparent text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
           }`}
         >
           <span>Overdue Invoices</span>
           {overdueInvoices && overdueInvoices.length > 0 && (
-            <span className="rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.2">
+            <span className="rounded-full bg-[hsl(var(--status-warning-bg))] text-[hsl(var(--status-warning-ink))] text-[10px] font-bold px-1.5 py-0.5">
               {overdueInvoices.length}
             </span>
           )}
@@ -74,9 +75,9 @@ export default function PaymentsPage() {
 
       {/* Tab Content */}
       {activeTab === "transactions" ? (
-        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+        <div className="overflow-x-auto rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-[var(--shadow-soft)]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider">
+            <thead className="bg-[hsl(var(--muted))] border-b border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))] font-semibold uppercase tracking-wider">
               <tr>
                 <th className="py-2.5 px-3">Date</th>
                 <th className="py-2.5 px-3">Invoice #</th>
@@ -87,27 +88,32 @@ export default function PaymentsPage() {
                 <th className="py-2.5 px-3 text-right">Amount</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[hsl(var(--border))]/50">
               {loadingPayments ? (
                 <tr>
-                  <td colSpan={7} className="py-6 text-center text-slate-400">Loading payment ledger…</td>
+                  <td colSpan={7} className="py-6 text-center text-[hsl(var(--muted-foreground))]">Loading payment ledger…</td>
                 </tr>
               ) : !payments || payments.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-6 text-center text-slate-400">No payment transactions found.</td>
+                  <td colSpan={7}>
+                    <EmptyState
+                      title="No payment transactions found"
+                      description="Recorded payments will appear here once invoices are settled."
+                    />
+                  </td>
                 </tr>
               ) : (
                 payments.map((p) => (
-                  <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-2.5 px-3 text-slate-600">{formatDate(new Date(p.paidAt))}</td>
-                    <td className="py-2.5 px-3 font-medium text-slate-800">{p.invoice.number}</td>
-                    <td className="py-2.5 px-3 text-slate-700">{p.invoice.customer.companyName}</td>
+                  <tr key={p.id} className="hover:bg-[hsl(var(--muted))]/50 transition-colors">
+                    <td className="py-2.5 px-3 text-[hsl(var(--muted-foreground))]">{formatDate(new Date(p.paidAt))}</td>
+                    <td className="py-2.5 px-3 font-medium text-[hsl(var(--foreground))]">{p.invoice.number}</td>
+                    <td className="py-2.5 px-3 text-[hsl(var(--foreground))]">{p.invoice.customer.companyName}</td>
                     <td className="py-2.5 px-3">
                       <Badge variant="draft">{p.method}</Badge>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-500">{p.recordedBy.email}</td>
-                    <td className="py-2.5 px-3 text-slate-500 italic">{p.note || "—"}</td>
-                    <td className="py-2.5 px-3 text-right tabular-nums font-semibold text-green-700">
+                    <td className="py-2.5 px-3 text-[hsl(var(--muted-foreground))]">{p.recordedBy.email}</td>
+                    <td className="py-2.5 px-3 text-[hsl(var(--muted-foreground))] italic">{p.note || "—"}</td>
+                    <td className="py-2.5 px-3 text-right tabular-nums font-semibold text-[hsl(var(--status-active-ink))]">
                       +{formatINR(Number(p.amount))}
                     </td>
                   </tr>
@@ -117,9 +123,9 @@ export default function PaymentsPage() {
           </table>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+        <div className="overflow-x-auto rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-[var(--shadow-soft)]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider">
+            <thead className="bg-[hsl(var(--muted))] border-b border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))] font-semibold uppercase tracking-wider">
               <tr>
                 <th className="py-2.5 px-3">Invoice #</th>
                 <th className="py-2.5 px-3">Customer</th>
@@ -130,15 +136,18 @@ export default function PaymentsPage() {
                 <th className="py-2.5 px-3 text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[hsl(var(--border))]/50">
               {loadingOverdue ? (
                 <tr>
-                  <td colSpan={7} className="py-6 text-center text-slate-400">Checking overdue invoices…</td>
+                  <td colSpan={7} className="py-6 text-center text-[hsl(var(--muted-foreground))]">Checking overdue invoices…</td>
                 </tr>
               ) : !overdueInvoices || overdueInvoices.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-6 text-center text-green-600 font-medium">
-                    🎉 Excellent! Zero overdue invoices.
+                  <td colSpan={7}>
+                    <EmptyState
+                      title="Zero overdue invoices"
+                      description="All receivables are current. Excellent collections performance."
+                    />
                   </td>
                 </tr>
               ) : (
@@ -148,22 +157,22 @@ export default function PaymentsPage() {
                   const outstanding = Math.max(0, grandTotal - amountPaid);
 
                   return (
-                    <tr key={inv.id} className="hover:bg-amber-50/50 transition-colors">
-                      <td className="py-2.5 px-3 font-medium text-slate-800">{inv.number}</td>
-                      <td className="py-2.5 px-3 text-slate-700">{inv.customer.companyName}</td>
-                      <td className="py-2.5 px-3 text-amber-700 font-semibold">
+                    <tr key={inv.id} className="hover:bg-[hsl(var(--status-warning-bg))]/30 transition-colors">
+                      <td className="py-2.5 px-3 font-medium text-[hsl(var(--foreground))]">{inv.number}</td>
+                      <td className="py-2.5 px-3 text-[hsl(var(--foreground))]">{inv.customer.companyName}</td>
+                      <td className="py-2.5 px-3 text-[hsl(var(--status-warning-ink))] font-semibold">
                         {formatDate(new Date(inv.dueDate))} (Overdue)
                       </td>
-                      <td className="py-2.5 px-3 text-right tabular-nums text-slate-600">{formatINR(grandTotal)}</td>
-                      <td className="py-2.5 px-3 text-right tabular-nums text-slate-600">{formatINR(amountPaid)}</td>
-                      <td className="py-2.5 px-3 text-right tabular-nums font-bold text-amber-800">
+                      <td className="py-2.5 px-3 text-right tabular-nums text-[hsl(var(--muted-foreground))]">{formatINR(grandTotal)}</td>
+                      <td className="py-2.5 px-3 text-right tabular-nums text-[hsl(var(--muted-foreground))]">{formatINR(amountPaid)}</td>
+                      <td className="py-2.5 px-3 text-right tabular-nums font-bold text-[hsl(var(--status-warning-ink))]">
                         {formatINR(outstanding)}
                       </td>
                       <td className="py-2.5 px-3 text-center">
                         <Button
                           size="sm"
                           variant="secondary"
-                          className="text-xs h-7"
+                          className="text-xs h-7 rounded-full"
                           onClick={() => setPaymentTarget({ id: inv.id, outstanding })}
                         >
                           Record Payment

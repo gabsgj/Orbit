@@ -5,14 +5,14 @@ import {
   DiscountRuleList,
   DiscountRuleDetail,
   DiscountRuleForm,
-} from "@/modules/discounts";
+} from "@/modules/discounts/client";
 
 export default function DiscountsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 md:p-10">
+    <div className="min-h-screen p-6 md:p-10">
       <div className="mx-auto max-w-5xl">
         {selectedId ? (
           <DiscountRuleDetail
