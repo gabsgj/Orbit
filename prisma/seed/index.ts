@@ -26,6 +26,7 @@ import {
   PaymentMethod,
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { DEMO_LOGINS } from "../../src/shared/lib/demo";
 
 const prisma = new PrismaClient();
 
@@ -76,20 +77,23 @@ async function main() {
   `);
 
   // ── 1. Users + customers (bcrypt 10 rounds, lowercase emails) ────────────
+  // Credentials come from src/shared/lib/demo.ts — the SINGLE source of truth
+  // that also drives the UI's DemoCredentials card. Nothing is duplicated.
+  const [adminLogin, staffLogin, acmeLogin] = DEMO_LOGINS;
   const [adminHash, staffHash, custHash] = await Promise.all([
-    bcrypt.hash("Admin@Orbit1", 10),
-    bcrypt.hash("Staff@Orbit1", 10),
-    bcrypt.hash("Cust@Orbit1", 10),
+    bcrypt.hash(adminLogin!.password, 10),
+    bcrypt.hash(staffLogin!.password, 10),
+    bcrypt.hash(acmeLogin!.password, 10),
   ]);
 
   const admin = await prisma.user.create({
-    data: { email: "admin@orbit.local", passwordHash: adminHash, role: Role.ADMIN },
+    data: { email: adminLogin!.email, passwordHash: adminHash, role: Role.ADMIN },
   });
   const staff = await prisma.user.create({
-    data: { email: "staff@orbit.local", passwordHash: staffHash, role: Role.STAFF },
+    data: { email: staffLogin!.email, passwordHash: staffHash, role: Role.STAFF },
   });
   const acmeUser = await prisma.user.create({
-    data: { email: "customer@acme.test", passwordHash: custHash, role: Role.CUSTOMER },
+    data: { email: acmeLogin!.email, passwordHash: custHash, role: Role.CUSTOMER },
   });
   const globexUser = await prisma.user.create({
     data: { email: "customer@globex.test", passwordHash: custHash, role: Role.CUSTOMER },
