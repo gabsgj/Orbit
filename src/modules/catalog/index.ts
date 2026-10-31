@@ -1,5 +1,42 @@
 /**
- * modules/catalog — PUBLIC API. Other modules may import ONLY from this barrel
- * (enforced by eslint no-restricted-imports; see docs/PLAN.md §1).
+ * modules/catalog — PUBLIC API barrel.
+ * Other modules may import ONLY from this file (eslint no-restricted-imports).
  */
 export { catalogRouter } from "./router";
+export {
+  listProductsSchema,
+  createProductSchema,
+  updateProductSchema,
+  createAttributeSchema,
+  createAttributeValueSchema,
+  createVariantSchema,
+  updateVariantSchema,
+  createPlanSchema,
+  updatePlanSchema,
+  listPlansSchema,
+  listTaxesSchema,
+  createTaxSchema,
+  updateTaxSchema,
+  periodSchema,
+  productTypeSchema,
+} from "./schemas";
+export type {
+  CreateProductInput,
+  UpdateProductInput,
+  CreateAttributeInput,
+  CreateAttributeValueInput,
+  CreateVariantInput,
+  UpdateVariantInput,
+  CreatePlanInput,
+  UpdatePlanInput,
+  ListProductsInput,
+  ListPlansInput,
+  ListTaxesInput,
+  CreateTaxInput,
+  UpdateTaxInput,
+} from "./schemas";
+
+// UI Components
+export { ProductsView } from "./components/products-view";
+export { PlansView } from "./components/plans-view";
+export { TaxesView } from "./components/taxes-view";
