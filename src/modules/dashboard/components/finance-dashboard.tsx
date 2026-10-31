@@ -8,6 +8,7 @@ import { MRRTrendCard } from "./mrr-trend-card";
 import { AgingBucketsCard } from "./aging-buckets-card";
 import { RevenueByPlanCard } from "./revenue-by-plan-card";
 import { RenewalsCard } from "./renewals-card";
+import { ExportButtons } from "./ExportButtons";
 import { Button } from "@/shared/ui/button";
 
 export function FinanceDashboard() {
@@ -152,6 +153,8 @@ export function FinanceDashboard() {
           >
             Refresh
           </Button>
+
+          <ExportButtons />
         </div>
       </div>
 
