@@ -1,6 +1,18 @@
-/** shared/ui barrel — presentational, module-agnostic primitives (Gate 0 target). */
-export { Button } from "./button";
-export { Card, CardHeader } from "./card";
-export { Badge, statusTone } from "./badge";
-export { Table, THead, TBody, TR, TH, TD, EmptyState } from "./table";
-export { Dialog } from "./dialog";
+/**
+ * shared/ui — Orbit Design System Primitives (Owner: Pavithra S Rajesh).
+ * Pure presentational components, themed from docs/DESIGN.md tokens.
+ * Zero domain logic allowed here; never imports from modules/.
+ */
+
+export * from "./button";
+export * from "./badge";
+export * from "./card";
+export * from "./input";
+export * from "./skeleton";
+export * from "./empty-state";
+export * from "./table";
+export * from "./data-table";
+export * from "./icons";
+export * from "./dialog";
+export * from "./app-shell";
+export * from "./portal-shell";

@@ -1,38 +1,125 @@
+import * as React from "react";
 import { cn } from "@/shared/lib/utils";
-import type { HTMLAttributes, TableHTMLAttributes, ThHTMLAttributes, TdHTMLAttributes, ReactNode } from "react";
 
-/** Minimal table primitives (shared/ui). Dense-data pattern (PLAN §11 Gate 1):
- *  sticky header, readable rows; TanStack Table wiring arrives with Pavithra. */
-export function Table({ className, ...props }: TableHTMLAttributes<HTMLTableElement>) {
-  return (
-    <div className="overflow-x-auto rounded-lg border border-[hsl(var(--border))]">
-      <table className={cn("w-full text-sm", className)} {...props} />
-    </div>
-  );
-}
-export function THead(props: HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className="sticky top-0 bg-[hsl(var(--muted))]" {...props} />;
-}
-export function TBody(props: HTMLAttributes<HTMLTableSectionElement>) {
-  return <tbody className="divide-y divide-[hsl(var(--border))]" {...props} />;
-}
-export function TR(props: HTMLAttributes<HTMLTableRowElement>) {
-  return <tr className="hover:bg-[hsl(var(--muted))]/50" {...props} />;
-}
-export function TH({ className, ...props }: ThHTMLAttributes<HTMLTableCellElement>) {
-  return <th className={cn("px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))]", className)} {...props} />;
-}
-export function TD({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn("px-4 py-3", className)} {...props} />;
-}
+export const Table = React.forwardRef<
+  HTMLTableElement,
+  React.HTMLAttributes<HTMLTableElement>
+>(({ className, ...props }, ref) => (
+  <div className="relative w-full overflow-auto rounded-[var(--radius)] border border-[hsl(var(--border))]">
+    <table
+      ref={ref}
+      className={cn("w-full caption-bottom text-sm text-[hsl(var(--foreground))]", className)}
+      {...props}
+    />
+  </div>
+));
+Table.displayName = "Table";
 
-/** Designed empty state for every list (Gate 1 checklist — never blank). */
-export function EmptyState({ title, hint, action }: { title: string; hint?: string; action?: ReactNode }) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[hsl(var(--border))] py-16 text-center">
-      <p className="font-medium">{title}</p>
-      {hint ? <p className="text-sm text-[hsl(var(--muted-foreground))]">{hint}</p> : null}
-      {action}
-    </div>
-  );
-}
+export const TableHeader = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <thead
+    ref={ref}
+    className={cn(
+      "border-b border-[hsl(var(--border))] bg-[hsl(var(--muted))]/50 text-[hsl(var(--muted-foreground))] sticky top-0 z-10",
+      className
+    )}
+    {...props}
+  />
+));
+TableHeader.displayName = "TableHeader";
+
+export const TableBody = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <tbody
+    ref={ref}
+    className={cn("[&_tr:last-child]:border-0 divide-y divide-[hsl(var(--border))]", className)}
+    {...props}
+  />
+));
+TableBody.displayName = "TableBody";
+
+export const TableFooter = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <tfoot
+    ref={ref}
+    className={cn(
+      "border-t border-[hsl(var(--border))] bg-[hsl(var(--muted))]/50 font-medium [&>tr]:last:border-b-0",
+      className
+    )}
+    {...props}
+  />
+));
+TableFooter.displayName = "TableFooter";
+
+export const TableRow = React.forwardRef<
+  HTMLTableRowElement,
+  React.HTMLAttributes<HTMLTableRowElement>
+>(({ className, ...props }, ref) => (
+  <tr
+    ref={ref}
+    className={cn(
+      "border-b border-[hsl(var(--border))] transition-colors hover:bg-[hsl(var(--muted))]/40 data-[state=selected]:bg-[hsl(var(--muted))]",
+      className
+    )}
+    {...props}
+  />
+));
+TableRow.displayName = "TableRow";
+
+export const TableHead = React.forwardRef<
+  HTMLTableCellElement,
+  React.ThHTMLAttributes<HTMLTableCellElement> & { alignRight?: boolean }
+>(({ className, alignRight = false, ...props }, ref) => (
+  <th
+    ref={ref}
+    className={cn(
+      "h-10 px-4 py-3 text-left align-middle text-xs font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))] whitespace-nowrap",
+      alignRight && "text-right",
+      className
+    )}
+    {...props}
+  />
+));
+TableHead.displayName = "TableHead";
+
+export const TableCell = React.forwardRef<
+  HTMLTableCellElement,
+  React.TdHTMLAttributes<HTMLTableCellElement> & { alignRight?: boolean; mono?: boolean }
+>(({ className, alignRight = false, mono = false, ...props }, ref) => (
+  <td
+    ref={ref}
+    className={cn(
+      "px-4 py-3 align-middle text-sm",
+      alignRight && "text-right tabular-nums",
+      mono && "font-mono text-xs",
+      className
+    )}
+    {...props}
+  />
+));
+TableCell.displayName = "TableCell";
+
+export const TableCaption = React.forwardRef<
+  HTMLTableCaptionElement,
+  React.HTMLAttributes<HTMLTableCaptionElement>
+>(({ className, ...props }, ref) => (
+  <caption
+    ref={ref}
+    className={cn("mt-4 text-xs text-[hsl(var(--muted-foreground))]", className)}
+    {...props}
+  />
+));
+TableCaption.displayName = "TableCaption";
+
+// Backward-compatible aliases for teammate call sites
+export const THead = TableHeader;
+export const TBody = TableBody;
+export const TR = TableRow;
+export const TH = TableHead;
+export const TD = TableCell;

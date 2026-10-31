@@ -1,33 +1,129 @@
 @import "tailwindcss";
 
 /*
- * Design tokens — PLACEHOLDER for UI Gate 0 (docs/PLAN.md §11).
- * Pavithra replaces this block from docs/DESIGN.md after running the
- * design-taste-frontend skill. Keep HSL channel variables shadcn-compatible.
+ * Orbit Design Tokens — UI Gate 0 (docs/DESIGN.md).
+ * Calibrated via design-taste-frontend (Achromatic Ledger with targeted data chroma).
+ * HSL channel variables maintain 100% shadcn/ui and Tailwind compatibility.
  */
 :root {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 9%;
-  --primary: 222 47% 11%;
-  --primary-foreground: 0 0% 98%;
-  --muted: 0 0% 96%;
-  --muted-foreground: 0 0% 45%;
-  --border: 0 0% 90%;
-  --radius: 0.5rem;
+  /* Surfaces & Chrome */
+  --background: 210 20% 98%;          /* #f8fafc */
+  --foreground: 222 47% 11%;          /* #0f172a - Deep ink */
+
+  --card: 0 0% 100%;                  /* #ffffff */
+  --card-foreground: 222 47% 11%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+
+  /* Actions & Primary */
+  --primary: 222 47% 11%;              /* #0f172a - Near black ink */
+  --primary-foreground: 210 40% 98%;   /* #f8fafc */
+
+  --secondary: 210 20% 94%;            /* #f1f5f9 - Muted interactive */
+  --secondary-foreground: 222 47% 11%;
+
+  --muted: 210 20% 96%;                /* #f1f5f9 */
+  --muted-foreground: 215 16% 47%;     /* #64748b - Secondary text */
+
+  --accent: 210 20% 92%;               /* #e2e8f0 */
+  --accent-foreground: 222 47% 11%;
+
+  --destructive: 0 84% 60%;            /* #ef4444 */
+  --destructive-foreground: 0 0% 98%;
+
+  /* Borders, Lines & Rings */
+  --border: 214 20% 90%;               /* #e2e8f0 - 1px rules */
+  --input: 214 20% 90%;                /* #e2e8f0 */
+  --ring: 222 47% 11%;                 /* #0f172a */
+
+  /* Radii */
+  --radius: 0.5rem;                    /* 8px base card */
+  --radius-sm: 0.375rem;               /* 6px control */
+  --radius-xs: 0.25rem;                /* 4px badge */
+
+  /* Financial Domain Chart Colors */
+  --chart-1: 217 91% 45%;              /* #1d5fbf - Primary MRR / data hue */
+  --chart-2: 215 16% 47%;              /* #64748b - Comparison series */
+  --chart-3: 199 89% 48%;              /* #0ea5e9 - Auxiliary series */
+  --chart-4: 38 92% 50%;               /* #f59e0b - Auxiliary series */
+
+  /* Financial Status Signals */
+  --status-active-bg: 142 76% 95%;     /* #ecfdf5 */
+  --status-active-ink: 160 84% 19%;    /* #064e3b */
+  --status-overdue-bg: 0 86% 97%;      /* #fef2f2 */
+  --status-overdue-ink: 0 74% 42%;     /* #991b1b */
+  --status-warning-bg: 48 96% 89%;     /* #fef3c7 */
+  --status-warning-ink: 38 92% 25%;    /* #78350f */
+  --status-neutral-bg: 210 20% 94%;    /* #f1f5f9 */
+  --status-neutral-ink: 215 25% 27%;   /* #334155 */
 }
 
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-border: hsl(var(--border));
-  --radius-md: var(--radius);
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+
+  --color-status-active-bg: hsl(var(--status-active-bg));
+  --color-status-active-ink: hsl(var(--status-active-ink));
+  --color-status-overdue-bg: hsl(var(--status-overdue-bg));
+  --color-status-overdue-ink: hsl(var(--status-overdue-ink));
+  --color-status-warning-bg: hsl(var(--status-warning-bg));
+  --color-status-warning-ink: hsl(var(--status-warning-ink));
+  --color-status-neutral-bg: hsl(var(--status-neutral-bg));
+  --color-status-neutral-ink: hsl(var(--status-neutral-ink));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: var(--radius-sm);
+  --radius-xs: var(--radius-xs);
 }
 
 body {
-  background: hsl(var(--background));
+  background-color: hsl(var(--background));
   color: hsl(var(--foreground));
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Ensure tabular figures for financial data alignment across all tables & KPIs */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dedicated Print Stylesheet for Invoices (Gate 3 requirement) */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
 }

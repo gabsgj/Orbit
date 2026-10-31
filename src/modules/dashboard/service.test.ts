@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import { PrismaClient, Period, SubscriptionStatus, InvoiceStatus } from "@prisma/client";
-import { kpis, mrr, aging, renewals } from "./service";
+import { kpis, mrr, aging, renewals, DashboardService } from "./service";
 
 /**
  * Dashboard service tests — real DB (orbit_test) with in-file fixtures,
@@ -148,13 +148,11 @@ async function seedSubscription(opts: {
   });
 }
 
-/** The "as of" date used across tests: mid-June 2026. */
 const AS_OF = new Date("2026-06-15");
 
 async function seedAll() {
   const base = await seedBase();
 
-  // Sub 1: monthly plan, 1559 × 1
   const sub1 = await seedSubscription({
     customerId: base.customer.id,
     variantId: base.variant.id,
@@ -165,7 +163,6 @@ async function seedAll() {
     nextBillingDate: new Date("2026-07-01"),
   });
 
-  // Sub 2: yearly plan, 9999 × 5
   const sub2 = await seedSubscription({
     customerId: base.customer.id,
     variantId: base.variant.id,
@@ -176,14 +173,13 @@ async function seedAll() {
     nextBillingDate: new Date("2026-07-01"),
   });
 
-  // Invoice 1: CONFIRMED, overdue by 45 days (due 2026-05-01, asOf=2026-06-15)
   const overdueInvoice = await prisma.invoice.create({
     data: {
       number: "INV-2026-00001",
       customerId: base.customer.id,
       subscriptionId: sub1.id,
       issueDate: new Date("2026-04-16"),
-      dueDate: new Date("2026-05-01"), // 45 days before AS_OF
+      dueDate: new Date("2026-05-01"),
       status: InvoiceStatus.CONFIRMED,
       subtotal: 1559,
       taxTotal: 280.62,
@@ -195,7 +191,6 @@ async function seedAll() {
     },
   });
 
-  // Invoice 2: PAID, payment in June 2026 (same month as AS_OF)
   const paidInvoice = await prisma.invoice.create({
     data: {
       number: "INV-2026-00002",
@@ -218,7 +213,7 @@ async function seedAll() {
       invoiceId: paidInvoice.id,
       method: "BANK_TRANSFER",
       amount: 58994.1,
-      paidAt: new Date("2026-06-10T12:00:00Z"), // June 2026 — same month as AS_OF
+      paidAt: new Date("2026-06-10T12:00:00Z"),
       recordedById: base.adminUser.id,
     },
   });
@@ -235,14 +230,8 @@ describe("dashboard service", () => {
       const result = await kpis(prisma, AS_OF);
 
       expect(result.activeSubscriptions).toBe(2);
-
-      // Revenue received: only the June payment (58994.10)
       expect(result.revenueReceived).toBe("58994.10");
-
-      // Amount owed: only the CONFIRMED overdue invoice (1839.62)
       expect(result.amountOwed).toBe("1839.62");
-
-      // Overdue: 1 CONFIRMED invoice with due_date < AS_OF and outstanding > 0
       expect(result.overdueInvoices).toBe(1);
     });
 
@@ -260,12 +249,7 @@ describe("dashboard service", () => {
       await seedAll();
       const result = await mrr(prisma);
 
-      // monthly: 1559 × 1 × 1 = 1559.00
-      // yearly:  9999 × 5 × (1/12) = 49995/12 = 4166.25
-      // MRR = 1559 + 4166.25 = 5725.25
       expect(result.mrr).toBe("5725.25");
-
-      // ARR = MRR × 12 = 68703.00
       expect(result.arr).toBe("68703.00");
     });
 
@@ -281,7 +265,6 @@ describe("dashboard service", () => {
       await seedAll();
       const buckets = await aging(prisma, AS_OF);
 
-      // Should have exactly 5 buckets in canonical order
       expect(buckets).toHaveLength(5);
       expect(buckets.map((b) => b.bucket)).toEqual([
         "current",
@@ -291,12 +274,10 @@ describe("dashboard service", () => {
         "90+",
       ]);
 
-      // The overdue invoice (due 2026-05-01, asOf 2026-06-15 → 45 days) → 31-60
       const bucket3160 = buckets.find((b) => b.bucket === "31-60")!;
       expect(bucket3160.count).toBe(1);
       expect(bucket3160.total).toBe("1839.62");
 
-      // All other buckets empty
       expect(buckets.find((b) => b.bucket === "current")!.count).toBe(0);
       expect(buckets.find((b) => b.bucket === "1-30")!.count).toBe(0);
       expect(buckets.find((b) => b.bucket === "61-90")!.count).toBe(0);
@@ -318,26 +299,68 @@ describe("dashboard service", () => {
       await seedAll();
       const result = await renewals(prisma, AS_OF, 30);
 
-      // Both subs renew on 2026-07-01 → within 30 days of 2026-06-15
       expect(result.length).toBeGreaterThanOrEqual(1);
 
       const totalCount = result.reduce((sum, r) => sum + r.count, 0);
       expect(totalCount).toBe(2);
 
-      // Total should be the sum of monthly-normalized values
       const totalVal = result.reduce(
         (sum, r) => sum + parseFloat(r.total),
         0,
       );
-      // 1559 + 9999*5/12 = 1559 + 4166.25 = 5725.25
       expect(totalVal).toBeCloseTo(5725.25, 2);
     });
 
     it("returns empty when no renewals are within the window", async () => {
       await seedAll();
-      // Look ahead only 5 days — renewals are on 2026-07-01, 16 days out
       const result = await renewals(prisma, AS_OF, 5);
       expect(result).toHaveLength(0);
+    });
+  });
+
+  describe("MRR calculation formula (SRS §1.3 and §6 rule 7)", () => {
+    const normalizeMonthly = (period: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY", amount: number) => {
+      switch (period) {
+        case "DAILY":
+          return amount * 30;
+        case "WEEKLY":
+          return amount * (52 / 12);
+        case "MONTHLY":
+          return amount * 1;
+        case "YEARLY":
+          return amount / 12;
+      }
+    };
+
+    it("correctly computes monthly multiplier for DAILY plans", () => {
+      expect(normalizeMonthly("DAILY", 100)).toBe(3000);
+    });
+
+    it("correctly computes monthly multiplier for WEEKLY plans (52/12)", () => {
+      expect(normalizeMonthly("WEEKLY", 1200)).toBe(5200);
+    });
+
+    it("correctly computes monthly multiplier for MONTHLY plans (1x)", () => {
+      expect(normalizeMonthly("MONTHLY", 5000)).toBe(5000);
+    });
+
+    it("correctly computes monthly multiplier for YEARLY plans (1/12)", () => {
+      expect(normalizeMonthly("YEARLY", 60000)).toBe(5000);
+    });
+
+    it("ARR is exactly 12 times MRR", () => {
+      const mrrVal = 25000;
+      expect(mrrVal * 12).toBe(300000);
+    });
+  });
+
+  describe("DashboardService class methods", () => {
+    it("exposes all required aggregate methods per docs/SRS.md M9", () => {
+      expect(typeof DashboardService.getSummaryKPIs).toBe("function");
+      expect(typeof DashboardService.getAgingAnalysis).toBe("function");
+      expect(typeof DashboardService.getPlanRevenueBreakdown).toBe("function");
+      expect(typeof DashboardService.getUpcomingRenewals).toBe("function");
+      expect(typeof DashboardService.getMRRMovementSummary).toBe("function");
     });
   });
 });

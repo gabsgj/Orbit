@@ -1,13 +1,26 @@
 import type { PrismaClient } from "@prisma/client";
 import * as queries from "./queries";
+import {
+  getDashboardKPIs,
+  getAgingBuckets,
+  getRevenueByPlan,
+  getRenewalForecast,
+  getMRRMovement,
+  type DashboardKPIs,
+  type AgingBucketItem,
+  type RevenueByPlanItem,
+  type RenewalForecastItem,
+  type MRRMovement,
+} from "./queries";
+import { DashboardFilterInput, RenewalForecastFilterInput } from "./schemas";
 
 /**
  * dashboard service — pure, framework-free business logic (no next/trpc imports).
- * Functions receive explicit inputs + a Prisma client and return shaped data
- * (Decimals → strings). Everything here is unit-tested in ./service.test.ts.
+ * Functions receive explicit inputs + a Prisma client and return shaped data.
+ * Everything here is unit-tested in ./service.test.ts.
  */
 
-// ── KPIs (FR-DASH-01) ────────────────────────────────────────────────────────
+// ── Functional exports (backend API matching Gabriel's contract) ─────────────
 
 export interface KpisResult {
   activeSubscriptions: number;
@@ -29,8 +42,6 @@ export async function kpis(
   };
 }
 
-// ── MRR / ARR (FR-DASH-03, SRS §6 rule 7) ───────────────────────────────────
-
 export interface MrrResult {
   mrr: string;
   arr: string;
@@ -45,15 +56,12 @@ export async function mrr(prisma: PrismaClient): Promise<MrrResult> {
   };
 }
 
-// ── Aging buckets (FR-PAY-05) ────────────────────────────────────────────────
-
 export interface AgingBucketResult {
   bucket: string;
   total: string;
   count: number;
 }
 
-/** Canonical bucket order for consistent UI rendering. */
 const BUCKET_ORDER = ["current", "1-30", "31-60", "61-90", "90+"];
 
 export async function aging(
@@ -62,7 +70,6 @@ export async function aging(
 ): Promise<AgingBucketResult[]> {
   const rows = await queries.aging(prisma, asOf);
 
-  // Ensure every bucket is present (fill empty ones) and in canonical order.
   const byBucket = new Map(rows.map((r) => [r.bucket, r]));
   return BUCKET_ORDER.map((bucket) => {
     const row = byBucket.get(bucket);
@@ -74,10 +81,8 @@ export async function aging(
   });
 }
 
-// ── Renewal forecast (FR-DASH-05) ────────────────────────────────────────────
-
 export interface RenewalWeekResult {
-  weekStart: string; // ISO date YYYY-MM-DD
+  weekStart: string;
   count: number;
   total: string;
 }
@@ -93,4 +98,31 @@ export async function renewals(
     count: Number(r.cnt),
     total: r.total.toFixed(2),
   }));
+}
+
+// ── DashboardService class (frontend UI domain integration) ──────────────────
+
+export class DashboardService {
+  static async getSummaryKPIs(filter?: DashboardFilterInput): Promise<DashboardKPIs> {
+    return getDashboardKPIs(filter);
+  }
+
+  static async getAgingAnalysis(): Promise<AgingBucketItem[]> {
+    return getAgingBuckets();
+  }
+
+  static async getPlanRevenueBreakdown(): Promise<RevenueByPlanItem[]> {
+    return getRevenueByPlan();
+  }
+
+  static async getUpcomingRenewals(
+    input?: RenewalForecastFilterInput
+  ): Promise<RenewalForecastItem[]> {
+    const days = input?.daysAhead ? parseInt(input.daysAhead, 10) : 30;
+    return getRenewalForecast(days);
+  }
+
+  static async getMRRMovementSummary(): Promise<MRRMovement> {
+    return getMRRMovement();
+  }
 }

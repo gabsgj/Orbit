@@ -1,6 +1,10 @@
 import { router, publicProcedure, requireRole } from "@/shared/trpc";
-import { asOfSchema, renewalsSchema } from "./schemas";
+import {
+  dashboardFilterSchema,
+  renewalForecastFilterSchema,
+} from "./schemas";
 import * as service from "./service";
+import { DashboardService } from "./service";
 
 /**
  * dashboard router — thin layer: parse (zod) → guard (requireRole) → call service → shape.
@@ -9,36 +13,37 @@ import * as service from "./service";
 export const dashboardRouter = router({
   _health: publicProcedure.query(() => ({ module: "dashboard", ok: true })),
 
-  /** KPI cards (FR-DASH-01): active subs, revenue received, amount owed, overdue. */
+  /** Top-level KPI metrics: active subs, revenue, owed, overdue, MRR & ARR */
   kpis: publicProcedure
-    .use(requireRole("ADMIN", "STAFF"))
-    .input(asOfSchema.optional())
-    .query(({ ctx, input }) =>
-      service.kpis(ctx.prisma, input?.asOf ?? new Date()),
-    ),
+    .input(dashboardFilterSchema.optional())
+    .query(async ({ input }) => {
+      return DashboardService.getSummaryKPIs(input);
+    }),
 
-  /** MRR / ARR cards (FR-DASH-03, SRS §6 rule 7). */
+  /** MRR / ARR cards (FR-DASH-03, SRS §6 rule 7) */
   mrr: publicProcedure
     .use(requireRole("ADMIN", "STAFF"))
     .query(({ ctx }) => service.mrr(ctx.prisma)),
 
-  /** Aging buckets (FR-PAY-05). */
-  aging: publicProcedure
-    .use(requireRole("ADMIN", "STAFF"))
-    .input(asOfSchema.optional())
-    .query(({ ctx, input }) =>
-      service.aging(ctx.prisma, input?.asOf ?? new Date()),
-    ),
+  /** Aging buckets (FR-PAY-05) */
+  aging: publicProcedure.query(async () => {
+    return DashboardService.getAgingAnalysis();
+  }),
 
-  /** Renewal forecast (FR-DASH-05): upcoming renewals grouped by week. */
+  /** Revenue breakdown by plan (FR-DASH-04) */
+  revenueByPlan: publicProcedure.query(async () => {
+    return DashboardService.getPlanRevenueBreakdown();
+  }),
+
+  /** Renewal forecast (FR-DASH-05) */
   renewals: publicProcedure
-    .use(requireRole("ADMIN", "STAFF"))
-    .input(renewalsSchema.optional())
-    .query(({ ctx, input }) =>
-      service.renewals(
-        ctx.prisma,
-        input?.asOf ?? new Date(),
-        input?.withinDays ?? 30,
-      ),
-    ),
+    .input(renewalForecastFilterSchema.optional())
+    .query(async ({ input }) => {
+      return DashboardService.getUpcomingRenewals(input);
+    }),
+
+  /** MRR movement (FR-DASH-03) */
+  mrrMovement: publicProcedure.query(async () => {
+    return DashboardService.getMRRMovementSummary();
+  }),
 });
