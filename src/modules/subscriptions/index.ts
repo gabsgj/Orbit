@@ -34,3 +34,4 @@ export { SubscriptionStatusBadge } from "./components/SubscriptionStatusBadge";
 export { SubscriptionList } from "./components/SubscriptionList";
 export { SubscriptionDetail } from "./components/SubscriptionDetail";
 export { SubscriptionCreateForm } from "./components/SubscriptionCreateForm";
+export { SubscriptionTimeline } from "./components/SubscriptionTimeline";

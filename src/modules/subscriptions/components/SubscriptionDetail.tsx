@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { trpc } from "@/shared/trpc/react";
 import { SubscriptionStatusBadge } from "./SubscriptionStatusBadge";
+import { SubscriptionTimeline } from "./SubscriptionTimeline";
 import { formatINR, formatDate } from "@/shared/lib/money";
 import type { SubscriptionStatus } from "@prisma/client";
 
@@ -23,10 +24,7 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
     id: subscriptionId,
   });
 
-  const { data: timeline } = trpc.subscriptions.timeline.useQuery(
-    { id: subscriptionId },
-    { enabled: activeTab === "timeline" },
-  );
+
 
   const transitionMutation = trpc.subscriptions.transition.useMutation({
     onSuccess: () => {
@@ -463,24 +461,7 @@ export function SubscriptionDetail({ subscriptionId, onBack }: SubscriptionDetai
         {/* Tab 2: Activity Timeline */}
         {activeTab === "timeline" && (
           <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            {!timeline || timeline.length === 0 ? (
-              <p className="text-xs text-slate-500 py-4 text-center">No timeline events yet.</p>
-            ) : (
-              <div className="relative border-l border-slate-200 pl-4 space-y-4">
-                {timeline.map((ev) => (
-                  <div key={ev.id} className="relative">
-                    <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-slate-900 ring-4 ring-white" />
-                    <div>
-                      <p className="text-xs font-semibold text-slate-900">{ev.title}</p>
-                      <p className="text-xs text-slate-600 mt-0.5">{ev.description}</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        {formatDate(ev.timestamp)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <SubscriptionTimeline subscriptionId={subscriptionId} />
           </div>
         )}
 

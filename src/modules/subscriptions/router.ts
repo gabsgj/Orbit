@@ -161,54 +161,30 @@ export const subscriptionsRouter = router({
     }),
 
   timeline: protectedProcedure
+    .use(requireRole("ADMIN", "STAFF"))
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      const user = ctx.session?.user;
-      if (!user) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
-
       const sub = await findSubscriptionById(ctx.prisma, input.id);
       if (!sub) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Subscription not found." });
       }
 
-      if (user.role === "CUSTOMER" && sub.customer.userId !== user.id) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied." });
-      }
-
-      interface TimelineEvent {
-        id: string;
-        type: "STATUS_CHANGE" | "INVOICE" | "PAYMENT";
-        title: string;
-        description: string;
-        timestamp: Date;
-        meta?: Record<string, unknown>;
-      }
-
-      const events: TimelineEvent[] = [];
-
-      for (const h of sub.statusHistory) {
-        events.push({
-          id: `status-${h.id}`,
-          type: "STATUS_CHANGE",
-          title: `Status: ${h.fromStatus} → ${h.toStatus}`,
-          description: h.note ? `${h.note} (by ${h.changedBy.email})` : `Changed by ${h.changedBy.email}`,
-          timestamp: h.changedAt,
-        });
-      }
-
-      for (const inv of sub.invoices) {
-        events.push({
-          id: `inv-${inv.id}`,
-          type: "INVOICE",
-          title: `Invoice ${inv.number}`,
-          description: `Total: ₹${Number(inv.grandTotal).toFixed(2)} · Status: ${inv.status}`,
-          timestamp: inv.issueDate,
-        });
-      }
-
-      events.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-      return events;
+      return {
+        statusHistory: sub.statusHistory.map((h) => ({
+          id: h.id,
+          changedAt: h.changedAt,
+          fromStatus: h.fromStatus,
+          toStatus: h.toStatus,
+          note: h.note,
+          changedByEmail: h.changedBy.email,
+        })),
+        invoices: sub.invoices.map((inv) => ({
+          id: inv.id,
+          number: inv.number,
+          status: inv.status,
+          grandTotal: inv.grandTotal,
+          issueDate: inv.issueDate,
+        })),
+      };
     }),
 });
