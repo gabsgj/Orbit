@@ -1,5 +1,7 @@
 # Orbit 🛰️ — Subscription Management System
 
+[![CI](https://github.com/gabsgj/Orbit/actions/workflows/ci.yml/badge.svg)](https://github.com/gabsgj/Orbit/actions/workflows/ci.yml)
+
 > Put your revenue in orbit. One platform for plans, subscriptions, recurring
 > billing, invoices, payments and revenue reporting.
 > **Odoo × Make-a-Ton 9.0, Kochi Hackathon.**
