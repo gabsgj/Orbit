@@ -73,3 +73,27 @@ _Chronological record of work done. Newest entries at the bottom._
 - **Module skeleton:** 11 modules with fixed anatomy; contracts fixed early — `DiscountEngine.evaluate` (discounts→billing hook), `BillingService.run` (one service for all 3 triggers). Smoke-tested: page renders, tRPC health OK, cron guard 401→200 with secret, worker boots.
 - **Gotcha fixed:** Prisma 6.19 does NOT snake_case unmapped fields — several `@map`s silently missing → caught via psql inspection, fixed, DB reset + re-baselined. **Lesson: always verify generated SQL with `\d table`.**
 - Still open: Vercel hello-deploy (needs Gabriel's Vercel login), Pavithra's UI Gate 0 (docs/DESIGN.md).
+
+
+## 2026-10-31 — UI Gate 0 COMPLETE & Finance Dashboard Foundations (Pavithra S Rajesh)
+
+**By:** Pavithra S Rajesh (Experience & Insights Lead) on branch `feat/design-pavithra`
+
+- **UI Gate 0 (Phase 0) Delivered & Locked:**
+  - Ran `design-taste-frontend` skill (v2 tasteskill) in app mode (`--app --kind finance`): dealt "Achromatic Ledger with Targeted Data Chroma".
+  - Authored and committed `docs/DESIGN.md`: full HSL color tokens, typography hierarchy, density & spacing rules, L-frame shell specs, component recipes, Gate 0-3 audit checklists, and binding anti-slop "We will NOT do" list.
+  - Configured `src/app/globals.css` with exact shadcn/Tailwind-compatible HSL variables, financial domain tokens (`--kpi-primary`, `--chart-1..4`, `--status-active/overdue/warning/neutral`), tabular numbers, and dedicated invoice print stylesheet rules (`@media print`).
+  - Created core UI primitives in `src/shared/ui/`: `Button` (5 variants, accessible focus rings), `Badge` (status pills with WCAG AA/AAA contrast), `Card`, `Input`, `Skeleton` (structural loaders, no blank spinners), `EmptyState`, `Table`, `Icons` (bespoke lightweight SVGs), `AppShell` (staff/admin L-frame with role-based navigation), and `PortalShell` (clean customer portal shell).
+- **Shared TanStack Table Pattern Built (`src/shared/ui/data-table.tsx`):**
+  - Reusable data table with sticky header, live search filter bar, sorting, keyset/page pagination footer with total item count, built once for the entire team's list views.
+- **Finance Dashboard Module Built (`src/modules/dashboard`):**
+  - `schemas.ts`: Single source of truth for date ranges and forecast horizons.
+  - `queries.ts`: High-performance aggregate SQL statements with `FILTER` (zero row-by-row JavaScript math). Enforces exact MRR formula per SRS §1.3/§6 rule 7 (`daily×30`, `weekly×52/12`, `monthly×1`, `yearly/12`), ARR (`MRR × 12`), overdue logic (`status='CONFIRMED' AND due_date < CURRENT_DATE AND (grand_total - amount_paid) > 0`), aging buckets (Current, 1–30, 31–60, 61–90, 90+ days), revenue by plan, and upcoming renewal forecast.
+  - `service.ts` & `service.test.ts`: Pure framework-free business logic; unit tests verify MRR multipliers and bucket structure.
+  - `router.ts`: Thin tRPC procedures (`kpis`, `aging`, `revenueByPlan`, `renewals`, `mrrMovement`).
+  - `components/`: `KPICards`, `AgingBucketsCard`, `RevenueByPlanCard`, `RenewalsCard`, and `FinanceDashboard` container with 10s TanStack Query live polling (FR-DASH-07).
+- **Pages Wired:**
+  - `/dashboard`: Admin/staff view inside `AppShell`.
+  - `/portal`: Customer view inside `PortalShell`.
+  - `/`: Clean landing linking both routes with architecture validation.
+- **Quality Gates Passed:** `npm run typecheck` (0 errors), `npm run lint` (0 warnings), `npm test` (12 test files / 19 passed), `npm run build` (production build compiled successfully).
