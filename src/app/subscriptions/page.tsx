@@ -5,7 +5,7 @@ import {
   SubscriptionList,
   SubscriptionDetail,
   SubscriptionCreateForm,
-} from "@/modules/subscriptions";
+} from "@/modules/subscriptions/client";
 
 export default function SubscriptionsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);

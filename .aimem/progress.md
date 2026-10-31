@@ -316,7 +316,7 @@ _Chronological record of work done. Newest entries at the bottom._
   - `npx vitest run src/modules/portal/service.test.ts` → 10/10 tests passing.
   - `npm run build` → 21/21 routes compiled and prerendered cleanly.
 
-## 2026-10-31 � Money-Flow deliverables complete (Phases 2 & 3)
+## 2026-10-31 � Money-Flow deliverables complete (Phases 2 & 3)
 
 **By:** mariacatheriine (Catherine Maria Benny)
 
@@ -325,3 +325,20 @@ _Chronological record of work done. Newest entries at the bottom._
 - **Payments Module (FR-PAY-01..04)**: PaymentService with transactional settlement, strict overpayment guard, atomic amount_paid update, auto-flip to PAID upon full settlement, `RecordPaymentDialog` modal, and dedicated Payments & Collections page (`/payments`) with transaction ledger and overdue invoices view. Tested with 4 vitest unit tests.
 - **Invoice Print Stylesheet (FR-INV-02)**: Configured print media styles in `src/app/globals.css` hiding navigation, sidebars, and buttons for clean A4 printing.
 - **Verification**: 79/79 unit tests passing across all Catherine modules, 0 TypeScript errors (`npm run typecheck`), 0 ESLint warnings/errors (`npm run lint`).
+## 2026-10-31 — Fix production crash: @trpc/server leaked into client bundle
+
+**By:** OpenCode (AI agent) on `main`
+
+- **Symptom:** Vercel deploy (`orbit-amber-two.vercel.app`) crashed on every page with *"You're trying to use @trpc/server in a non-server environment"* — a client-side exception that blanked the app.
+- **Root cause:** module barrels (`src/modules/<name>/index.ts`) re-exported BOTH the server router AND the client components. Pages like `/dashboard`, `/billing`, `/portal`, `/subscriptions`, `/templates`, `/catalog/*`, `/admin/*` imported components from the barrel → the whole router chain (`@/shared/trpc` → `@trpc/server` + Prisma) was bundled into the browser. `initTRPC.create()` throws as soon as it loads outside Node.
+- **Fix (extends the existing sanctioned pattern from commits 16283a6 + 45a4060):**
+  - Created a client-safe second barrel `src/modules/<name>/client.ts` for **billing, templates, catalog, subscriptions, admin, dashboard, portal** (auth already had one). Each exports ONLY the module's client components — never the router/service/prisma.
+  - Repointed all 11 page imports from `@/modules/<name>` → `@/modules/<name>/client`.
+  - Fixed a self-import leak in `RunBillingButton.tsx`: `import type { BillingRunResult } from "@/modules/billing"` → `from "../service"` (type-only, erased at compile time).
+  - Left untouched: `@/shared/trpc/root.ts` (server, needs the routers) and `/api/cron/billing/route.ts` (server route, correctly imports the barrel).
+- **Verification:**
+  - `npx next build` → 21/21 routes, 0 errors. First Load JS dropped (pages no longer drag the server stack).
+  - Grepped built client chunks: **zero** occurrences of `initTRPC`/`@trpc/server`, `PrismaClient`, or the "non-server environment" error string.
+  - `next lint` → 0 warnings/errors (modularity `no-restricted-imports` contract still satisfied — `/client` is a sanctioned subpath).
+  - `next start` smoke test: `/` 200, `/login` 200, `/subscriptions` 200, `/dashboard` 307→login, and no leak string in served HTML.
+- **Action required:** commit + push to trigger a Vercel redeploy. Local `next build` output matches what Vercel compiles, so the redeploy will resolve the crash.

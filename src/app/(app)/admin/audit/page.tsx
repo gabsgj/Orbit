@@ -2,7 +2,7 @@
  * Audit log (FR-ADM-03) — global, append-only trail of sensitive actions
  * (status changes, discounts, payments). List lives in a client component.
  */
-import { AuditLogList } from "@/modules/admin";
+import { AuditLogList } from "@/modules/admin/client";
 
 export default function AuditPage() {
   return (

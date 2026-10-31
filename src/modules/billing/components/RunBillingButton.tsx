@@ -8,7 +8,7 @@
 import { useState } from "react";
 import { trpc } from "@/shared/trpc/react";
 import { Badge, Button, Dialog } from "@/shared/ui";
-import type { BillingRunResult } from "@/modules/billing";
+import type { BillingRunResult } from "../service";
 
 export function RunBillingButton() {
   const [dialogOpen, setDialogOpen] = useState(false);

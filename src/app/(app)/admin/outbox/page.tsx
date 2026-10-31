@@ -3,7 +3,7 @@
  * and invoice emails are staged here instead of going through SMTP.
  * The interactive list lives in a client component (modules/admin/components).
  */
-import { OutboxList } from "@/modules/admin";
+import { OutboxList } from "@/modules/admin/client";
 
 export default function OutboxPage() {
   return (

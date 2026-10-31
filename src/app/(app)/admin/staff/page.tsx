@@ -1,4 +1,4 @@
-import { StaffView } from "@/modules/admin";
+import { StaffView } from "@/modules/admin/client";
 
 export const metadata = {
   title: "Staff Management — Orbit",

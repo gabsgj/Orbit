@@ -1,5 +1,5 @@
 import { Card, CardHeader } from "@/shared/ui";
-import { RunBillingButton, BillingRunsTable } from "@/modules/billing";
+import { RunBillingButton, BillingRunsTable } from "@/modules/billing/client";
 
 /**
  * Billing day page (FR-BILL-02 / FR-BILL-06) — the demo centerpiece.

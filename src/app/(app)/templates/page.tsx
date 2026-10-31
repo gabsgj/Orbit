@@ -1,4 +1,4 @@
-import { TemplatesView } from "@/modules/templates";
+import { TemplatesView } from "@/modules/templates/client";
 
 export const metadata = {
   title: "Quotation Templates — Orbit",

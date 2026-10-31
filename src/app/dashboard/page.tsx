@@ -1,5 +1,5 @@
 import { AppShell } from "@/shared/ui";
-import { FinanceDashboard } from "@/modules/dashboard";
+import { FinanceDashboard } from "@/modules/dashboard/client";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/shared/auth";

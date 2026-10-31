@@ -1,4 +1,4 @@
-import { TaxesView } from "@/modules/catalog";
+import { TaxesView } from "@/modules/catalog/client";
 
 export const metadata = {
   title: "Taxes — Orbit",

@@ -1,5 +1,5 @@
 import { PortalShell } from "@/shared/ui";
-import { CustomerPortal } from "@/modules/portal";
+import { CustomerPortal } from "@/modules/portal/client";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/shared/auth";

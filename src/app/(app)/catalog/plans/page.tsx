@@ -1,4 +1,4 @@
-import { PlansView } from "@/modules/catalog";
+import { PlansView } from "@/modules/catalog/client";
 
 export const metadata = {
   title: "Subscription Plans — Orbit",

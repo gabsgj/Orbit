@@ -1,4 +1,4 @@
-import { ProductsView } from "@/modules/catalog";
+import { ProductsView } from "@/modules/catalog/client";
 
 export const metadata = {
   title: "Products & Variants — Orbit",
