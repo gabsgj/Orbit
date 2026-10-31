@@ -25,8 +25,24 @@ async function tick() {
   }
 }
 
-console.log(`[worker] Orbit billing scheduler started — cron "${schedule}"`);
+console.log(
+  `[worker] Orbit billing scheduler started — trigger source: local worker, ` +
+    `offline scheduler (node-cron) — cron "${schedule}"`,
+);
 cron.schedule(schedule, tick);
 
 // Run once at startup when BILLING_RUN_ON_START=true (useful for rehearsal).
 if (process.env.BILLING_RUN_ON_START === "true") void tick();
+
+// Graceful shutdown: close the DB pool so `npm run worker` exits cleanly.
+async function shutdown(signal: NodeJS.Signals) {
+  console.log(`[worker] ${signal} received — shutting down, disconnecting prisma…`);
+  try {
+    await prisma.$disconnect();
+  } catch (err) {
+    console.error("[worker] prisma disconnect failed:", err);
+  }
+  process.exit(0);
+}
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);

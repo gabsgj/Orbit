@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { router, publicProcedure, requireRole } from "@/shared/trpc";
+import { billingRunSchema } from "./schemas";
 import { run } from "./service";
 
 /**
@@ -10,7 +10,7 @@ export const billingRouter = router({
   /** "Run billing day" button (FR-BILL-02a). Returns the run summary. */
   run: publicProcedure
     .use(requireRole("ADMIN", "STAFF"))
-    .input(z.object({ asOf: z.coerce.date().optional() }).optional())
+    .input(billingRunSchema)
     .mutation(({ ctx, input }) =>
       run(ctx.prisma, {
         asOf: input?.asOf ?? new Date(),
