@@ -1,5 +1,11 @@
 # Progress Log
 
+## 2026-10-31
+- Interview prep Q&A session (as Gabriel): answered Next.js env vars, CSS block formatting contexts, JS garbage collection/memory leaks, Prisma db pull internals, React rules of hooks, TypeScript discriminated unions. Style: one paragraph, human, no em dashes/hyphens.
+- fix: repaired broken Mermaid sequence diagram in README.md (semicolon in message text on the `P->>I` line was a statement separator; replaced with comma). GitHub render error resolved.
+- docs: created `docs/youtube-metadata.md` with video title, description (timestamps, repo link, team), tags, and thumbnail options. Thumbnail image generation failed (insufficient credits); gave Canva prompt + dashboard screenshot alternative. User asked to remove timestamps; description is now two narrative paragraphs.
+- assets: built YouTube thumbnail as HTML/CSS matching Orbit branding (`assets/thumbnail/thumbnail.html`), rendered to `assets/thumbnail/orbit-thumbnail.png` (1280×720) via headless Chrome. Fixed clipped chart end-dot. Metadata file updated with re-render command.
+
 _Chronological record of work done. Newest entries at the bottom._
 
 ## 2026-10-31 — Identity & Catalog hardening follow-up
