@@ -171,3 +171,32 @@ _Chronological record of work done. Newest entries at the bottom._
   - `npm run typecheck` ✓ 0 errors.
   - `npm run lint` ✓ 0 errors / 0 warnings.
   - `npm test` ✓ all test files passing.
+
+## 2026-10-31 — Identity & Catalog Slices COMPLETE (Abhiram H)
+
+**By:** Abhiram H (Identity & Catalog Lead) on `main`
+
+- **Auth & RBAC Delivered (FR-AUTH-01…07, FR-ADM-01):**
+  - `modules/auth/schemas.ts`: Shared Zod password policy schema (>8 chars, ≥1 upper, ≥1 lower, ≥1 special), signup/login/forgot/reset schemas, staff management schemas.
+  - `modules/auth/queries.ts`: Pure Prisma queries for customer user creation with company profile transaction, staff user provisioning, safe email prefix deactivation (`deactivated::`), single-use token lifecycle, and offline outbox staging.
+  - `modules/auth/service.ts`: Bcrypt hashing (12 rounds), case-insensitive email collision guard (409 conflict code), SHA256 hashed single-use expiring reset tokens with outbox email staging, and admin staff management.
+  - `modules/auth/router.ts`: Thin tRPC procedures for signup, forgotPassword, resetPassword, createStaff (ADMIN only), deactivateStaff (ADMIN only), listStaff (ADMIN only).
+  - `modules/auth/service.test.ts`: Vitest unit tests covering all password policy rules, duplicate email conflicts, single-use token invalidation, token expiry, and staff provisioning/deactivation.
+  - UI Pages: `/login`, `/signup` (with live password policy checklist), `/forgot-password`, `/reset-password` (with query token extraction & offline outbox hints).
+- **Catalog Delivered (FR-CAT-01…05):**
+  - `modules/catalog/schemas.ts`: Base product schema (service/good, cost/sales price), attribute & attribute values, variant schema with `priceExtra` modifier (e.g. Odoo brand +560), plan schema with lifecycle flags (autoClose, closableEarly, pausable, renewable) and date interval checks (`availableTo > availableFrom`), and tax CRUD schema.
+  - `modules/catalog/queries.ts`: Keyset-paginated product and plan queries, attribute/variant relations, tax rules, and soft-delete archive mechanisms.
+  - `modules/catalog/service.ts` & `router.ts`: Admin-only write procedures and staff+admin read procedures.
+  - `modules/catalog/service.test.ts`: Unit tests verifying product creation, variant price_extra addition, plan lifecycle flags, date validations, and tax rates.
+  - UI Pages & Views: `/catalog/products` (ProductsView with variant configuration), `/catalog/plans` (PlansView with period selector and lifecycle matrix), `/catalog/taxes` (TaxesView).
+- **Quotation Templates Delivered (FR-QT-01…02):**
+  - `modules/templates/schemas.ts`, `queries.ts`, `service.ts`, `router.ts`: Template creation with plan association and `validityDays`, plus atomic line snapshot upserts (variant, quantity, snapshot unit price).
+  - `modules/templates/service.test.ts`: Unit tests verifying template creation and transactional line replacement.
+  - UI Page: `/templates` (TemplatesView with preset line attachments).
+- **Admin Staff Management Delivered (FR-ADM-01):**
+  - `modules/admin/components/staff-view.tsx` & `/admin/staff` page: Admin-only staff provisioning and status table with deactivation capabilities.
+- **Quality Gates Passed:**
+  - `npm run typecheck` (0 errors)
+  - `npm run lint` (0 warnings)
+  - `npx vitest run` (14 test files passed / 73 tests passed)
+  - `npm run build` (20 static & dynamic routes compiled successfully)

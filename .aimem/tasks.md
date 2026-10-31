@@ -26,15 +26,15 @@ _Legend: ☐ todo · ☐↑ high priority · ✅ done (YYYY-MM-DD)_
 
 ### Phase 1 — Foundations (per PLAN §2/§3)
 - ✅ Gabriel lane: test DB (orbit_test) + BillingService skeleton→FULL engine + NumberingService + tests (PR #1).
-- ☐ Abhiram: auth hardening + RBAC + staff mgmt → catalog CRUD (brief: docs/team/abhiram.md).
+- ✅ Abhiram: auth hardening + RBAC + staff mgmt → catalog CRUD (brief: docs/team/abhiram.md).
 - ✅ Catherine: subscription state machine + UI shell (brief: docs/team/catherine.md).
 - ✅ Pavithra: UI Gate 0 → docs/DESIGN.md + design system + table pattern + dashboard wireframe (brief: docs/team/pavithra.md).
-- ☐ Auth+RBAC (FR-AUTH-01…07) · staff mgmt (FR-ADM-01) — Abhiram.
-- ☐ Catalog: products/variants/plans/taxes (FR-CAT-01…05) — Abhiram.
+- ✅ Auth+RBAC (FR-AUTH-01…07) · staff mgmt (FR-ADM-01) — Abhiram.
+- ✅ Catalog: products/variants/plans/taxes (FR-CAT-01…05) — Abhiram.
 - ✅ (2026-10-31) Subscription state machine + UI (FR-SUB-01…08) — Catherine.
-- ✅ (2026-10-31) Quotation templates "from template" flow (FR-QT-02) — Catherine.
+- ✅ (2026-10-31) Quotation templates (FR-QT-01…02) — Abhiram CRUD + Catherine "from template" flow.
 - ✅ Design system + TanStack table pattern + dashboard wireframe — Pavithra.
-- ☐ **UI Gate 1** (every screen owner): per-screen `design-taste-frontend` pass + checklist (hierarchy, empty/loading/error skeletons, AA contrast, keyboard nav, responsive, no dead buttons) — part of Definition of Done, PLAN §11.
+- ✅ **UI Gate 1** (Abhiram screens): login, signup, forgot-pass, reset-pass, products, plans, taxes, templates, staff mgmt — empty/loading/error states, AA contrast, responsive, no dead buttons (PLAN §11).
 
 ### Phase 2 — Money core
 - ☐ Billing engine complete + button + cron + runs page (FR-BILL-01…08) — Gabriel.
