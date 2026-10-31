@@ -1,0 +1,91 @@
+-- =============================================================================
+-- explain-invoices.sql
+-- EXPLAIN (ANALYZE, BUFFERS) for the typical invoice-list queries.
+-- Demonstrates that the correct indexes are picked up by the planner.
+--
+-- Usage:  psql "$DATABASE_URL" -f scripts/perf/explain-invoices.sql
+-- =============================================================================
+\timing on
+Timing is on.
+\echo '============================================================'
+============================================================
+\echo 'INVOICE LIST — QUERY PLANS'
+INVOICE LIST — QUERY PLANS
+\echo '============================================================'
+============================================================
+-- 1. Typical paginated list: CONFIRMED invoices ordered by due_date
+\echo ''
+
+\echo '--- 1. Paginated list (CONFIRMED, due_date ASC, LIMIT 25) -------'
+--- 1. Paginated list (CONFIRMED, due_date ASC, LIMIT 25) -------
+\echo '    Index expected: invoices_overdue_idx  (partial: status=CONFIRMED)'
+    Index expected: invoices_overdue_idx  (partial: status=CONFIRMED)
+EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
+SELECT id, number, customer_id, subscription_id,
+       issue_date, due_date, status,
+       subtotal, tax_total, discount_total, grand_total, amount_paid
+FROM invoices
+WHERE status = 'CONFIRMED'
+ORDER BY due_date ASC
+LIMIT 25;
+                                                                  QUERY PLAN                                                                  
+----------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=0.28..94.99 rows=25 width=172) (actual time=0.022..0.093 rows=25.00 loops=1)
+   Buffers: shared hit=26
+   ->  Index Scan using invoices_overdue_idx on invoices  (cost=0.28..201.07 rows=53 width=172) (actual time=0.021..0.090 rows=25.00 loops=1)
+         Index Searches: 1
+         Buffers: shared hit=26
+ Planning:
+   Buffers: shared hit=217
+ Planning Time: 0.932 ms
+ Execution Time: 0.118 ms
+(9 rows)
+
+Time: 2.294 ms
+-- 2. Overdue partial-index query
+\echo ''
+
+\echo '--- 2. Overdue invoices (partial-index scan) ---------------------'
+--- 2. Overdue invoices (partial-index scan) ---------------------
+\echo '    Index expected: invoices_overdue_idx  (partial: status=CONFIRMED)'
+    Index expected: invoices_overdue_idx  (partial: status=CONFIRMED)
+\echo '    Predicate matches partial-index WHERE clause exactly.'
+    Predicate matches partial-index WHERE clause exactly.
+EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
+SELECT id, number, customer_id,
+       due_date, grand_total, amount_paid,
+       (grand_total - amount_paid) AS outstanding
+FROM invoices
+WHERE status = 'CONFIRMED'
+  AND due_date < CURRENT_DATE
+ORDER BY due_date ASC
+LIMIT 25;
+                                                                   QUERY PLAN                                                                   
+------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=64.01..64.06 rows=18 width=132) (actual time=2.238..2.242 rows=25.00 loops=1)
+   Buffers: shared hit=311
+   ->  Sort  (cost=64.01..64.06 rows=18 width=132) (actual time=2.237..2.239 rows=25.00 loops=1)
+         Sort Key: due_date
+         Sort Method: top-N heapsort  Memory: 30kB
+         Buffers: shared hit=311
+         ->  Bitmap Heap Scan on invoices  (cost=4.42..63.64 rows=18 width=132) (actual time=0.149..1.729 rows=2357.00 loops=1)
+               Recheck Cond: ((due_date < CURRENT_DATE) AND (status = 'CONFIRMED'::"InvoiceStatus"))
+               Heap Blocks: exact=304
+               Buffers: shared hit=308
+               ->  Bitmap Index Scan on invoices_overdue_idx  (cost=0.00..4.42 rows=18 width=0) (actual time=0.106..0.107 rows=2357.00 loops=1)
+                     Index Cond: (due_date < CURRENT_DATE)
+                     Index Searches: 1
+                     Buffers: shared hit=4
+ Planning Time: 0.077 ms
+ Execution Time: 2.260 ms
+(16 rows)
+
+Time: 2.680 ms
+\echo ''
+
+\echo '============================================================'
+============================================================
+\echo 'END OF INVOICES EXPLAIN'
+END OF INVOICES EXPLAIN
+\echo '============================================================'
+============================================================
