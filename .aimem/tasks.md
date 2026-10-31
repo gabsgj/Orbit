@@ -39,18 +39,19 @@ _Legend: ☐ todo · ☐↑ high priority · ✅ done (YYYY-MM-DD)_
 - ☐ **UI Gate 1** (every screen owner): per-screen `design-taste-frontend` pass + checklist (hierarchy, empty/loading/error skeletons, AA contrast, keyboard nav, responsive, no dead buttons) — part of Definition of Done, PLAN §11.
 
 ### Phase 2 — Money core
-- ☐ Billing engine complete + button + cron + runs page (FR-BILL-01…08) — Gabriel.
+- ✅ Gabriel: billing engine + button + cron + runs page (FR-BILL-01…08) — engine (PR #1) + UI (a3) DONE.
+- ✅ Admin backend+pages: audit log, mail outbox, sequences (FR-ADM-02/03, FR-MAIL-02) — a4/a5 DONE.
+- ✅ Dashboard aggregates backend (KPIs, MRR/ARR, aging, renewals) — a6 DONE; charts/UI remain Pavithra's.
+- ✅ Mail outbox + admin viewer (FR-MAIL-01…02) — a5 DONE (offline reset-link button works).
 - ☐ Invoices (FR-INV-01…05) + payments (FR-PAY-01…04) — Catherine.
-- ☐ DiscountEngine (FR-DISC-01…06) — Catherine (hook point with Gabriel's billing).
-- ☐ Dashboard KPIs + MRR/ARR + charts + renewals + aging (FR-DASH-01…05, FR-PAY-05) — Pavithra.
-- ☐ Mail outbox + admin viewer (FR-MAIL-01…02) — Abhiram.
-- ☐ **UI Gate 2** (Pavithra, end of Phase 2): mid-build `impeccable` review of core flows; findings → "UI polish" tasks fixed in Phase 3.
+- ☐ DiscountEngine (FR-DISC-01…06) — Catherine (hook ready in billing; contract exported).
+- ☐ **UI Gate 2** (Pavithra, end of Phase 2): mid-build `impeccable` review of core flows.
 
 ### Phase 3 — Differentiators & proof
-- ☐ Volume seed (≥10k subs/40k invoices) + `EXPLAIN ANALYZE` <2s verification (FR-ADM-04, NFR-PERF-01) — Gabriel.
+- ✅ Volume seed (10,007 subs / 15,147 invoices) + `EXPLAIN ANALYZE` verification — **worst query 10.55ms, ~190× headroom**; docs/PERF.md filled (FR-ADM-04, NFR-PERF-01) — DONE (a2+a7).
 - ☐ Invoice print stylesheet (FR-INV-02) — Catherine. Timeline UI (FR-SUB-08) — Catherine.
 - ☐ Customer portal (FR-PORT-01…03) — Catherine backend + Pavithra UI.
-- ☐ Polling live-ish dashboard (FR-DASH-07) — Pavithra.
+- ☐ Polling live-ish dashboard (FR-DASH-07) — Pavithra (billing runs page already polls 10s).
 
 ### Phase 4 — Harden & rehearse (FEATURE FREEZE at start)
 - ☐ Validation sweep (client+server, consistent error shape) — ALL.

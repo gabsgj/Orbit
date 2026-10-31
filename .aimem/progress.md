@@ -84,3 +84,25 @@ _Chronological record of work done. Newest entries at the bottom._
 - **BillingService.run** (SRS M5, PLAN §4): pg_try_advisory_xact_lock serializes runs; due-selection via (status,next_billing_date) index; catch-up loop invoices every missed period (≤12, one per period); **idempotency** = UNIQUE(subscription_id,period_start) + P2002→"skipped", with **per-subscription SAVEPOINT** undoing the 25P02 aborted state (per-period isolation); snapshot lines (frozen unit_price) + per-line tax (exact Decimals) + DiscountEngine hook (contract ready for Catherine); gapless INV numbers; auto_close + status history; anchor advance; billing_runs audit (RUNNING→DONE).
 - **Router:** billing.run (ADMIN/STAFF) + billing.runs audit list.
 - **Proof:** 13 test files green (10 billing tests vs orbit_test: snapshot, idempotency, visible-skip via partial-history collision, catch-up, concurrency, auto-close, month-end, Decimal math); smoke vs dev DB → run1 created INV-2026-00001 ₹1839.62 CONFIRMED, run2 created 0. typecheck/lint/build ✓. **PR #1 open** (awaiting teammate review per standards).
+
+## 2026-10-31 — Multi-agent orchestration: 11 agents on Gabriel's pending works
+
+**By:** OpenCode orchestrator (at Gabriel's request: "use as many agents as possible, minimum 10, you orchestrate")
+
+- **Setup:** merged PR #1 to main (billing engine on main); built orchestrator-owned foundation to prevent agent conflicts: shared/ui primitives (Button/Card/Badge/Table/Dialog + barrel) + (app) staff-admin shell with role guard + sidebar nav. Wrote /tmp/orbit-agents/CONTEXT.md + 11 strictly file-partitioned prompts.
+- **Fleet:** 11 headless agents via `opencode run --auto --model amazon-bedrock/us.moonshotai.kimi-k3` (pilot a8 first, then 10 parallel in 2 waves). All 11 completed with .done.md markers.
+- **Delivered:** a1 seed v2 (full story dataset: 7 subs all states, 2 historical invoices — 1 PAID+payment, 1 OVERDUE, 2 discount rules) · a2 volume seed (10k subs/15k invoices in 4s) · a3 billing-day UI (RunBillingButton + result dialog + runs table w/ 10s polling) · a4 admin API (keyset auditLog/outbox/sequences) · a5 admin pages (/admin/runs, /admin/outbox + [id] w/ offline reset-link button, /admin/audit) · a6 dashboard aggregates (KPIs, MRR/ARR, aging, renewals — raw SQL + 8 real tests) · a7 perf kit (EXPLAIN scripts + run.sh) · a8 docs/DEMO.md (9-act script) + demo-check.sh (all green) · a9 README/.env catch-up · a10 keyset pagination helper + tests · a11 docs/DEPLOY.md (Vercel+Neon guide).
+- **Orchestrator integration:** fixed 4 module-boundary lint errors by exporting components from module barrels (billing, admin) + 1 react/no-unescaped-entities; full gate re-run: **14 test files green (48 tests), typecheck ✓, lint ✓, build ✓ (9 routes)**; live smoke: landing 200, /billing 307→signin, csrf OK.
+- **PERF PROOF (NFR-PERF-01):** seeded 10,007 subs + 15,147 invoices, ran EXPLAIN ANALYZE → **worst query (MRR aggregate) 10.55ms**, invoice list page 0.12ms, overdue 2.26ms — **~190× headroom under the 2s budget**. docs/PERF.md filled with real plans + timings; partial overdue index confirmed in use.
+- **Git:** 9 logical commits on main pushed (c890e31 foundation → 3aaa615 docs). Each agent credited in its commit message (a1..a11).
+- **Lesson for agents:** module-boundary eslint rule caught deep component imports — correct fix is exporting components from the module barrel (public surface), never bypassing the rule.
+
+## 2026-10-31 — Admin UI pages (parallel agent a5-adminui)
+
+**By:** OpenCode agent a5-adminui (orchestrated parallel build)
+
+- **Pages created:** `admin/runs` (reuses `trpc.billing.runs`, FR-ADM-02), `admin/outbox` list (FR-MAIL-02, demo-critical), `admin/outbox/[id]` detail (server component, prisma direct read, first-href "Open link" button = offline reset-link demo), `admin/audit` list (FR-ADM-03).
+- **Components:** `modules/admin/components/{outbox-list,audit-log-list}.tsx` — client components, keyset "Load more" via `nextCursor` (no OFFSET, NFR-PERF-01), page accumulator in state.
+- **Contract:** matches a4-adminapi's `admin.outbox`/`admin.auditLog` (`{items,nextCursor}`, audit includes `user.email`).
+- **Gotcha:** TanStack Query v5 has no `keepPreviousData: true` — must use `placeholderData: keepPreviousData` import.
+- **Verify:** `npx tsc --noEmit` clean for all 6 files (only remaining repo errors are a2-volume's `prisma/seed/volume.ts`).
