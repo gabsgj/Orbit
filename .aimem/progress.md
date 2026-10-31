@@ -122,6 +122,15 @@ _Chronological record of work done. Newest entries at the bottom._
 - **≡ƒÉ¢ Found + fixed a broken main:** Pavithra's Gate-0 commit added `@tanstack/react-table` + `recharts` to package.json *without running npm install* ΓåÆ stale lockfile, runtime crash (`Cannot find module '@tanstack/react-table'`), and `npm ci` would fail for any fresh clone. Fixed by running `npm install` (lockfile already in sync ΓÇö deps were added to package.json's lock entry). **Lesson recorded: agents must run npm install after adding deps, and CI-style `npm ci` check would catch this.**
 - Gabriel's lane is now **code-complete**; only integration-steward + Phase-4 dry-run duties remain (waiting on teammates' PRs).
 
+## 2026-10-31 — Teammates land + CI pipeline (integration steward)
+
+**By:** OpenCode agent (Gabriel's lane — integration + platform)
+
+- **Pulled teammates' work:** Abhiram (FR-AUTH-01…07 password policy/RBAC, FR-CAT-01…05 products/variants/plans/taxes, FR-QT-01 templates, FR-ADM-01 staff mgmt) + Catherine phase-1 (subscription state machine + transitions + tests + UI). Integration gate on main: **typecheck ✓ · lint ✓ · 112 tests ✓ · build ✓ (21 routes)** — no fixes needed.
+- **Built CI** (`.github/workflows/ci.yml`): on every push/PR to main → postgres:18 service + `npm ci` + prisma migrate deploy + typecheck + `eslint --max-warnings=0` + vitest + build. README badge added.
+- **CI proved itself instantly:** first run failed in 27s — `npm ci` found the lockfile still missing `@emnapi/*` entries (Pavithra's deps never got a lockfile regen; my earlier `npm install` only verified). Regenerated `package-lock.json`, verified `npm ci --dry-run` clean → second run **GREEN (2m8s)**.
+- Repo state: main green under CI; every future teammate PR is auto-gated.
+
 ## 2026-10-31 ΓÇö Admin UI pages (parallel agent a5-adminui)
 
 **By:** Pavithra S Rajesh (Experience & Insights Lead) on `main`
