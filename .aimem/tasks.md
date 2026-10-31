@@ -75,10 +75,21 @@ _Legend: ☐ todo · ☐↑ high priority · ✅ done (YYYY-MM-DD)_
 - ✅ Polling live-ish dashboard (FR-DASH-07) — Pavithra DONE (10s TanStack Query polling + refresh button + error banner).
 
 ### Phase 4 — Harden & rehearse (FEATURE FREEZE at start)
-- ☐ Validation sweep (client+server, consistent error shape) — ALL.
+- ✅ Validation sweep (client+server, consistent error shape) — c7 agent: missing zod schemas added to billing/invoices/subscriptions routers; error codes verified consistent.
 - ✅ **UI Gate 3** (Pavithra owned screens & print stylesheet): final `impeccable` audit completed across `/dashboard` and `/portal`, dedicated `@media print` A4 invoice print stylesheet implemented in `globals.css` with zero UI chrome, zero console errors, zero lorem ipsum, consistent `formatINR()` (₹) and date formats, and demo-path pixel polish verified. Teammate screens audit ready for team post-freeze.
-- ☐ README verified on a clean checkout; offline rehearsal (WiFi off) — Gabriel.
-- ☐ Demo script (PLAN §7) rehearsed ×2 — ALL.
+- ✅ **UI Gate 3 (auth screens)** — impeccable detector: 0 anti-patterns on /login /signup /forgot-password after server-bundle + placeholder fixes.
+- ✅ Dead-button sweep (c6): 20+ screens — 0 dead buttons/hrefs/forms; 4 loading-state gaps + portal deep-links fixed.
+- ✅ README verified on a clean checkout (2026-10-31, FINAL code): fresh clone → install → migrate → seed → dev → 142 tests → build ✓.
+- ✅ Offline rehearsal (WiFi off audit): zero external URLs/fonts/CDN/fetch in src/ (docs/DEMO.md evidence); flow-smoke 12/12 green locally.
+- ☐ Demo script (PLAN §7) rehearsed ×2 aloud — ALL (team activity; every mechanic verified working).
+
+### Feature completion (C-sprint, 2026-10-31)
+- ✅ Subscription activity timeline (FR-SUB-08) — c1 (Catherine).
+- ✅ CSV export invoices + payments (FR-DASH-06) — c2 (Pavithra).
+- ✅ Dunning reminders → mail outbox (FR-PAY-06) — c3 (Catherine).
+- ✅ Vercel-cron hardening (runtime, maxDuration, misconfig guard) — c4 (Gabriel).
+- ✅ 12-flow E2E verifier `scripts/flow-smoke.ts` — c5 (Gabriel) — 12/12 green.
+- ✅ Stretch shipped early: CSV export + dunning reminders. Still stretch-only: proration · dark mode.
 
 ### Identity & Catalog hardening follow-up (Abhiram, 2026-10-31)
 - ✅ Reset-token consumption is atomic: the transaction conditionally marks `used_at` only when unused and unexpired; concurrent-use regression test added.
