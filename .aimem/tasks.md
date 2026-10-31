@@ -26,7 +26,11 @@ _Legend: ☐ todo · ☐↑ high priority · ✅ done (YYYY-MM-DD)_
 - ☐ **UI Gate 0** (Pavithra, `design-taste-frontend`): art direction → `docs/DESIGN.md` + tokens into globals.css + AppShell/PortalShell.
 - ☐ Vercel hello-deploy (needs Gabriel's Vercel login; bonus mirror only).
 
-### Phase 1 — Foundations (per PLAN §2/§3: Gabriel=billing skeleton+seeds, Abhiram=auth+catalog, Catherine=subscriptions, Pavithra=design system+dashboard wire)
+### Phase 1 — Foundations (per PLAN §2/§3)
+- ✅ Gabriel lane: test DB (orbit_test) + BillingService skeleton→FULL engine + NumberingService + tests (PR #1).
+- ☐ Abhiram: auth hardening + RBAC + staff mgmt → catalog CRUD (brief: docs/team/abhiram.md).
+- ☐ Catherine: subscription state machine + UI shell (brief: docs/team/catherine.md).
+- ☐ Pavithra: UI Gate 0 → docs/DESIGN.md + design system + table pattern + dashboard wireframe (brief: docs/team/pavithra.md).
 - ☐ Auth+RBAC (FR-AUTH-01…07) · staff mgmt (FR-ADM-01) — Abhiram.
 - ☐ Catalog: products/variants/plans/taxes (FR-CAT-01…05) — Abhiram.
 - ☐ Subscription state machine + UI (FR-SUB-01…08) — Catherine.
