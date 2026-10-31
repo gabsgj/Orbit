@@ -88,9 +88,12 @@ export const authRouter = router({
   createStaff: publicProcedure
     .use(requireRole("ADMIN"))
     .input(createStaffSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       try {
-        return await createStaff(prisma, input);
+        return await createStaff(prisma, {
+          ...input,
+          adminUserId: ctx.session!.user.id,
+        });
       } catch (err: unknown) {
         const e = err as { code?: string; message?: string };
         if (e.code === "EMAIL_CONFLICT") {
