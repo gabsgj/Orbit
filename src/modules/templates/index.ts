@@ -1,5 +1,22 @@
 /**
- * modules/templates — PUBLIC API. Other modules may import ONLY from this barrel
- * (enforced by eslint no-restricted-imports; see docs/PLAN.md §1).
+ * modules/templates — PUBLIC API barrel.
+ * Other modules may import ONLY from this file (eslint no-restricted-imports).
  */
 export { templatesRouter } from "./router";
+export {
+  createTemplateSchema,
+  updateTemplateSchema,
+  upsertTemplateLinesSchema,
+  listTemplatesSchema,
+  templateLineSchema,
+} from "./schemas";
+export type {
+  CreateTemplateInput,
+  UpdateTemplateInput,
+  UpsertTemplateLinesInput,
+  ListTemplatesInput,
+  TemplateLine,
+} from "./schemas";
+
+// UI Components
+export { TemplatesView } from "./components/templates-view";
