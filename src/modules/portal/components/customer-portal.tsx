@@ -8,6 +8,7 @@ import { Button } from "@/shared/ui/button";
 import { Dialog } from "@/shared/ui/dialog";
 import { Input } from "@/shared/ui/input";
 import { DataTable } from "@/shared/ui/data-table";
+import { EmptyState } from "@/shared/ui/empty-state";
 import { formatINR, formatDate } from "@/shared/lib/money";
 import { trpc } from "@/shared/trpc/react";
 import {
@@ -30,6 +31,26 @@ export interface CustomerPortalProps {
   subscriptions?: PortalSubscription[];
   invoices?: PortalInvoice[];
   isLoading?: boolean;
+}
+
+/* ── Icon dot: pastel tint bg + -ink foreground (same pattern as dashboard) ── */
+function IconDot({
+  tint,
+  ink,
+  children,
+}: {
+  tint: string;
+  ink: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+      style={{ backgroundColor: `hsl(var(${tint}))`, color: `hsl(var(${ink}))` }}
+    >
+      {children}
+    </span>
+  );
 }
 
 export function CustomerPortal({
@@ -112,9 +133,8 @@ export function CustomerPortal({
   const invoices: PortalInvoice[] = propInvoices || remoteInvoices || [];
   const isLoading = propLoading || (isSubsLoading && !propSubscriptions) || (isInvoicesLoading && !propInvoices);
 
-  const totalMonthlySpend = subscriptions
-    .filter((s) => s.status === "ACTIVE")
-    .reduce((sum, s) => sum + s.monthlyLineValue, 0);
+  const activeSubs = subscriptions.filter((s) => s.status === "ACTIVE");
+  const totalMonthlySpend = activeSubs.reduce((sum, s) => sum + s.monthlyLineValue, 0);
 
   const totalOutstanding = invoices
     .filter((i) => i.status === "CONFIRMED")
@@ -210,7 +230,7 @@ export function CustomerPortal({
             variant="outline"
             size="sm"
             onClick={() => setSelectedInvoice(row.original)}
-            className="h-6 text-[11px] px-2"
+            className="h-6 text-[11px] px-2 rounded-full"
           >
             <PrinterIcon size={12} className="mr-1" />
             View & Print
@@ -220,22 +240,28 @@ export function CustomerPortal({
     },
   ];
 
+  const tabItems = [
+    { key: "subscriptions" as const, label: `Subscriptions (${subscriptions.length})`, icon: SubscriptionIcon },
+    { key: "invoices" as const, label: `Invoices (${invoices.length})`, icon: InvoiceIcon },
+    { key: "billing" as const, label: "Billing Profile", icon: CreditCardIcon },
+  ];
+
   return (
     <div className="space-y-6">
       {/* ── Status Feedback Banner ──────────────────────────────────────── */}
       {feedbackMessage && (
         <div
-          className={`rounded-[var(--radius-xs)] border p-3 flex items-center justify-between text-xs ${
+          className={`rounded-[var(--radius-lg)] border p-3.5 flex items-center justify-between text-xs shadow-[var(--shadow-soft)] ${
             feedbackMessage.type === "success"
-              ? "border-[hsl(var(--status-active-ink))]/30 bg-[hsl(var(--status-active-ink))]/10 text-[hsl(var(--foreground))]"
-              : "border-[hsl(var(--status-overdue-ink))]/30 bg-[hsl(var(--status-overdue-ink))]/10 text-[hsl(var(--status-overdue-ink))]"
+              ? "border-[hsl(var(--status-active-ink))]/20 bg-[hsl(var(--status-active-bg))] text-[hsl(var(--status-active-ink))]"
+              : "border-[hsl(var(--status-overdue-ink))]/20 bg-[hsl(var(--status-overdue-bg))] text-[hsl(var(--status-overdue-ink))]"
           }`}
         >
           <div className="flex items-center gap-2">
             {feedbackMessage.type === "success" ? (
-              <CheckIcon size={14} className="text-[hsl(var(--status-active-ink))]" />
+              <CheckIcon size={14} />
             ) : (
-              <AlertTriangleIcon size={14} className="text-[hsl(var(--status-overdue-ink))]" />
+              <AlertTriangleIcon size={14} />
             )}
             <span>{feedbackMessage.text}</span>
           </div>
@@ -249,229 +275,232 @@ export function CustomerPortal({
         </div>
       )}
 
-      {/* ── Customer Account Banner ─────────────────────────────────────── */}
-      <div className="rounded-[var(--radius)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 shadow-xs">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold tracking-tight text-[hsl(var(--foreground))]">
-                {customer.companyName}
-              </h1>
-              <Badge variant="active" className="text-[10px] py-0 px-1.5">
-                Active Account
-              </Badge>
-            </div>
-            <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5">
-              Contact: {customer.name} · {customer.email} · GSTIN: {customer.taxId || "Not Registered"}
-            </p>
+      {/* ── KPI Strip ──────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Monthly Spend */}
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 shadow-[var(--shadow-soft)]">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-[hsl(var(--muted-foreground))]">Monthly Spend</span>
+            <IconDot tint="--tint-blue" ink="--tint-blue-ink">
+              <SubscriptionIcon size={16} />
+            </IconDot>
           </div>
-
-          <div className="flex items-center gap-4 text-xs border-t sm:border-t-0 sm:border-l border-[hsl(var(--border))] pt-3 sm:pt-0 sm:pl-4">
-            <div>
-              <span className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase tracking-wider block">
-                Monthly Spend
-              </span>
-              <span className="text-sm font-bold tabular-nums text-[hsl(var(--foreground))]">
-                {formatINR(totalMonthlySpend)}
-              </span>
-            </div>
-            <div className="border-l border-[hsl(var(--border))] pl-4">
-              <span className="text-[10px] text-[hsl(var(--muted-foreground))] uppercase tracking-wider block">
-                Outstanding
-              </span>
-              <span
-                className={`text-sm font-bold tabular-nums ${
-                  totalOutstanding > 0 ? "text-[hsl(var(--status-overdue-ink))]" : "text-[hsl(var(--foreground))]"
-                }`}
-              >
-                {formatINR(totalOutstanding)}
-              </span>
-            </div>
+          <div className="mt-2 text-3xl font-bold tabular-nums" style={{ color: "hsl(var(--tint-blue-ink))" }}>
+            {formatINR(totalMonthlySpend)}
+          </div>
+          <div className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
+            across {activeSubs.length} active {activeSubs.length === 1 ? "plan" : "plans"}
           </div>
         </div>
 
-        {/* Overdue alert if applicable */}
-        {overdueInvoices.length > 0 && (
-          <div className="mt-4 rounded-[var(--radius-xs)] border border-[hsl(var(--status-overdue-ink))]/30 bg-[hsl(var(--status-overdue-ink))]/10 p-3 flex items-center justify-between text-xs text-[hsl(var(--foreground))]">
-            <div className="flex items-center gap-2">
-              <AlertTriangleIcon size={14} className="text-[hsl(var(--status-overdue-ink))]" />
-              <span>
-                You have {overdueInvoices.length} overdue invoice requiring attention.
-              </span>
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setActiveTab("invoices")}
-              className="h-6 text-[11px] px-2.5"
-            >
-              Review Invoices
-            </Button>
+        {/* Outstanding */}
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 shadow-[var(--shadow-soft)]">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-[hsl(var(--muted-foreground))]">Outstanding</span>
+            <IconDot tint="--tint-rose" ink="--tint-rose-ink">
+              <InvoiceIcon size={16} />
+            </IconDot>
           </div>
-        )}
+          <div className="mt-2 text-3xl font-bold tabular-nums" style={{ color: "hsl(var(--tint-rose-ink))" }}>
+            {formatINR(totalOutstanding)}
+          </div>
+          <div className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
+            {totalOutstanding > 0 ? "payment due" : "all settled"}
+          </div>
+        </div>
+
+        {/* Active Subscriptions */}
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 shadow-[var(--shadow-soft)]">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-[hsl(var(--muted-foreground))]">Active Plans</span>
+            <IconDot tint="--tint-green" ink="--tint-green-ink">
+              <CheckIcon size={16} />
+            </IconDot>
+          </div>
+          <div className="mt-2 text-3xl font-bold tabular-nums" style={{ color: "hsl(var(--tint-green-ink))" }}>
+            {activeSubs.length}
+          </div>
+          <div className="mt-2 flex items-center gap-1.5">
+            <span className="inline-flex items-center rounded-full bg-[hsl(var(--status-active-bg))] px-2 py-0.5 text-xs font-medium text-[hsl(var(--status-active-ink))]">
+              {customer.companyName || "Account"}
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* ── Navigation Tabs ─────────────────────────────────────────────── */}
-      <div className="flex items-center gap-1 border-b border-[hsl(var(--border))] pb-px">
-        <button
-          type="button"
-          onClick={() => setActiveTab("subscriptions")}
-          className={`flex items-center gap-2 px-3.5 py-2 text-xs font-medium border-b-2 transition-colors ${
-            activeTab === "subscriptions"
-              ? "border-[hsl(var(--foreground))] text-[hsl(var(--foreground))] font-semibold"
-              : "border-transparent text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-          }`}
-        >
-          <SubscriptionIcon size={14} />
-          <span>Active Subscriptions ({subscriptions.length})</span>
-        </button>
+      {/* ── Overdue Alert Strip ────────────────────────────────────────── */}
+      {overdueInvoices.length > 0 && (
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--status-overdue-ink))]/20 bg-[hsl(var(--status-overdue-bg))] p-4 flex items-center justify-between shadow-[var(--shadow-soft)]">
+          <div className="flex items-center gap-3 text-sm text-[hsl(var(--status-overdue-ink))]">
+            <AlertTriangleIcon size={18} />
+            <span className="font-medium">
+              {overdueInvoices.length} overdue invoice{overdueInvoices.length > 1 ? "s" : ""} requiring attention
+            </span>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setActiveTab("invoices")}
+            className="rounded-full text-xs px-4"
+          >
+            Review Invoices
+          </Button>
+        </div>
+      )}
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("invoices")}
-          className={`flex items-center gap-2 px-3.5 py-2 text-xs font-medium border-b-2 transition-colors ${
-            activeTab === "invoices"
-              ? "border-[hsl(var(--foreground))] text-[hsl(var(--foreground))] font-semibold"
-              : "border-transparent text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-          }`}
-        >
-          <InvoiceIcon size={14} />
-          <span>Invoice History ({invoices.length})</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab("billing")}
-          className={`flex items-center gap-2 px-3.5 py-2 text-xs font-medium border-b-2 transition-colors ${
-            activeTab === "billing"
-              ? "border-[hsl(var(--foreground))] text-[hsl(var(--foreground))] font-semibold"
-              : "border-transparent text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-          }`}
-        >
-          <CreditCardIcon size={14} />
-          <span>Payment & Tax Profile</span>
-        </button>
+      {/* ── Pill Tab Bar ────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-1 rounded-full bg-[hsl(var(--muted))] p-1 w-fit">
+        {tabItems.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium transition-all ${
+                isActive
+                  ? "bg-[hsl(var(--card))] text-[hsl(var(--foreground))] shadow-[var(--shadow-soft)]"
+                  : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+              }`}
+            >
+              <Icon size={14} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* ── TAB 1: Subscriptions View ───────────────────────────────────── */}
       {activeTab === "subscriptions" && (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {subscriptions.map((sub) => (
-              <Card key={sub.id} className="border-[hsl(var(--border))] bg-[hsl(var(--card))]">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-mono text-[11px] text-[hsl(var(--muted-foreground))]">
-                        {sub.number}
-                      </span>
-                      <CardTitle className="text-base font-semibold text-[hsl(var(--foreground))] mt-0.5">
-                        {sub.productName}
-                      </CardTitle>
-                    </div>
-                    <Badge
-                      variant={
-                        sub.status === "ACTIVE"
-                          ? "active"
-                          : sub.status === "PAUSED"
-                          ? "warning"
-                          : "neutral"
-                      }
-                      className="text-[10px]"
-                    >
-                      {sub.status}
-                    </Badge>
-                  </div>
-                  <CardDescription className="text-xs">
-                    {sub.planName} · Billing cadence: {sub.period.toLowerCase()}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="rounded-[var(--radius-xs)] border border-[hsl(var(--border))] bg-[hsl(var(--background))] p-3 space-y-2 text-xs">
+          {subscriptions.length === 0 && !isLoading ? (
+            <EmptyState
+              icon={<SubscriptionIcon size={20} />}
+              title="No subscriptions yet"
+              description="Your account does not have any subscription plans. Contact your Brightloop account manager to get started."
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {subscriptions.map((sub) => (
+                <Card
+                  key={sub.id}
+                  className="rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] border-[hsl(var(--border))] bg-[hsl(var(--card))]"
+                >
+                  <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[hsl(var(--muted-foreground))]">Quantity / Seats:</span>
-                      <span className="font-medium text-[hsl(var(--foreground))] tabular-nums">
-                        {sub.quantity} {sub.quantity === 1 ? "seat" : "seats"}
-                      </span>
+                      <div>
+                        <span className="font-mono text-[11px] text-[hsl(var(--muted-foreground))]">
+                          {sub.number}
+                        </span>
+                        <CardTitle className="text-base font-semibold text-[hsl(var(--foreground))] mt-0.5">
+                          {sub.productName}
+                        </CardTitle>
+                      </div>
+                      <Badge
+                        variant={
+                          sub.status === "ACTIVE"
+                            ? "active"
+                            : sub.status === "PAUSED"
+                            ? "warning"
+                            : "neutral"
+                        }
+                        className="text-[10px]"
+                      >
+                        {sub.status}
+                      </Badge>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[hsl(var(--muted-foreground))]">Rate per seat:</span>
-                      <span className="font-medium text-[hsl(var(--foreground))] tabular-nums">
-                        {formatINR(sub.unitPrice)}
-                      </span>
+                    <CardDescription className="text-xs">
+                      {sub.planName} · Billing cadence: {sub.period.toLowerCase()}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="rounded-[var(--radius-sm)] border border-[hsl(var(--border))] bg-[hsl(var(--background))] p-3 space-y-2 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[hsl(var(--muted-foreground))]">Quantity / Seats:</span>
+                        <span className="font-medium text-[hsl(var(--foreground))] tabular-nums">
+                          {sub.quantity} {sub.quantity === 1 ? "seat" : "seats"}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[hsl(var(--muted-foreground))]">Rate per seat:</span>
+                        <span className="font-medium text-[hsl(var(--foreground))] tabular-nums">
+                          {formatINR(sub.unitPrice)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between border-t border-[hsl(var(--border))] pt-2">
+                        <span>Monthly Recurring Value:</span>
+                        <span className="font-semibold text-[hsl(var(--foreground))] tabular-nums">
+                          {formatINR(sub.monthlyLineValue)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-[hsl(var(--muted-foreground))]">
+                        <span>Next Scheduled Billing:</span>
+                        <span className="font-medium text-[hsl(var(--foreground))] tabular-nums">
+                          {formatDate(sub.nextBillingDate)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-[hsl(var(--muted-foreground))]">
+                        <span>Payment Terms:</span>
+                        <span className="text-[hsl(var(--foreground))]">
+                          Net {sub.paymentTermsDays} days
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between border-t border-[hsl(var(--border))] pt-2">
-                      <span>Monthly Recurring Value:</span>
-                      <span className="font-semibold text-[hsl(var(--foreground))] tabular-nums">
-                        {formatINR(sub.monthlyLineValue)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-[hsl(var(--muted-foreground))]">
-                      <span>Next Scheduled Billing:</span>
-                      <span className="font-medium text-[hsl(var(--foreground))] tabular-nums">
-                        {formatDate(sub.nextBillingDate)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-[hsl(var(--muted-foreground))]">
-                      <span>Payment Terms:</span>
-                      <span className="text-[hsl(var(--foreground))]">
-                        Net {sub.paymentTermsDays} days
-                      </span>
-                    </div>
-                  </div>
 
-                  {/* Plan action buttons (FR-PORT-03, DEMO Act 8) */}
-                  <div className="flex flex-wrap items-center justify-between text-xs pt-1 gap-2">
-                    <span className="text-[11px] text-[hsl(var(--muted-foreground))] flex items-center gap-1">
-                      <ClockIcon size={12} />
-                      Active since {formatDate(sub.startDate)}
-                    </span>
+                    {/* Plan action buttons (FR-PORT-03, DEMO Act 8) */}
+                    <div className="flex flex-wrap items-center justify-between text-xs pt-1 gap-2">
+                      <span className="text-[11px] text-[hsl(var(--muted-foreground))] flex items-center gap-1">
+                        <ClockIcon size={12} />
+                        Active since {formatDate(sub.startDate)}
+                      </span>
 
-                    <div className="flex items-center gap-2">
-                      {sub.status === "ACTIVE" && sub.pausable && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setActionTargetSub({ sub, action: "PAUSE" })}
-                          className="h-7 text-xs px-2.5 text-[hsl(var(--status-warning-ink))] hover:bg-[hsl(var(--status-warning-ink))]/10"
-                        >
-                          Request Pause
-                        </Button>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {sub.status === "ACTIVE" && sub.pausable && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setActionTargetSub({ sub, action: "PAUSE" })}
+                            className="h-7 text-xs px-3 rounded-full text-[hsl(var(--status-warning-ink))] hover:bg-[hsl(var(--status-warning-bg))]"
+                          >
+                            Request Pause
+                          </Button>
+                        )}
 
-                      {sub.status === "PAUSED" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setActionTargetSub({ sub, action: "RESUME" })}
-                          className="h-7 text-xs px-2.5 text-[hsl(var(--status-active-ink))] hover:bg-[hsl(var(--status-active-ink))]/10"
-                        >
-                          Resume Plan
-                        </Button>
-                      )}
+                        {sub.status === "PAUSED" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setActionTargetSub({ sub, action: "RESUME" })}
+                            className="h-7 text-xs px-3 rounded-full text-[hsl(var(--status-active-ink))] hover:bg-[hsl(var(--status-active-bg))]"
+                          >
+                            Resume Plan
+                          </Button>
+                        )}
 
-                      {sub.renewable && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setActionTargetSub({ sub, action: "RENEW" })}
-                          className="h-7 text-xs px-2.5"
-                        >
-                          Renew
-                        </Button>
-                      )}
+                        {sub.renewable && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setActionTargetSub({ sub, action: "RENEW" })}
+                            className="h-7 text-xs px-3 rounded-full"
+                          >
+                            Renew
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* ── TAB 2: Invoice History ─────────────────────────────────────── */}
       {activeTab === "invoices" && (
-        <Card className="border-[hsl(var(--border))] bg-[hsl(var(--card))]">
+        <Card className="rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] border-[hsl(var(--border))] bg-[hsl(var(--card))]">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold text-[hsl(var(--foreground))]">
               Invoices & Statements
@@ -496,8 +525,8 @@ export function CustomerPortal({
 
       {/* ── TAB 3: Payment Details & GST Compliance Profile ────────────── */}
       {activeTab === "billing" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-[hsl(var(--border))] bg-[hsl(var(--card))]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] border-[hsl(var(--border))] bg-[hsl(var(--card))]">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold text-[hsl(var(--foreground))]">
                 Wire & Direct Transfer Account
@@ -507,7 +536,7 @@ export function CustomerPortal({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-xs">
-              <div className="rounded-[var(--radius-xs)] border border-[hsl(var(--border))] bg-[hsl(var(--background))] p-3 space-y-2">
+              <div className="rounded-[var(--radius-sm)] border border-[hsl(var(--border))] bg-[hsl(var(--background))] p-3 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-[hsl(var(--muted-foreground))]">Beneficiary Name:</span>
                   <span className="font-semibold text-[hsl(var(--foreground))]">Brightloop Software India Pvt Ltd</span>
@@ -536,7 +565,7 @@ export function CustomerPortal({
             </CardContent>
           </Card>
 
-          <Card className="border-[hsl(var(--border))] bg-[hsl(var(--card))]">
+          <Card className="rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] border-[hsl(var(--border))] bg-[hsl(var(--card))]">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold text-[hsl(var(--foreground))]">
                 Registered Billing Information
@@ -546,7 +575,7 @@ export function CustomerPortal({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-xs">
-              <div className="rounded-[var(--radius-xs)] border border-[hsl(var(--border))] bg-[hsl(var(--background))] p-3 space-y-2">
+              <div className="rounded-[var(--radius-sm)] border border-[hsl(var(--border))] bg-[hsl(var(--background))] p-3 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-[hsl(var(--muted-foreground))]">Legal Entity:</span>
                   <span className="font-semibold text-[hsl(var(--foreground))]">{customer.companyName}</span>
@@ -609,7 +638,7 @@ export function CustomerPortal({
                 variant="outline"
                 size="sm"
                 onClick={() => setActionTargetSub(null)}
-                className="text-xs"
+                className="text-xs rounded-full"
               >
                 Cancel
               </Button>
@@ -618,7 +647,7 @@ export function CustomerPortal({
                 size="sm"
                 onClick={handleExecuteAction}
                 isLoading={requestActionMutation.isPending}
-                className="text-xs"
+                className="text-xs rounded-full"
               >
                 Confirm {actionTargetSub.action}
               </Button>
@@ -671,7 +700,7 @@ export function CustomerPortal({
               </div>
             </div>
 
-            <div className="rounded-[var(--radius-xs)] border border-[hsl(var(--border))] overflow-hidden">
+            <div className="rounded-[var(--radius-sm)] border border-[hsl(var(--border))] overflow-hidden">
               <table className="w-full text-left text-xs">
                 <thead className="bg-[hsl(var(--muted))]/50 border-b border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))]">
                   <tr>
@@ -700,6 +729,7 @@ export function CustomerPortal({
                 variant="outline"
                 size="sm"
                 onClick={() => setSelectedInvoice(null)}
+                className="rounded-full"
               >
                 Close
               </Button>
@@ -707,7 +737,7 @@ export function CustomerPortal({
                 variant="primary"
                 size="sm"
                 onClick={() => window.print()}
-                className="gap-1.5"
+                className="gap-1.5 rounded-full"
               >
                 <PrinterIcon size={14} />
                 Print Statement
