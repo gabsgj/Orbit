@@ -467,47 +467,70 @@ export async function getRenewalForecast(daysAhead: number = 30): Promise<Renewa
   }));
 }
 
+/**
+ * MRR movement over the last 30 days — all four components are real SQL.
+ * Semantics (documented, SRS §1.3):
+ *  - newMRR        = MRR from subscriptions CREATED in the window
+ *  - expansionMRR  = MRR from subscriptions RESUMED (PAUSED → ACTIVE) in the
+ *                    window — reactivated revenue (no plan-upgrade flow exists
+ *                    yet; when it ships, its line-change events add here)
+ *  - contractionMRR= MRR from subscriptions PAUSED (ACTIVE → PAUSED) in the
+ *                    window — revenue temporarily suspended
+ *  - churnMRR      = MRR from subscriptions CLOSED in the window
+ * Pause/resume transitions come from subscription_status_history (FR-SUB-08),
+ * so every number is derived from data, never hardcoded.
+ */
 export async function getMRRMovement(): Promise<MRRMovement> {
   const result = await prisma.$queryRaw<
     Array<{
       new_mrr: Prisma.Decimal | number | null;
+      expansion_mrr: Prisma.Decimal | number | null;
+      contraction_mrr: Prisma.Decimal | number | null;
       churn_mrr: Prisma.Decimal | number | null;
     }>
   >(Prisma.sql`
+    WITH mrr_per_sub AS (
+      SELECT s.id, s.created_at, s.status,
+        SUM(sl.quantity * sl.unit_price * (
+          CASE p.period
+            WHEN 'DAILY' THEN 30.0
+            WHEN 'WEEKLY' THEN (52.0 / 12.0)
+            WHEN 'MONTHLY' THEN 1.0
+            WHEN 'YEARLY' THEN (1.0 / 12.0)
+            ELSE 1.0
+          END
+        )) AS mrr
+      FROM subscriptions s
+      JOIN plans p ON s.plan_id = p.id
+      JOIN subscription_lines sl ON s.id = sl.subscription_id
+      GROUP BY s.id
+    ),
+    transitions AS (
+      SELECT h.subscription_id,
+        MAX(CASE WHEN h.from_status = 'PAUSED' AND h.to_status = 'ACTIVE'
+                  AND h.changed_at >= (CURRENT_DATE - INTERVAL '30 days')
+                 THEN 1 ELSE 0 END) AS resumed_in_window,
+        MAX(CASE WHEN h.from_status = 'ACTIVE' AND h.to_status = 'PAUSED'
+                  AND h.changed_at >= (CURRENT_DATE - INTERVAL '30 days')
+                 THEN 1 ELSE 0 END) AS paused_in_window
+      FROM subscription_status_history h
+      GROUP BY h.subscription_id
+    )
     SELECT
-      COALESCE(SUM(
-        sl.quantity * sl.unit_price * (
-          CASE p.period
-            WHEN 'DAILY' THEN 30.0
-            WHEN 'WEEKLY' THEN (52.0 / 12.0)
-            WHEN 'MONTHLY' THEN 1.0
-            WHEN 'YEARLY' THEN (1.0 / 12.0)
-            ELSE 1.0
-          END
-        )
-      ) FILTER (WHERE s.created_at >= (CURRENT_DATE - INTERVAL '30 days')), 0) AS new_mrr,
-      
-      COALESCE(SUM(
-        sl.quantity * sl.unit_price * (
-          CASE p.period
-            WHEN 'DAILY' THEN 30.0
-            WHEN 'WEEKLY' THEN (52.0 / 12.0)
-            WHEN 'MONTHLY' THEN 1.0
-            WHEN 'YEARLY' THEN (1.0 / 12.0)
-            ELSE 1.0
-          END
-        )
-      ) FILTER (WHERE s.status = 'CLOSED'), 0) AS churn_mrr
-    FROM subscriptions s
-    JOIN plans p ON s.plan_id = p.id
-    JOIN subscription_lines sl ON s.id = sl.subscription_id
+      COALESCE(SUM(m.mrr) FILTER (
+        WHERE m.created_at >= (CURRENT_DATE - INTERVAL '30 days')), 0) AS new_mrr,
+      COALESCE(SUM(m.mrr) FILTER (WHERE t.resumed_in_window = 1), 0) AS expansion_mrr,
+      COALESCE(SUM(m.mrr) FILTER (WHERE t.paused_in_window = 1), 0) AS contraction_mrr,
+      COALESCE(SUM(m.mrr) FILTER (WHERE m.status = 'CLOSED'), 0) AS churn_mrr
+    FROM mrr_per_sub m
+    LEFT JOIN transitions t ON t.subscription_id = m.id
   `);
 
   const row = result[0];
   const newMRR = Number(row?.new_mrr ?? 0);
+  const expansionMRR = Number(row?.expansion_mrr ?? 0);
+  const contractionMRR = Number(row?.contraction_mrr ?? 0);
   const churnMRR = Number(row?.churn_mrr ?? 0);
-  const expansionMRR = 0;
-  const contractionMRR = 0;
   const netMRRChange = newMRR + expansionMRR - contractionMRR - churnMRR;
 
   return {
