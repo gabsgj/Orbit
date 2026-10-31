@@ -13,6 +13,13 @@ _Chronological record of work done. Newest entries at the bottom._
 - Added tax search/status filters and keyset pagination, and reused `createTaxSchema` in the tax form.
 - Did not alter the Prisma schema: `users.email` is still TEXT rather than the required `citext`; this is explicitly queued for Gabriel because it needs a reviewed migration.
 
+## 2026-10-31 — CI regression repair
+
+**By:** Abhiram H / Codex
+
+- Fixed the CI type errors in `catalog/service.test.ts` after taxes moved to the shared keyset `Page<T>` response: test input now supplies `take`, and the assertion correctly reads `page.items`.
+- Added the missing expired-token regression test and a server-side `requireRole` RBAC matrix for anonymous, CUSTOMER, STAFF, and ADMIN callers.
+
 ## 2026-10-31 ΓÇö Project bootstrap (ruleset phase)
 
 **By:** OpenCode agent (at Gabriel's request)

@@ -84,6 +84,7 @@ _Legend: ☐ todo · ☐↑ high priority · ✅ done (YYYY-MM-DD)_
 - ✅ Dashboard, portal, and the internal app shell now derive user identity/role from the authenticated server session; static demo identities removed.
 - ✅ Taxes list now has status/search filters and keyset pagination; its create form reuses `createTaxSchema` client-side.
 - ☐ **Gabriel coordination required:** create a reviewed migration making `users.email` `citext` with a unique constraint. Do not change `schema.prisma` directly.
+- ✅ Added explicit expired-token and `requireRole` ADMIN/STAFF/CUSTOMER/anonymous regression coverage.
 - ☐ Verify hardening against local PostgreSQL (`npm test`, typecheck, lint, build) after restoring dependencies; current audit environment has an incomplete `node_modules` install.
 
 ### Team / process

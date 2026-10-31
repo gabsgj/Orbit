@@ -183,7 +183,7 @@ describe("Catalog - Taxes (FR-CAT-05)", () => {
     });
     expect(Number(tax.ratePercent)).toBe(18.0);
 
-    const list = await getTaxes(testDb, { isActive: true });
-    expect(list.some((t) => t.name === "Test GST 18%")).toBe(true);
+    const list = await getTaxes(testDb, { isActive: true, take: 20 });
+    expect(list.items.some((item) => item.name === "Test GST 18%")).toBe(true);
   });
 });

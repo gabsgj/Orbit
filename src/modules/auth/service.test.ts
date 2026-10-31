@@ -204,6 +204,27 @@ describe("resetPassword — FR-AUTH-04 (single-use, expiry)", () => {
     ).rejects.toMatchObject({ code: "INVALID_TOKEN" });
   });
 
+  it("throws INVALID_TOKEN for an expired token", async () => {
+    const email = uniqueEmail("expired");
+    const { userId } = await signup(testDb, {
+      email,
+      password: "OldPass#1",
+      companyName: "Co",
+    });
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    await testDb.passwordResetToken.create({
+      data: {
+        userId,
+        tokenHash: sha256(rawToken),
+        expiresAt: new Date(Date.now() - 1_000),
+      },
+    });
+
+    await expect(
+      resetPassword(testDb, { token: rawToken, newPassword: "NewPass#2" }),
+    ).rejects.toMatchObject({ code: "INVALID_TOKEN" });
+  });
+
   it("allows only one concurrent use of the same reset token", async () => {
     const email = uniqueEmail("concurrent");
     await signup(testDb, { email, password: "OldPass#1", companyName: "Co" });
