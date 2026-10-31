@@ -1,0 +1,1 @@
+Landing-page building blocks. `diagrams.tsx` holds the three in-page SVG diagrams (subscription lifecycle, billing flow, invoice anatomy) as crisp vector geometry on the Orbit Soft Ledger tokens — integrated into `page.tsx` by the orchestrator.

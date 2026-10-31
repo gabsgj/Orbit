@@ -330,7 +330,7 @@ sequenceDiagram
     I->>DB: UNIQUE(subscription, period_start) guards duplicate
     E->>S: advance next_billing_date (+ auto_close if plan says)
     A->>P: record payment (method, amount, date, note)
-    P->>I: amount_paid += amount (same tx); auto-flip to PAID
+    P->>I: amount_paid += amount (same tx), auto-flip to PAID
     Note over I,DB: overdue = CONFIRMED + due_date < today + outstanding > 0<br/>partial index serves the chase list
 ```
 

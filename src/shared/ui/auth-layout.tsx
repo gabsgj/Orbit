@@ -3,10 +3,10 @@ import { LogoMark } from "./logo";
 
 /**
  * AuthLayout — the ledger "folio" for all auth surfaces (Gate-3/landing world).
- * Left: quiet brand panel with the ledger motif + three product facts (desktop).
- * Right: the form as a bordered ledger sheet. Achromatic, 1px rules, no
- * gradients, no stock illustration. Used by /login /signup /forgot-password
- * /reset-password.
+ * Left: quiet brand panel with a pastel gradient ground + three product facts
+ * (desktop). Right: the form as a bordered ledger sheet. Liquid-glass brand
+ * pill floats at the top of both panels. Used by /login /signup
+ * /forgot-password /reset-password.
  */
 export function AuthLayout({
   children,
@@ -20,10 +20,20 @@ export function AuthLayout({
   return (
     <div className="grid min-h-screen bg-[hsl(var(--background))] lg:grid-cols-[44%_56%]">
       {/* brand panel */}
-      <aside className="relative hidden flex-col justify-between border-r border-[hsl(var(--border))] bg-[hsl(var(--card))] p-10 lg:flex">
-        <Link href="/" className="flex items-center gap-2" aria-label="Orbit home">
-          <LogoMark size={32} />
-          <span className="text-base font-bold tracking-tight">Orbit</span>
+      <aside
+        className="relative hidden flex-col justify-between border-r border-[hsl(var(--border))] p-10 lg:flex"
+        style={{
+          background:
+            "linear-gradient(160deg, hsl(var(--tint-blue)) 0%, hsl(var(--card)) 55%)",
+        }}
+      >
+        <Link
+          href="/"
+          className="inline-flex items-center gap-3 self-start rounded-full bg-[hsl(var(--card)/0.6)] px-5 py-3 shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--card)/0.5)] backdrop-blur-xl"
+          aria-label="Orbit home"
+        >
+          <LogoMark size={40} />
+          <span className="text-2xl font-bold tracking-tight">Orbit</span>
         </Link>
 
         <div>
@@ -55,11 +65,17 @@ export function AuthLayout({
       {/* form panel */}
       <main className="flex items-center justify-center p-6">
         <div className="w-full max-w-md">
-          <Link href="/" className="mb-8 flex items-center gap-2 lg:hidden" aria-label="Orbit home">
-            <LogoMark size={32} />
-            <span className="text-base font-bold tracking-tight">Orbit</span>
-          </Link>
-          <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-8 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
+          <div className="mb-6 flex justify-center lg:hidden">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-3 rounded-full bg-[hsl(var(--card)/0.6)] px-5 py-3 shadow-[var(--shadow-soft)] ring-1 ring-[hsl(var(--card)/0.5)] backdrop-blur-xl"
+              aria-label="Orbit home"
+            >
+              <LogoMark size={40} />
+              <span className="text-2xl font-bold tracking-tight">Orbit</span>
+            </Link>
+          </div>
+          <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-8 shadow-[var(--shadow-lift)]">
             <h1 className="text-2xl font-bold tracking-[-0.02em] [text-wrap:balance]">{title}</h1>
             <p className="mt-1.5 text-sm leading-relaxed text-[hsl(var(--muted-foreground))] [text-wrap:pretty]">{subtitle}</p>
             <div className="mt-6">{children}</div>
